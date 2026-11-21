@@ -99,11 +99,82 @@ Baseado em League of Legends, mas não idêntico:
 - Duas equipes de 5, cada uma com uma posição por jogador.
 - **Minions** nas rotas: abatê-los dá **experiência** (nível do personagem) e **ouro** (para comprar **itens**).
 - Quem farma pouco chega às lutas e aos duelos de rota com **nível mais baixo e menos itens**.
-- **Objetivos de mapa** que podem ser disputados ou abandonados (decisão de Macro). Lista de objetivos: **[A DEFINIR]**
+- **Objetivos de mapa** que podem ser disputados ou abandonados (decisão de Macro) — ver 7.1.
 - **Campeões** fictícios, com características próprias.
 - **Patches:** mudam a força dos campeões e o meta ao longo da temporada.
 
-Como a partida é exibida (visão 2D de cima com bonecos lutando sozinhos, ou narração com estatísticas): **[A DEFINIR]**
+Como a partida é exibida (visão 2D de cima com bonecos lutando sozinhos, ou narração com estatísticas): **[A DEFINIR]**. Observação: as regras de prioridade das torres e as mecânicas de área dos monstros e do Guardião aparecem muito melhor numa visão 2D de cima.
+
+## 7.1 Mapa
+
+### Rotas e torres
+
+- **3 rotas, com 3 torres cada: 9 torres por time.**
+- As torres atacam tudo o que entra no seu alcance, com esta prioridade (como no LoL):
+  1. Se um campeão inimigo atacar um campeão aliado dentro do alcance da torre, ela foca nesse inimigo.
+  2. Caso contrário, se minions entraram primeiro no alcance, ela foca neles e depois nos campeões.
+- **Cada torre destruída dá uma quantidade considerável de ouro** ao time que a destruiu.
+- **Minions fortalecidos:** quando a terceira torre de uma rota cai, os minions do time atacante naquela rota ficam mais fortes. Esses minions **dão mais ouro ao serem abatidos**, o que dá ao time que perdeu mais torres uma chance de se recuperar.
+- Vida, dano e alcance das torres: **[A DEFINIR — balanceamento]**
+
+### Cristal e Guardião
+
+- Depois das 9 torres, cada time tem um **Cristal** para proteger. **Destruir o Cristal inimigo vence a partida.**
+- Na frente de cada Cristal fica o **Guardião** do time: uma estátua enorme com uma lança numa mão e um escudo na outra.
+  - Ataca os inimigos e aguenta muito dano. **É o ser com mais vida no jogo.**
+  - **A cada 5 ataques, bate o escudo no chão**, causando dano em área nos inimigos próximos. Quem se posiciona bem (Macro) recua a tempo.
+  - **Renasce 5 minutos depois de ser derrotado**, se o Cristal ainda não tiver sido destruído. Isso cria chances de virada no fim de jogo.
+- O time atacante precisa derrotar o Guardião e destruir o Cristal; o defensor precisa impedir.
+
+### Monstros épicos
+
+Ficam na selva: a **Hydra** na metade de cima do mapa e o **Cérbero** na metade de baixo. Um tem foco em lutar, o outro em destruir torres.
+
+| | Hydra (cima) | Cérbero (baixo) |
+|---|---|---|
+| **Foco** | Lutas | Torres |
+| **Bônus** | Ouro + 10% de dano, vida máxima e mana máxima | Ouro + dobro de dano em torres |
+| **Primeira aparição** | Quando todos chegariam ao **nível 9** pegando todos os minions de cada onda | Quando todos chegariam ao **nível 5** pegando todos os minions de cada onda |
+
+Os tempos exatos de primeira aparição serão calculados quando a curva de experiência estiver definida.
+
+Regras comuns aos dois:
+
+- O bônus é **temporário: dura 2 minutos**.
+- O monstro **reaparece 4 minutos** depois de ser derrotado.
+- **Se um campeão com o bônus morrer, ele perde o bônus**; o resto do time continua com ele.
+
+**Fases da Hydra** (fica mais perigosa conforme apanha):
+
+1. **1 cabeça:** morde os inimigos.
+2. **2 cabeças:** surge a segunda cabeça; elas cospem bolas de água nos inimigos.
+3. **3 cabeças:** começa a invocar redemoinhos com dano em área.
+
+**Fases do Cérbero** (cada terço da vida é uma fase):
+
+1. **Garras:** ataca com as garras.
+2. **Ao perder um terço da vida, uma das cabeças cai.** As duas restantes mordem até 2 campeões diferentes, ou mordem 2 vezes o mesmo campeão (dobro de dano).
+3. **Resta uma cabeça,** que ataca com fogo em área de cone.
+
+**Roubo de objetivo:** quando os dois times disputam um monstro épico, o caçador adversário pode "roubar" o último golpe.
+
+- **Estar lá na hora certa é Macro:** decidir disputar o objetivo e chegar a tempo.
+- **Acertar o último golpe é Micro:** a execução mecânica.
+- Na simulação, o Macro do time define se existe chance de roubo (se o caçador chegou a tempo), e a diferença de Micro entre os dois caçadores define a chance de sucesso.
+
+### Acampamentos da selva
+
+- **4 acampamentos pequenos:** 2 na metade de cima, 2 na metade de baixo. Dão ouro e experiência e reaparecem depois de um tempo.
+- **Acampamentos médios com bônus para o caçador:**
+  - um com foco em **mana e dano mágico**;
+  - outro com foco em **vida e dano físico**.
+- Posição exata, tempos de reaparição e valores dos bônus: **[A DEFINIR]**
+
+### Recompensa por jogador em destaque
+
+- Um jogador com vários abates seguidos sem morrer passa a valer mais ouro para quem derrotá-lo.
+- Ajuda o time que está atrás e conversa com o atributo Mental.
+- Valores: **[A DEFINIR]**
 
 ## 8. Draft (pick & ban)
 
@@ -146,7 +217,9 @@ Detalhes: **[A DEFINIR]**
 - Penalidade por jogar fora da posição principal
 - Fórmula das lutas em equipe (Micro + Macro)
 - Formato de exibição da partida
-- Objetivos de mapa do MOBA fictício
+- Balanceamento de torres, Guardião, monstros épicos e acampamentos
+- Curva de experiência (define os tempos de aparição da Hydra e do Cérbero)
+- Detalhes dos acampamentos da selva (posição, reaparição, bônus)
 - Regras do draft
 - Nome do jogo, do MOBA fictício e dos campeões
 - Estrutura da liga (quantos times, formato, playoffs, mundial)
