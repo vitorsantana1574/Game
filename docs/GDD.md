@@ -103,7 +103,7 @@ Baseado em League of Legends, mas não idêntico:
 - **Campeões** fictícios, com características próprias.
 - **Patches:** mudam a força dos campeões e o meta ao longo da temporada.
 
-Como a partida é exibida (visão 2D de cima com bonecos lutando sozinhos, ou narração com estatísticas): **[A DEFINIR]**. Observação: as regras de prioridade das torres e as mecânicas de área dos monstros e do Guardião aparecem muito melhor numa visão 2D de cima.
+**Exibição da partida:** visão **2D de cima**, com os campeões se movendo e lutando sozinhos pelo mapa, e um **painel de narração ao lado** descrevendo o que está acontecendo (abates, ganks, objetivos, torres, roubos etc.).
 
 ## 7.1 Mapa
 
@@ -256,7 +256,6 @@ Detalhes: **[A DEFINIR]**
 - Valores de dinheiro inicial e de cada nível de dificuldade
 - Penalidade por jogar fora da posição principal
 - Fórmula das lutas em equipe (Micro + Macro)
-- Formato de exibição da partida
 - Balanceamento de torres, Guardião, monstros épicos e acampamentos
 - Curva de experiência (define os tempos de aparição da Hydra e do Cérbero)
 - Detalhes dos acampamentos da selva (posição, reaparição, bônus)
