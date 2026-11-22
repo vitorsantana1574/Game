@@ -78,11 +78,24 @@ A Resistência funciona em duas partes:
 - **Lutas em equipe:** não há atributo próprio de Teamfight. O desempenho nas lutas é calculado a partir de **Micro + Macro** (e do nível e itens de cada personagem). Fórmula exata: **[A DEFINIR]**
 - **Mental:** quando o time está atrás no placar/ouro, o desempenho de cada jogador cai — e quanto maior o Mental, menor essa queda.
 
-### 6.3 Lista de campeões
+### 6.3 Domínio de campeões
 
-- Cada jogador tem uma **lista de campeões que domina**.
-- Jogar com um campeão fora da lista gera **penalidade** de desempenho.
-- Isso dá peso ao **pick & ban** e ao **meta** de cada patch.
+Cada jogador tem um nível de domínio para cada campeão:
+
+| Nível | Significado |
+|---|---|
+| **Favorito** | Os campeões com que ele joga melhor. |
+| **Conhece bem** | Joga com segurança. |
+| **Já jogou** | Conhece o básico, com desempenho reduzido. |
+| **Não conhece** | Penalidade forte de desempenho. |
+
+**Tamanho da lista × maestria:**
+
+- **Lista pequena:** mais maestria nos campeões que ele mais joga. É especialista.
+- **Lista vasta:** razoável com quase tudo, mas não é especialista em nenhum.
+- O mesmo vale para as **posições**: um jogador especialista na posição principal rende mais nela, enquanto um jogador flexível rende de forma mais equilibrada entre a principal e as secundárias.
+
+Isso dá peso ao **pick & ban** e ao **meta** de cada patch. Tamanho exato das penalidades e bônus: **[A DEFINIR]**
 
 ### 6.4 Traços ocultos
 
@@ -218,9 +231,54 @@ Gank é quando o caçador sai da selva para ajudar uma rota a abater o inimigo.
 
 ## 8. Draft (pick & ban)
 
-- Fase de banimentos e escolhas antes de cada partida.
-- O jogador avalia campeões, o meta atual e as listas de campeões dos seus jogadores e dos adversários.
-- Ordem e quantidade de bans/picks: **[A DEFINIR]**
+Fase de banimentos e escolhas antes de cada partida.
+
+### 8.1 Ordem (padrão do LoL profissional)
+
+1. **1ª rodada de bans:** 3 por time, alternando.
+2. **1ª rodada de picks:** 3 por time, na ordem A, B, B, A, A, B.
+3. **2ª rodada de bans:** 2 por time, alternando (já sabendo o que o rival escolheu).
+4. **2ª rodada de picks:** os 2 últimos de cada time, na ordem B, A, A, B.
+
+### 8.2 Quem escolhe primeiro
+
+- **Liga:** o time melhor colocado na tabela decide.
+- **Séries:** alterna a cada jogo.
+
+### 8.3 Formato das séries
+
+- **MD1** na fase de pontos corridos.
+- **MD3/MD5** nos playoffs. Séries longas cansam mais (sistema de energia).
+
+### 8.4 Draft "fearless" nos playoffs
+
+- Numa série de playoff, o campeão que um time já usou não pode ser usado de novo **por esse time** nos jogos seguintes.
+- Valoriza jogadores com lista de campeões grande.
+
+### 8.5 Campeões no jogo
+
+- Começar com **cerca de 30 campeões** (uns 6 por posição) e ampliar com o tempo.
+
+### 8.6 Quem faz o draft
+
+- **Fase 1:** o jogador faz o draft manualmente.
+- **Depois:** opção de **delegar ao técnico**, e a qualidade dele define as escolhas.
+
+### 8.7 Informações na tela durante o draft
+
+- O domínio de campeões dos seus jogadores (ver 6.3).
+- Campeões favoritos do adversário, revelados por olheiro ou analista.
+- **A força de cada campeão no patch NÃO é mostrada.** O meta precisa ser descoberto e aprendido:
+  - com **treinos**, numa fase de treinamento; e/ou
+  - pelo **técnico, que precisa estudar e treinar o meta**. Um técnico atualizado com o meta orienta melhor o draft.
+- Detalhes de como o conhecimento do meta é exibido e evolui: **[A DEFINIR]**
+
+## 8.8 Técnico (a discutir)
+
+- O técnico contratado terá **atributos que podem ser treinados** e **cansaço**, como os jogadores.
+- Ele estuda o meta, orienta o draft e pode receber o draft delegado.
+- Como o conhecimento do meta passa a depender dele, o técnico provavelmente precisa entrar já na **Fase 1**, e não só com o restante do staff na Fase 2.
+- Atributos, cansaço, contratação e salário: **[A DEFINIR — próximo tema]**
 
 ## 9. Camada de negócio (Fase 2)
 
@@ -259,7 +317,8 @@ Detalhes: **[A DEFINIR]**
 - Balanceamento de torres, Guardião, monstros épicos e acampamentos
 - Curva de experiência (define os tempos de aparição da Hydra e do Cérbero)
 - Detalhes dos acampamentos da selva (posição, reaparição, bônus)
-- Regras do draft
+- Técnico: atributos, cansaço, contratação e salário
+- Como o conhecimento do meta é exibido e evolui
 - Nome do jogo, do MOBA fictício e dos campeões
 - Estrutura da liga (quantos times, formato, playoffs, mundial)
 - Transferências, contratos e janela de mercado
