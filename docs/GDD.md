@@ -3,7 +3,7 @@
 > Documento vivo: registra tudo o que já foi decidido sobre o jogo e o que ainda está em aberto.
 > Itens marcados com **[A DEFINIR]** ainda não foram decididos.
 
-Última atualização: 21/11/2026
+Última atualização: 22/11/2026
 
 ---
 
@@ -164,11 +164,19 @@ Regras comuns aos dois:
 
 ### Acampamentos da selva
 
-- **4 acampamentos pequenos:** 2 na metade de cima, 2 na metade de baixo. Dão ouro e experiência e reaparecem depois de um tempo.
-- **Acampamentos médios com bônus para o caçador:**
-  - um com foco em **mana e dano mágico**;
-  - outro com foco em **vida e dano físico**.
-- Posição exata, tempos de reaparição e valores dos bônus: **[A DEFINIR]**
+**Cada time tem sua própria selva com o mesmo conjunto de acampamentos** (espelhada), dividida em duas metades:
+
+| Metade | Acampamento | Tipo | Recompensa |
+|---|---|---|---|
+| 1 | **Pássaro grande + 4 pássaros pequenos** | Pequeno | Ouro e experiência; dá **mais ouro** que os outros pequenos |
+| 1 | **Sapo vermelho enorme** | Médio (bônus) | Ouro, experiência + **regeneração de vida e dano físico extra** |
+| 1 | **Rato médio** | Pequeno | Ouro e experiência |
+| 2 | **3 aranhas** | Pequeno | Ouro e experiência |
+| 2 | **Polvo enorme** | Médio (bônus) | Ouro, experiência + **regeneração de mana e poder mágico extra** |
+| 2 | **Pequeno Golem de pedra** | Pequeno | Ouro e experiência |
+
+- Todos reaparecem depois de um tempo.
+- Posição exata no mapa, tempos de reaparição, duração e valores dos bônus: **[A DEFINIR]**
 
 ### Recompensa por jogador em destaque
 
