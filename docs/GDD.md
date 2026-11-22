@@ -176,7 +176,36 @@ Regras comuns aos dois:
 | 2 | **Pequeno Golem de pedra** | Pequeno | Ouro e experiência |
 
 - Todos reaparecem depois de um tempo.
+- **Os acampamentos são o farm do caçador**, já que minions não chegam à selva (como no LoL). Por isso **todos são obrigatórios na rotina normal da selva**.
+- **Pular um acampamento é decisão de Macro:** um caçador com Macro alto pode deixar um acampamento para trás quando enxerga uma oportunidade melhor (um gank, um objetivo, uma invasão).
+- **Bônus herdado:** se o portador do bônus do Sapo ou do Polvo morrer, **quem deu o abate herda o bônus** pelo tempo que restava.
 - Posição exata no mapa, tempos de reaparição, duração e valores dos bônus: **[A DEFINIR]**
+
+### Gank
+
+Gank é quando o caçador sai da selva para ajudar uma rota a abater o inimigo.
+
+- **Perceber a oportunidade e ir é Macro:** por exemplo, notar que o inimigo de uma rota está com pouca vida.
+- **O sucesso do gank depende de Micro:** comparação de Micro entre os envolvidos. O gank pode dar errado: o inimigo pode jogar tão bem que escapa ou até abate o jogador da rota e o caçador.
+
+### Invasão de selva
+
+- O caçador (ou o time) pode **entrar na selva inimiga e roubar acampamentos**, inclusive o Sapo e o Polvo.
+- Invadir ou proteger a própria selva é decisão de **Macro**.
+
+### Encontros entre caçadores
+
+- Os caçadores podem se encontrar na selva e **lutar, disputar objetivos ou disputar farm**.
+- O resultado depende de **Micro**.
+
+### Visão (névoa de guerra)
+
+- **Os times não sabem onde estão os jogadores inimigos**, a não ser que tenham visão deles.
+- Formas de ter visão:
+  - **Proximidade:** ver inimigos que estão perto dos seus campeões (e, presumivelmente, de minions e torres aliados — **[A DEFINIR]**).
+  - **Torres de visão:** pequenas torres que revelam uma área por **1 minuto** e levam **1min30 para recarregar**.
+- Quantas torres de visão cada jogador pode colocar e se o Suporte tem alguma vantagem nisso: **[A DEFINIR]**
+- Gank, invasão e roubo de objetivos dependem de visão: sem visão, o time pode ser pego de surpresa.
 
 ### Recompensa por jogador em destaque
 
