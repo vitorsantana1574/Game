@@ -202,9 +202,12 @@ Gank é quando o caçador sai da selva para ajudar uma rota a abater o inimigo.
 
 - **Os times não sabem onde estão os jogadores inimigos**, a não ser que tenham visão deles.
 - Formas de ter visão:
-  - **Proximidade:** ver inimigos que estão perto dos seus campeões (e, presumivelmente, de minions e torres aliados — **[A DEFINIR]**).
+  - **Proximidade:** campeões, minions e torres aliados revelam os inimigos que estão por perto.
   - **Torres de visão:** pequenas torres que revelam uma área por **1 minuto** e levam **1min30 para recarregar**.
-- Quantas torres de visão cada jogador pode colocar e se o Suporte tem alguma vantagem nisso: **[A DEFINIR]**
+- **Limite de torres de visão carregadas:**
+  - **Cada jogador carrega no máximo 2** ao mesmo tempo.
+  - **O Suporte carrega até 3** e pode **comprar mais na base por um preço barato** (só na base).
+- **Destruir uma torre de visão inimiga** dá um pouco de ouro e uma quantidade quase nula de experiência.
 - Gank, invasão e roubo de objetivos dependem de visão: sem visão, o time pode ser pego de surpresa.
 
 ### Recompensa por jogador em destaque
