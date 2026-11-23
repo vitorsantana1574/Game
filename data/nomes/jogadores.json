@@ -1,0 +1,24 @@
+{
+	"_comentario": "Listas para gerar jogadores fictícios. Os apelidos são montados combinando um início e um final.",
+	"primeiros_nomes": [
+		"Ana", "Beatriz", "Bruna", "Camila", "Carla", "Clara", "Daniela", "Fernanda", "Gabriela", "Helena",
+		"Isabela", "Júlia", "Larissa", "Letícia", "Luana", "Mariana", "Natália", "Paula", "Rafaela", "Sofia",
+		"André", "Arthur", "Bernardo", "Bruno", "Caio", "Daniel", "Diego", "Eduardo", "Enzo", "Felipe",
+		"Gabriel", "Gustavo", "Heitor", "Igor", "João", "Leonardo", "Lucas", "Mateus", "Murilo", "Nicolas",
+		"Otávio", "Pedro", "Rafael", "Renan", "Samuel", "Thiago", "Vinícius", "Vitor", "Yuri", "Wesley"
+	],
+	"sobrenomes": [
+		"Almeida", "Alves", "Andrade", "Araújo", "Barbosa", "Barros", "Cardoso", "Carvalho", "Castro", "Costa",
+		"Dias", "Duarte", "Fernandes", "Ferreira", "Freitas", "Gomes", "Lima", "Lopes", "Machado", "Martins",
+		"Mendes", "Monteiro", "Moraes", "Moreira", "Nascimento", "Nogueira", "Oliveira", "Pereira", "Pinto", "Ramos",
+		"Ribeiro", "Rocha", "Rodrigues", "Santana", "Santos", "Silva", "Soares", "Souza", "Teixeira", "Vieira"
+	],
+	"apelido_inicio": [
+		"Ka", "Ze", "Vo", "Ny", "Ra", "Mi", "Lu", "Tor", "Fen", "Gri", "Ax", "Ky", "Sol", "Nu", "Vex",
+		"Dra", "Ori", "Pyx", "Zan", "Bel", "Cy", "Eko", "Jin", "Kor", "Lyn", "Mor", "Ney", "Quin", "Rho", "Tay"
+	],
+	"apelido_fim": [
+		"zen", "rix", "lo", "dra", "vy", "ko", "nar", "th", "mi", "zo", "ra", "lix", "dan", "ru", "so",
+		"ven", "ka", "ny", "xis", "vo", "len", "ty", "rok", "sha", "qi", "nox", "ge", "fy", "wyn", "do"
+	]
+}

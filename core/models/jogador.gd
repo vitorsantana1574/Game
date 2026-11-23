@@ -1,0 +1,124 @@
+class_name Jogador
+extends RefCounted
+## Um jogador profissional. Ver docs/GDD.md, seções 5 e 6.
+## Todos os atributos vão de 1 a 100.
+
+const ATRIBUTOS: Array[String] = ["resistencia", "mental", "farm", "micro", "macro"]
+const POSICOES: Array[String] = ["topo", "selva", "meio", "atirador", "suporte"]
+
+var id: String = ""
+var apelido: String = ""
+var nome_real: String = ""
+var idade: int = 18
+
+## Posição principal e afinidade (0 a 1) com cada posição. 1.0 = rendimento total.
+var posicao_principal: String = "meio"
+var afinidade_posicao: Dictionary = {}
+## 0 = especialista (lista pequena, muita maestria); 1 = versátil (bom em tudo, especialista em nada).
+## Vale para posições e, quando existirem, para campeões.
+var versatilidade: float = 0.5
+
+## Atributos principais: resistencia, mental, farm, micro, macro.
+var atributos: Dictionary = {}
+
+## Estados do dia a dia (0 a 100).
+var energia: float = 100.0
+var satisfacao: float = 70.0
+var lealdade: float = 20.0
+var experiencia: int = 0
+
+## Traços ocultos: só aparecem para o jogador quando revelados.
+var potencial: int = 50
+var ego: int = 50
+var tracos_revelados: Array[String] = []
+
+## Salário mensal que ele pede, em reais.
+var salario_pedido: int = 0
+
+## Domínio de campeões (id do campeão -> nível). Preenchido na etapa dos campeões.
+var dominio_campeoes: Dictionary = {}
+
+
+## Nível geral do jogador numa posição (1 a 100), ponderando os atributos pelos pesos da posição.
+func nivel_geral(posicao: String = "") -> float:
+	var alvo: String = posicao if not posicao.is_empty() else posicao_principal
+	var pesos: Dictionary = Dados.balanceamento()["pesos_por_posicao"][alvo]
+	var soma: float = 0.0
+	for atributo: String in ATRIBUTOS:
+		soma += float(atributos.get(atributo, 1)) * float(pesos[atributo])
+	return soma * float(afinidade_posicao.get(alvo, 1.0))
+
+
+func traco_revelado(traco: String) -> bool:
+	return traco in tracos_revelados
+
+
+## Dados que a interface pode exibir. Traços ocultos só aparecem se revelados.
+func resumo_publico() -> Dictionary:
+	var resumo: Dictionary = {
+		"id": id,
+		"apelido": apelido,
+		"nome_real": nome_real,
+		"idade": idade,
+		"posicao_principal": posicao_principal,
+		"afinidade_posicao": afinidade_posicao.duplicate(),
+		"atributos": atributos.duplicate(),
+		"nivel_geral": roundi(nivel_geral()),
+		"energia": roundi(energia),
+		"satisfacao": roundi(satisfacao),
+		"lealdade": roundi(lealdade),
+		"experiencia": experiencia,
+		"salario_pedido": salario_pedido,
+	}
+	if traco_revelado("potencial"):
+		resumo["potencial"] = potencial
+	if traco_revelado("ego"):
+		resumo["ego"] = ego
+	return resumo
+
+
+func para_dicionario() -> Dictionary:
+	return {
+		"id": id,
+		"apelido": apelido,
+		"nome_real": nome_real,
+		"idade": idade,
+		"posicao_principal": posicao_principal,
+		"afinidade_posicao": afinidade_posicao,
+		"versatilidade": versatilidade,
+		"atributos": atributos,
+		"energia": energia,
+		"satisfacao": satisfacao,
+		"lealdade": lealdade,
+		"experiencia": experiencia,
+		"potencial": potencial,
+		"ego": ego,
+		"tracos_revelados": tracos_revelados,
+		"salario_pedido": salario_pedido,
+		"dominio_campeoes": dominio_campeoes,
+	}
+
+
+static func de_dicionario(dados: Dictionary) -> Jogador:
+	var jogador: Jogador = Jogador.new()
+	jogador.id = str(dados["id"])
+	jogador.apelido = str(dados["apelido"])
+	jogador.nome_real = str(dados["nome_real"])
+	jogador.idade = int(dados["idade"])
+	jogador.posicao_principal = str(dados["posicao_principal"])
+	for posicao: String in dados["afinidade_posicao"]:
+		jogador.afinidade_posicao[posicao] = float(dados["afinidade_posicao"][posicao])
+	jogador.versatilidade = float(dados["versatilidade"])
+	for atributo: String in dados["atributos"]:
+		jogador.atributos[atributo] = int(dados["atributos"][atributo])
+	jogador.energia = float(dados["energia"])
+	jogador.satisfacao = float(dados["satisfacao"])
+	jogador.lealdade = float(dados["lealdade"])
+	jogador.experiencia = int(dados["experiencia"])
+	jogador.potencial = int(dados["potencial"])
+	jogador.ego = int(dados["ego"])
+	for traco: Variant in dados["tracos_revelados"]:
+		jogador.tracos_revelados.append(str(traco))
+	jogador.salario_pedido = int(dados["salario_pedido"])
+	jogador.dominio_campeoes = dados.get("dominio_campeoes", {}).duplicate()
+	return jogador

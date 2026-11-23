@@ -1,0 +1,31 @@
+{
+	"_comentario": "Valores provisórios. Serão calibrados junto com a economia (salários, prêmios, patrocínios).",
+	"capitais": [
+		{ "id": "baixo", "nome": "Menos dinheiro", "valor": 40000 },
+		{ "id": "medio", "nome": "Caixa equilibrado", "valor": 80000 },
+		{ "id": "alto", "nome": "Mais dinheiro", "valor": 120000 }
+	],
+	"rivais": [
+		{ "id": "iniciantes", "nome": "Adversários iniciantes", "qualidade_media": 38 },
+		{ "id": "equilibrados", "nome": "Adversários equilibrados", "qualidade_media": 50 },
+		{ "id": "experientes", "nome": "Adversários experientes", "qualidade_media": 62 },
+		{ "id": "brutais", "nome": "Adversários brutais", "qualidade_media": 72 }
+	],
+	"predefinicoes": [
+		{ "id": "facil", "nome": "Fácil", "capital": "alto", "rivais": "iniciantes", "bloqueada_no_inicio": false },
+		{ "id": "normal", "nome": "Normal", "capital": "medio", "rivais": "equilibrados", "bloqueada_no_inicio": false },
+		{ "id": "dificil", "nome": "Difícil", "capital": "baixo", "rivais": "experientes", "bloqueada_no_inicio": false },
+		{ "id": "pesadelo", "nome": "Pesadelo", "capital": "baixo", "rivais": "brutais", "bloqueada_no_inicio": true,
+		  "condicao_desbloqueio": "Vencer o mundial jogando no Difícil." }
+	],
+	"personalizado": {
+		"id": "personalizado",
+		"nome": "Personalizado",
+		"capitais_permitidos": ["baixo", "medio", "alto"],
+		"rivais_permitidos": ["iniciantes", "equilibrados", "experientes"]
+	},
+	"nome_organizacao": {
+		"minimo": 3,
+		"maximo": 24
+	}
+}

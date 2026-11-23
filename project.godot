@@ -12,7 +12,13 @@ config_version=5
 
 config/name="MOBA Manager"
 config/description="Jogo de gerenciamento de equipe de e-sports de um MOBA fictício."
+run/main_scene="res://ui/telas/tela_inicial.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[autoload]
+
+Eventos="*res://core/autoload/eventos.gd"
+Jogo="*res://core/autoload/jogo.gd"
 
 [display]
 

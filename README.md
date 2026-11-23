@@ -30,4 +30,4 @@ O foco é a **pura administração de pessoas e números**: elenco, contratos, e
 
 ## Status
 
-Arquitetura definida. A programação da Fase 1 ainda não começou.
+Fase 1 em andamento: tela inicial (GPT) e estado do jogo, saves e gerador de jogadores (Claude) prontos.

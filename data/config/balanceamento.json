@@ -1,0 +1,46 @@
+{
+	"_comentario": "Constantes provisórias de balanceamento. Serão calibradas com o simulador de temporadas (tools/).",
+	"atributos": {
+		"minimo": 1,
+		"maximo": 100
+	},
+	"posicoes": [
+		{ "id": "topo", "nome": "Topo" },
+		{ "id": "selva", "nome": "Selva" },
+		{ "id": "meio", "nome": "Meio" },
+		{ "id": "atirador", "nome": "Atirador" },
+		{ "id": "suporte", "nome": "Suporte" }
+	],
+	"pesos_por_posicao": {
+		"_comentario": "Peso de cada atributo no nível geral do jogador em cada posição. Cada linha soma 1.",
+		"topo":     { "resistencia": 0.15, "mental": 0.15, "farm": 0.20, "micro": 0.30, "macro": 0.20 },
+		"selva":    { "resistencia": 0.15, "mental": 0.15, "farm": 0.15, "micro": 0.20, "macro": 0.35 },
+		"meio":     { "resistencia": 0.15, "mental": 0.15, "farm": 0.20, "micro": 0.30, "macro": 0.20 },
+		"atirador": { "resistencia": 0.15, "mental": 0.15, "farm": 0.30, "micro": 0.25, "macro": 0.15 },
+		"suporte":  { "resistencia": 0.15, "mental": 0.20, "farm": 0.05, "micro": 0.20, "macro": 0.40 }
+	},
+	"afinidade_posicao": {
+		"_comentario": "Rendimento fora da posição principal (1.0 = 100%). Especialista: versatilidade 0. Versátil: versatilidade 1.",
+		"principal_especialista": 1.0,
+		"principal_versatil": 0.92,
+		"secundaria_especialista": 0.55,
+		"secundaria_versatil": 0.85,
+		"sem_afinidade": 0.40
+	},
+	"geracao": {
+		"idade_minima": 16,
+		"idade_maxima": 29,
+		"desvio_atributos": 9,
+		"energia_inicial": 100,
+		"satisfacao_inicial": 70,
+		"lealdade_inicial": 20
+	},
+	"salario": {
+		"_comentario": "Salário mensal pedido = base * (geral / referencia) ^ expoente * (1 + experiencia * bonus_por_experiencia), arredondado para centenas.",
+		"base": 3000,
+		"referencia": 50,
+		"expoente": 2.2,
+		"bonus_por_experiencia": 0.004,
+		"minimo": 1200
+	}
+}

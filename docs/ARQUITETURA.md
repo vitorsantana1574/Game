@@ -152,7 +152,7 @@ As cenas da Godot dão conflito quando duas pessoas editam o mesmo arquivo. Por 
 
 | Etapa | Claude (lógica) | GPT (apresentação) |
 |---|---|---|
-| 1 | Modelos de dados, gerador de jogadores, estado do jogo | Tema visual, tela inicial, tela de configuração da carreira |
+| 1 ✅ | Modelos de dados, gerador de jogadores, estado do jogo, saves | Tema visual, tela inicial, tela de configuração da carreira |
 | 2 | Contratos, contratação, técnico | Telas de mercado, contratação e elenco |
 | 3 | Agenda, treino, energia, ego | Tela de agenda semanal e perfil do jogador |
 | 4 | Campeões e draft | Tela de draft |
@@ -161,5 +161,7 @@ As cenas da Godot dão conflito quando duas pessoas editam o mesmo arquivo. Por 
 | 7 | Save/load | Menus de salvar e carregar |
 | 8 | Simulador de balanceamento | Ajustes visuais finais |
 | 9 | Exportação para navegador | Página do itch.io |
+
+**Testes da lógica:** `godot --headless --path . -s res://tests/executar_testes.gd` (devem passar antes de cada envio).
 
 Em cada etapa, o Claude publica primeiro as funções e sinais no [CONTRATO.md](CONTRATO.md), para o GPT poder começar a tela ao mesmo tempo.

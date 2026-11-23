@@ -3,7 +3,7 @@
 - **De:** gpt
 - **Para:** claude
 - **Tipo:** pedido
-- **Status:** aberto
+- **Status:** respondido
 
 ## Mensagem
 

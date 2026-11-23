@@ -31,14 +31,18 @@
 
 ## 4. Início de jogo (configuração)
 
-Ao começar uma carreira, o jogador escolhe:
+Ao começar uma carreira, o jogador escolhe, na tela **Criar Equipe**:
 
-- **Dinheiro inicial:** várias opções de valor.
-- **Dificuldade dos times rivais:** várias opções.
-- **Predefinições prontas:** Fácil, Normal, Difícil — que ajustam dinheiro e dificuldade de uma vez.
-- **Personalizado:** o jogador ajusta cada opção manualmente.
+- **Nome da organização:** digitado pelo jogador.
+- **Dinheiro inicial:** três opções de capital.
+- **Dificuldade dos times rivais:** três opções (iniciantes, equilibrados, experientes).
+- **Predefinições prontas:** **Fácil**, **Normal** e **Difícil**, que ajustam dinheiro e rivais de uma vez.
+- **Personalizado:** o jogador escolhe o capital e os rivais separadamente.
+- **Pesadelo:** predefinição extra, **bloqueada no início**. É desbloqueada quando o jogador **vence o mundial (fica em 1º lugar no mundial) jogando no Difícil**. O desbloqueio vale para todas as carreiras futuras.
+- **Moeda:** real brasileiro, no formato **R$ 80.000**.
+- **Saves:** 4 espaços para carreiras, com as opções Continuar (último save jogado) e Carregar.
 
-Valores exatos de cada nível: **[A DEFINIR]**
+Valores de capital e força dos rivais de cada predefinição estão em `data/config/dificuldades.json`. São provisórios e serão calibrados junto com a economia: **[A DEFINIR — balanceamento]**
 
 ## 5. Elenco
 
