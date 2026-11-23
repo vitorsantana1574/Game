@@ -291,12 +291,18 @@ Fase de banimentos e escolhas antes de cada partida.
 - **Os candidatos não aparecem na hora:** chegam depois de um tempo.
 - O anúncio pode ter uma **oferta mínima**: oferecer mais garante que os candidatos apareçam mais rápido.
 - Custo de cada anúncio e tempos de espera: **[A DEFINIR]**
-- Forma extra de conseguir técnicos melhores: **[A DEFINIR]**
+- **Formas extras de conseguir técnicos melhores:**
+  - **Reputação da organização:** títulos e bons resultados atraem candidatos melhores nos anúncios.
+  - **Tirar técnico de outro time:** pagar uma multa para levar o técnico de um rival. É caro, mas você escolhe exatamente quem quer.
 
 ### Salário
 
 - **Salário mensal.** O jogador precisa planejar as finanças para sempre conseguir pagar.
-- O que acontece se o salário atrasar: **[A DEFINIR]**
+- **Salário atrasado:**
+  - o técnico fica insatisfeito e rende menos;
+  - se o atraso continuar, ele pede demissão;
+  - **a reputação da organização cai**;
+  - as mesmas regras valem para os jogadores.
 
 ### Atributos
 
@@ -304,15 +310,25 @@ Fase de banimentos e escolhas antes de cada partida.
 |---|---|
 | **Macro** | O Macro do técnico dá um **pequeno bônus de Macro** aos jogadores do time. |
 | **Conhecimento** | O quanto ele sabe do **patch atual** e dos **confrontos campeão contra campeão** (matchups). |
-| **Olheiro** | Habilidade de avaliar e encontrar **novos jogadores** para contratar. |
+| **Olheiro** | Habilidade de avaliar jogadores: encontrar **novos jogadores** para contratar e revelar os **campeões principais dos jogadores do time inimigo**. |
 
 - Os atributos podem ser **treinados**.
+- **Conhecimento cai a cada patch novo:** parte dele fica desatualizada e o técnico precisa estudar de novo. Quanto maior o Conhecimento, mais rápido ele se atualiza.
+- Na Fase 2, o **Analista** é o especialista em estudar os rivais: revela mais e mais rápido do que o Olheiro do técnico, sem substituí-lo.
 
 ### Cansaço
 
 - O técnico tem **cansaço**, que **não pode ser treinado**.
 - O cansaço **só se recupera com férias**.
-- Efeitos do cansaço e regras das férias: **[A DEFINIR]**
+- **Durante as férias o time fica sem o técnico:** sem o bônus de Macro e sem o Conhecimento dele. Tirar férias entre temporadas é seguro; no meio dos playoffs, é um risco.
+- Efeitos exatos do cansaço e duração das férias: **[A DEFINIR]**
+
+## 8.9 Reputação da organização
+
+- A organização tem uma **reputação**.
+- **Sobe** com títulos e bons resultados; **cai** com salários atrasados.
+- Reputação alta atrai **técnicos melhores** nos anúncios.
+- Outros efeitos (jogadores, patrocinadores, fãs) e como é exibida: **[A DEFINIR]**
 
 ## 9. Camada de negócio (Fase 2)
 
@@ -351,7 +367,8 @@ Detalhes: **[A DEFINIR]**
 - Balanceamento de torres, Guardião, monstros épicos e acampamentos
 - Curva de experiência (define os tempos de aparição da Hydra e do Cérbero)
 - Detalhes dos acampamentos da selva (posição, reaparição, bônus)
-- Técnico: custos e tempos dos anúncios, salário atrasado, efeitos do cansaço e férias
+- Técnico: custos e tempos dos anúncios, efeitos do cansaço e duração das férias
+- Reputação: outros efeitos e exibição
 - Como o conhecimento do meta é exibido e evolui
 - Nome do jogo, do MOBA fictício e dos campeões
 - Estrutura da liga (quantos times, formato, playoffs, mundial)
