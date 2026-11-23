@@ -106,8 +106,39 @@ Descobertos aos poucos pelo jogador (por exemplo, com o tempo de convivência ou
 - **Ego:** o quanto o jogador aceita ficar no banco de reservas. Jogadores com ego alto ficam insatisfeitos quando vão para o banco.
   - Principal função: dar um **custo ao rodízio** de reservas (sistema de energia). Descansar o craque tem um preço.
   - Jogadores com ego alto podem exigir no contrato uma **cláusula de titular**: se forem para o banco, ficam insatisfeitos ou pedem para sair.
-  - O ego **sobe e desce** ao longo da carreira. Mecanismos de balanceamento: **[A DEFINIR — em discussão]**
+  - O ego **sobe e desce** ao longo da carreira (ver 6.5).
 - **Salário pedido:** quanto o jogador exige para assinar ou renovar contrato.
+
+### 6.5 Ego, satisfação e lealdade
+
+> **Regra de design:** as ferramentas abaixo **atenuam o problema, mas nunca o eliminam**. O ego deve continuar dando trabalho. Em algum momento ele vai obrigar o jogador a escolher entre manter um craque ou gastar muito dinheiro, e uma decisão ruim pode levar a organização à falência.
+
+**O que faz o ego subir**
+- Títulos e prêmios individuais (MVP, seleção do mundial).
+- Ser o destaque do time, com os melhores números do elenco.
+- Receber propostas de outros times.
+- Receber um salário muito acima do resto do elenco.
+
+**O que faz o ego descer**
+- Sequências de derrotas e atuações ruins.
+- Ser superado por um companheiro da mesma posição (perder a titularidade "no campo").
+- Idade e maturidade: jogadores mais velhos tendem a se acalmar.
+- **Psicólogo** (staff da Fase 2): reduz o ego aos poucos.
+
+**Ferramentas do gestor**
+- **Conversa individual:** elogiar, cobrar ou prometer tempo de jogo.
+  - Elogiar acalma, mas elogio exagerado infla o ego.
+  - **Promessas precisam ser cumpridas:** promessa quebrada derruba a satisfação com muito mais força.
+- **Capitão:** um jogador de ego baixo e Mental alto como capitão ajuda a segurar a satisfação do elenco.
+
+**Retenção de jogadores em nível mundial**
+- **Lealdade (indicador por jogador):** sobe com tempo de casa, títulos conquistados juntos, salário em dia e promessas cumpridas. Lealdade alta reduz a chance de aceitar propostas de rivais e deixa as renegociações mais moderadas. Jogadores formados desde iniciantes tendem a ser mais fiéis.
+- **Reputação a favor:** quando o time está no topo, os jogadores querem ficar, e os rivais precisam oferecer muito mais.
+- **Direito de preferência:** quando um rival faz proposta, você pode igualar antes de o jogador decidir.
+- **Rivais com orçamento limitado:** os times do computador também têm caixa; só os ricos conseguem levar os seus astros.
+- **Multa rescisória alta** e **contratos longos assinados cedo** (ver 8.11).
+
+Valores, velocidade de mudança do ego e da lealdade: **[A DEFINIR — balanceamento]**
 
 ## 7. O MOBA fictício
 
@@ -479,4 +510,4 @@ Detalhes: **[A DEFINIR]**
 - Nome do jogo, do MOBA fictício e dos campeões
 - Mundial: vagas por região, séries do play-in e da fase suíça, premiação
 - Contratos: ganho de experiência, regras de rescisão
-- Ego: mecanismos para subir e descer; retenção de jogadores em nível mundial
+- Ego e lealdade: valores e velocidade de mudança (balanceamento)
