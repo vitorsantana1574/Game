@@ -273,12 +273,46 @@ Fase de banimentos e escolhas antes de cada partida.
   - pelo **técnico, que precisa estudar e treinar o meta**. Um técnico atualizado com o meta orienta melhor o draft.
 - Detalhes de como o conhecimento do meta é exibido e evolui: **[A DEFINIR]**
 
-## 8.8 Técnico (a discutir)
+## 8.8 Técnico
 
-- O técnico contratado terá **atributos que podem ser treinados** e **cansaço**, como os jogadores.
 - Ele estuda o meta, orienta o draft e pode receber o draft delegado.
-- Como o conhecimento do meta passa a depender dele, o técnico provavelmente precisa entrar já na **Fase 1**, e não só com o restante do staff na Fase 2.
-- Atributos, cansaço, contratação e salário: **[A DEFINIR — próximo tema]**
+- Como o conhecimento do meta depende dele, o técnico entra já na **Fase 1**, e não só com o restante do staff na Fase 2.
+
+### Contratação
+
+- O jogador publica um **anúncio**, em três tamanhos:
+
+| Anúncio | Candidatos |
+|---|---|
+| Pequeno | 1 técnico |
+| Médio | até 3 técnicos |
+| Grande | até 5 técnicos |
+
+- **Os candidatos não aparecem na hora:** chegam depois de um tempo.
+- O anúncio pode ter uma **oferta mínima**: oferecer mais garante que os candidatos apareçam mais rápido.
+- Custo de cada anúncio e tempos de espera: **[A DEFINIR]**
+- Forma extra de conseguir técnicos melhores: **[A DEFINIR]**
+
+### Salário
+
+- **Salário mensal.** O jogador precisa planejar as finanças para sempre conseguir pagar.
+- O que acontece se o salário atrasar: **[A DEFINIR]**
+
+### Atributos
+
+| Atributo | O que faz |
+|---|---|
+| **Macro** | O Macro do técnico dá um **pequeno bônus de Macro** aos jogadores do time. |
+| **Conhecimento** | O quanto ele sabe do **patch atual** e dos **confrontos campeão contra campeão** (matchups). |
+| **Olheiro** | Habilidade de avaliar e encontrar **novos jogadores** para contratar. |
+
+- Os atributos podem ser **treinados**.
+
+### Cansaço
+
+- O técnico tem **cansaço**, que **não pode ser treinado**.
+- O cansaço **só se recupera com férias**.
+- Efeitos do cansaço e regras das férias: **[A DEFINIR]**
 
 ## 9. Camada de negócio (Fase 2)
 
@@ -317,7 +351,7 @@ Detalhes: **[A DEFINIR]**
 - Balanceamento de torres, Guardião, monstros épicos e acampamentos
 - Curva de experiência (define os tempos de aparição da Hydra e do Cérbero)
 - Detalhes dos acampamentos da selva (posição, reaparição, bônus)
-- Técnico: atributos, cansaço, contratação e salário
+- Técnico: custos e tempos dos anúncios, salário atrasado, efeitos do cansaço e férias
 - Como o conhecimento do meta é exibido e evolui
 - Nome do jogo, do MOBA fictício e dos campeões
 - Estrutura da liga (quantos times, formato, playoffs, mundial)
