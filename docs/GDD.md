@@ -12,6 +12,7 @@
 - **Gênero:** gerenciamento de equipe de e-sports (manager), com foco em administração e estratégia.
 - **Referências:** CS Manager, Teamfight Manager, Football Manager (gestão de time); Big Ambitions e Supermarket Simulator (gestão de negócio, como inspiração temática — não em 3D).
 - **Premissa:** o jogador é dono e gestor de uma organização de e-sports que disputa ligas de um **MOBA fictício**, inspirado em League of Legends.
+- **Pilar do design:** um jogo de **pura administração de pessoas e números**. Toda mecânica nova deve gerar decisões de gestão.
 - **Estrutura em duas camadas:**
   1. **Núcleo (Fase 1):** gerenciar o time — elenco, treinos, draft, partidas simuladas, liga, transferências.
   2. **Negócio (Fase 2):** gerenciar a organização como empresa — gaming house, patrocinadores, loja, staff, finanças.
@@ -102,7 +103,10 @@ Isso dá peso ao **pick & ban** e ao **meta** de cada patch. Tamanho exato das p
 Descobertos aos poucos pelo jogador (por exemplo, com o tempo de convivência ou com um olheiro):
 
 - **Idade e potencial:** quanto o jogador ainda pode evoluir.
-- **Ego:** aceita ou não ficar no banco de reservas; jogadores com ego alto podem ficar insatisfeitos.
+- **Ego:** o quanto o jogador aceita ficar no banco de reservas. Jogadores com ego alto ficam insatisfeitos quando vão para o banco.
+  - Principal função: dar um **custo ao rodízio** de reservas (sistema de energia). Descansar o craque tem um preço.
+  - Jogadores com ego alto podem exigir no contrato uma **cláusula de titular**: se forem para o banco, ficam insatisfeitos ou pedem para sair.
+  - O ego **sobe e desce** ao longo da carreira. Mecanismos de balanceamento: **[A DEFINIR — em discussão]**
 - **Salário pedido:** quanto o jogador exige para assinar ou renovar contrato.
 
 ## 7. O MOBA fictício
@@ -475,4 +479,4 @@ Detalhes: **[A DEFINIR]**
 - Nome do jogo, do MOBA fictício e dos campeões
 - Mundial: vagas por região, séries do play-in e da fase suíça, premiação
 - Contratos: ganho de experiência, regras de rescisão
-- Ego: manter (com cláusula de titular) ou retirar
+- Ego: mecanismos para subir e descer; retenção de jogadores em nível mundial
