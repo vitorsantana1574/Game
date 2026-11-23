@@ -410,18 +410,27 @@ Formato das séries no play-in e na fase suíça, valores de premiação: **[A D
 - **Renegociação:** se um jogador evolui muito (por exemplo, um iniciante que ganhou muita experiência, mas assinou 2 anos com salário de iniciante), ele pode **pedir revisão do contrato com aumento de salário**.
 - Se o pedido não for atendido, ele pode **quebrar o contrato, pagando uma multa, e sair**.
 - **Demissão não é livre:** dependendo do contrato, o time não pode simplesmente demitir o jogador. Regras e custo de rescisão: **[A DEFINIR]**
+- **Multa rescisória definida no contrato:** negociada na assinatura. Uma multa alta protege o jogador contra outros times, que podem levá-lo pagando esse valor; em troca, o jogador pede mais salário para aceitar uma multa alta.
+- **Bônus por desempenho:** em vez de um salário alto, oferecer prêmios por título ou por classificação para o mundial. É mais barato se o time não vencer, mas mais arriscado para o jogador, então nem todos aceitam.
 
 ### Fim do contrato e renovação
 
 - Quando o contrato acaba, é possível **renovar, se o jogador quiser**.
 - O time pode fazer **ofertas enormes para segurar um jogador importante**, mesmo que nem compensem financeiramente (por exemplo, o melhor jogador da regional, às vésperas do mundial).
-- O que acontece se o contrato acabar durante a temporada ou durante um evento: **[A DEFINIR — em discussão]**
 
-### Trocas de jogadores
+**Contrato que vence durante a temporada ou um evento** (responsabilidade do jogador, com redes de segurança):
+1. **Dois avisos:** quando faltam **3 meses** e quando falta **1 semana** para o contrato vencer.
+2. **O contrato vai até o fim do evento em andamento:** se vence no meio dos playoffs ou do mundial, o jogador fica até o fim da competição e só depois sai.
+3. **Contratação emergencial:** se faltar gente, dá para contratar jogadores sem time a qualquer momento. Os disponíveis costumam ser mais fracos ou mais caros.
+4. **Derrota por W.O.:** sem 5 jogadores para entrar em campo, o time perde a partida.
 
-- Feitas **com outras equipes, fora da temporada**.
+### Trocas e propostas
+
+- **Trocas, compras e propostas só podem ser feitas fora de competições em andamento.**
 - Quem propõe a troca pode **oferecer dinheiro junto**.
 - O resultado depende do **nível do seu jogador, do nível do jogador rival e do dinheiro oferecido**. Com uma quantia absurdamente grande, é possível trocar um jogador mediano por um ótimo.
+- **Os outros times também fazem propostas** pelos seus jogadores, principalmente os que se destacaram. Você pode aceitar, recusar ou fazer uma contraproposta.
+- **O jogador precisa aceitar a troca:** ele pode recusar ir para um time com reputação muito menor que a do atual.
 
 ## 9. Camada de negócio (Fase 2)
 
@@ -465,4 +474,5 @@ Detalhes: **[A DEFINIR]**
 - Como o conhecimento do meta é exibido e evolui
 - Nome do jogo, do MOBA fictício e dos campeões
 - Mundial: vagas por região, séries do play-in e da fase suíça, premiação
-- Contratos: ganho de experiência, regras de rescisão, contrato que vence durante a temporada
+- Contratos: ganho de experiência, regras de rescisão
+- Ego: manter (com cláusula de titular) ou retirar
