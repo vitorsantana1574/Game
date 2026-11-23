@@ -381,6 +381,48 @@ Três níveis: **regional**, **nacional** e **mundial**.
 
 Formato das séries no play-in e na fase suíça, valores de premiação: **[A DEFINIR]**
 
+## 8.11 Contratos e transferências
+
+### Duração
+
+- Contratos firmados por período: **6 meses, 1 ano, 2 anos** e assim por diante.
+
+### Modelos de contrato
+
+**1. Clássico (salário)**
+- Salário **negociável, mas sem fugir muito** do valor pedido pelo jogador.
+- **Quanto melhor e mais conhecido o jogador, mais difícil a negociação.** Iniciantes são mais simples de negociar.
+- O salário pedido é **fortemente ligado aos atributos** do jogador.
+
+**2. Com pagamento na assinatura (luvas)**
+- Uma **quantia alta paga só na hora da assinatura**, e depois segue o salário normal.
+- Aumenta a chance de o jogador aceitar, mas **ele ainda pode recusar**, dependendo de quão bom e conhecido ele é.
+
+### Experiência
+
+- Cada jogador tem uma **barra de experiência**.
+- Quem **já disputou a regional** antes começa com alguma experiência.
+- Experiência e atributos definem o quanto o jogador é "conhecido" e quanto ele pede de salário.
+- Como a experiência é ganha e quanto ela influencia: **[A DEFINIR]**
+
+### Durante o contrato
+
+- **Renegociação:** se um jogador evolui muito (por exemplo, um iniciante que ganhou muita experiência, mas assinou 2 anos com salário de iniciante), ele pode **pedir revisão do contrato com aumento de salário**.
+- Se o pedido não for atendido, ele pode **quebrar o contrato, pagando uma multa, e sair**.
+- **Demissão não é livre:** dependendo do contrato, o time não pode simplesmente demitir o jogador. Regras e custo de rescisão: **[A DEFINIR]**
+
+### Fim do contrato e renovação
+
+- Quando o contrato acaba, é possível **renovar, se o jogador quiser**.
+- O time pode fazer **ofertas enormes para segurar um jogador importante**, mesmo que nem compensem financeiramente (por exemplo, o melhor jogador da regional, às vésperas do mundial).
+- O que acontece se o contrato acabar durante a temporada ou durante um evento: **[A DEFINIR — em discussão]**
+
+### Trocas de jogadores
+
+- Feitas **com outras equipes, fora da temporada**.
+- Quem propõe a troca pode **oferecer dinheiro junto**.
+- O resultado depende do **nível do seu jogador, do nível do jogador rival e do dinheiro oferecido**. Com uma quantia absurdamente grande, é possível trocar um jogador mediano por um ótimo.
+
 ## 9. Camada de negócio (Fase 2)
 
 Entra depois que o núcleo estiver divertido. Feita em menus e painéis, não em 3D.
@@ -423,4 +465,4 @@ Detalhes: **[A DEFINIR]**
 - Como o conhecimento do meta é exibido e evolui
 - Nome do jogo, do MOBA fictício e dos campeões
 - Mundial: vagas por região, séries do play-in e da fase suíça, premiação
-- Transferências, contratos e janela de mercado
+- Contratos: ganho de experiência, regras de rescisão, contrato que vence durante a temporada
