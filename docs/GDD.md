@@ -337,22 +337,49 @@ Três níveis: **regional**, **nacional** e **mundial**.
 ### Ligas regional e nacional (mesmo formato)
 
 **Fase de pontos**
-- **16 equipes.**
+- **8 equipes.**
 - **Vitória: 5 pontos. Derrota: 0 pontos.**
 - Partidas em **MD1** (ver 8.3).
-- Número de rodadas e critérios de desempate: **[A DEFINIR]**
+- **Turno e returno: 14 jogos por equipe** (cada time enfrenta os outros 7 duas vezes). *Recomendação a confirmar; a alternativa é turno único, com 7 jogos.*
+- **Critérios de desempate**, nesta ordem:
+  1. confronto direto;
+  2. saldo de abates;
+  3. tempo médio das vitórias (quem vence mais rápido fica na frente).
 
 **Playoffs**
-- As **8 primeiras colocadas** avançam.
-- Os confrontos são **sorteados de forma totalmente aleatória**: quem se classificou em 8º pode enfrentar logo o 1º colocado.
-- Quartas de final → semifinais → final.
-- Formato das séries nos playoffs (MD3/MD5) e draft fearless (ver 8.4).
+- As **4 primeiras colocadas** avançam.
+- Os confrontos são **sorteados de forma totalmente aleatória**: quem se classificou em 4º pode enfrentar logo o 1º colocado.
+- **Semifinais (MD5) → final (MD5)**, com draft fearless (ver 8.4).
+- **Vantagem pela colocação:** o time melhor colocado na fase de pontos escolhe quem faz o primeiro pick no **jogo 1** da série. Nos jogos seguintes, alterna (ver 8.2).
 
-Como as ligas regional e nacional se conectam (classificação, acesso) e quem vai ao mundial: **[A DEFINIR]**
+**Conexão entre regional e nacional: acesso e rebaixamento**
+- O time começa na **regional**. Os melhores sobem para a **nacional** na temporada seguinte, e os piores da nacional caem para a regional.
+- Quantos times sobem e caem: **[A DEFINIR]**
 
 ### Mundial
 
-- Formato muito mais completo que as ligas. **[A DEFINIR — em discussão]**
+**1. Classificação**
+- Campeões e mais bem colocados das ligas nacionais de várias **regiões fictícias**, cada uma com seu estilo de jogo e seus campeões favoritos.
+- Quantas vagas cada região tem: **[A DEFINIR]**
+
+**2. Play-in**
+- Times de regiões mais fracas disputam as vagas restantes.
+
+**3. Fase suíça (16 times)**
+- A cada rodada, cada time enfrenta alguém com a mesma campanha.
+- **3 vitórias: avança. 3 derrotas: eliminado.**
+
+**4. Mata-mata (8 times)**
+- Chave fixa, todas as séries em **MD5**, até a grande final.
+
+**5. Extras**
+- **Bootcamp antes do torneio:** gastar dinheiro para treinar fora e se adaptar ao meta do mundial.
+- **Viagem e fuso horário:** cansam os jogadores e afetam a energia nos primeiros dias.
+- **Meta do mundial:** costuma vir num patch especial; o Conhecimento do técnico conta muito.
+- **Prêmios individuais:** MVP do torneio, melhor jogador por posição, seleção do mundial.
+- **Premiação em dinheiro e grande ganho de reputação.**
+
+Formato das séries no play-in e na fase suíça, valores de premiação: **[A DEFINIR]**
 
 ## 9. Camada de negócio (Fase 2)
 
@@ -395,6 +422,6 @@ Detalhes: **[A DEFINIR]**
 - Reputação: outros efeitos e exibição
 - Como o conhecimento do meta é exibido e evolui
 - Nome do jogo, do MOBA fictício e dos campeões
-- Liga: número de rodadas, desempate, conexão regional–nacional, vagas para o mundial
-- Formato do mundial
+- Liga: quantos times sobem e caem; confirmar turno e returno (14 jogos)
+- Mundial: vagas por região, séries do play-in e da fase suíça, premiação
 - Transferências, contratos e janela de mercado
