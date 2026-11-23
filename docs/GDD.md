@@ -330,6 +330,30 @@ Fase de banimentos e escolhas antes de cada partida.
 - Reputação alta atrai **técnicos melhores** nos anúncios.
 - Outros efeitos (jogadores, patrocinadores, fãs) e como é exibida: **[A DEFINIR]**
 
+## 8.10 Competições
+
+Três níveis: **regional**, **nacional** e **mundial**.
+
+### Ligas regional e nacional (mesmo formato)
+
+**Fase de pontos**
+- **16 equipes.**
+- **Vitória: 5 pontos. Derrota: 0 pontos.**
+- Partidas em **MD1** (ver 8.3).
+- Número de rodadas e critérios de desempate: **[A DEFINIR]**
+
+**Playoffs**
+- As **8 primeiras colocadas** avançam.
+- Os confrontos são **sorteados de forma totalmente aleatória**: quem se classificou em 8º pode enfrentar logo o 1º colocado.
+- Quartas de final → semifinais → final.
+- Formato das séries nos playoffs (MD3/MD5) e draft fearless (ver 8.4).
+
+Como as ligas regional e nacional se conectam (classificação, acesso) e quem vai ao mundial: **[A DEFINIR]**
+
+### Mundial
+
+- Formato muito mais completo que as ligas. **[A DEFINIR — em discussão]**
+
 ## 9. Camada de negócio (Fase 2)
 
 Entra depois que o núcleo estiver divertido. Feita em menus e painéis, não em 3D.
@@ -371,5 +395,6 @@ Detalhes: **[A DEFINIR]**
 - Reputação: outros efeitos e exibição
 - Como o conhecimento do meta é exibido e evolui
 - Nome do jogo, do MOBA fictício e dos campeões
-- Estrutura da liga (quantos times, formato, playoffs, mundial)
+- Liga: número de rodadas, desempate, conexão regional–nacional, vagas para o mundial
+- Formato do mundial
 - Transferências, contratos e janela de mercado
