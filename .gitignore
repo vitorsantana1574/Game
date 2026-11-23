@@ -1,0 +1,13 @@
+# Godot 4
+.godot/
+/android/
+export_presets.cfg.bak
+
+# Exportações (os builds vão para o itch.io, não para o repositório)
+/build/
+/exports/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini

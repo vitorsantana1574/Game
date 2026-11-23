@@ -19,7 +19,8 @@
 
 ## 2. Plataforma e tecnologia
 
-- **Motor:** Godot 4.7.2 (versão padrão, GDScript), 2D.
+- **Motor:** Godot 4.7.2 (versão padrão, GDScript), 2D, renderizador **Compatibility** (necessário para a versão de navegador).
+- **Divisão do trabalho:** Claude cuida da lógica; GPT cuida da interface, arte, animações e sons. Detalhes em [ARQUITETURA.md](ARQUITETURA.md).
 - **Publicação:** itch.io (gratuito), com versão jogável no navegador. Game Jolt como opção secundária. Steam e Epic descartadas por enquanto (taxa de US$ 100).
 - **Repositório:** `vitorsantana1574/Game`.
 
