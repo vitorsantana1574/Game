@@ -140,6 +140,25 @@ Descobertos aos poucos pelo jogador (por exemplo, com o tempo de convivência ou
 
 Valores, velocidade de mudança do ego e da lealdade: **[A DEFINIR — balanceamento]**
 
+### 6.6 Treino
+
+O treino tem várias modalidades, cada uma voltada para atributos diferentes.
+
+| Modalidade | Atributos treinados | Observações |
+|---|---|---|
+| **Acompanhamento psicológico / dia de relaxar** | **Mental** e **Resistência** | Evolução **lenta**. Não é treino de partida: é treino de mente, fora do computador. |
+| **X1 entre os jogadores** | **Farm** e **Micro** + **domínio de campeão** | Escolhe até **2 campeões**: um principal e um secundário. **O principal sempre é o mais treinado.** |
+| **Treino puro de farm** | **Farm** (foco principal) | Um bot fica usando habilidades no jogador sem parar; ele precisa farmar sem perder minions e sem matar o bot. |
+| **Partidas internas, simulações e análise de partidas** | **Macro** | Inclui exercícios por posição, por exemplo: o caçador treina o roubo de objetivo; o jogador de rota treina a hora certa de sair sem perder muito farm. |
+
+**Treino do técnico**
+- Sempre **fora das partidas**.
+- Durante o período de treino, o técnico **fica indisponível**, dedicado ao atributo escolhido na aba de treino.
+
+**Ainda a definir:** duração de cada treino, custos em dinheiro e o quanto cada modalidade melhora os atributos.
+
+**Futuro:** contratar um **treinador auxiliar** que aumenta a eficiência dos treinos.
+
 ## 7. O MOBA fictício
 
 Baseado em League of Legends, mas não idêntico:
@@ -511,3 +530,4 @@ Detalhes: **[A DEFINIR]**
 - Mundial: vagas por região, séries do play-in e da fase suíça, premiação
 - Contratos: ganho de experiência, regras de rescisão
 - Ego e lealdade: valores e velocidade de mudança (balanceamento)
+- Treino: duração, custos e ganhos de cada modalidade
