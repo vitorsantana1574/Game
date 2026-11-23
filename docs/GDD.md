@@ -340,7 +340,7 @@ Três níveis: **regional**, **nacional** e **mundial**.
 - **8 equipes.**
 - **Vitória: 5 pontos. Derrota: 0 pontos.**
 - Partidas em **MD1** (ver 8.3).
-- **Turno e returno: 14 jogos por equipe** (cada time enfrenta os outros 7 duas vezes). *Recomendação a confirmar; a alternativa é turno único, com 7 jogos.*
+- **Turno e returno: 14 jogos por equipe** (cada time enfrenta os outros 7 duas vezes).
 - **Critérios de desempate**, nesta ordem:
   1. confronto direto;
   2. saldo de abates;
@@ -354,7 +354,7 @@ Três níveis: **regional**, **nacional** e **mundial**.
 
 **Conexão entre regional e nacional: acesso e rebaixamento**
 - O time começa na **regional**. Os melhores sobem para a **nacional** na temporada seguinte, e os piores da nacional caem para a regional.
-- Quantos times sobem e caem: **[A DEFINIR]**
+- **2 sobem e 2 caem** por temporada.
 
 ### Mundial
 
@@ -422,6 +422,5 @@ Detalhes: **[A DEFINIR]**
 - Reputação: outros efeitos e exibição
 - Como o conhecimento do meta é exibido e evolui
 - Nome do jogo, do MOBA fictício e dos campeões
-- Liga: quantos times sobem e caem; confirmar turno e returno (14 jogos)
 - Mundial: vagas por região, séries do play-in e da fase suíça, premiação
 - Transferências, contratos e janela de mercado
