@@ -151,9 +151,19 @@ O treino tem várias modalidades, cada uma voltada para atributos diferentes.
 | **Treino puro de farm** | **Farm** (foco principal) | Um bot fica usando habilidades no jogador sem parar; ele precisa farmar sem perder minions e sem matar o bot. |
 | **Partidas internas, simulações e análise de partidas** | **Macro** | Inclui exercícios por posição, por exemplo: o caçador treina o roubo de objetivo; o jogador de rota treina a hora certa de sair sem perder muito farm. |
 
+**Regras gerais do treino**
+- **Treino gasta energia:** X1, treino de farm e partidas internas consomem energia. O gestor precisa escolher entre treinar e descansar, principalmente antes de jogos importantes.
+- **Exceções:** o dia de relaxar e o acompanhamento psicológico **recuperam** energia.
+- **Agenda semanal:** uma grade com os dias da semana, em que o gestor distribui treinos, descanso e partidas para cada jogador.
+- **Partida interna titulares × reservas:** com 10 jogadores, o time joga um 5v5 completo entre si. É o treino de Macro mais forte, mas cansa os 10 ao mesmo tempo, e dá aos reservas experiência e chance de mostrar serviço.
+- **Ganhos dependem de idade, potencial e nível atual:** jovens com potencial alto evoluem rápido; veteranos evoluem pouco; atributos já altos sobem devagar.
+- **Treinar demais derruba a satisfação:** agenda pesada por muitas semanas irrita os jogadores, principalmente os de ego alto.
+- O **treino puro de farm não treina domínio de campeão**, para o X1 continuar valendo a pena.
+- **Cuidado de balanceamento:** o ganho de cada modalidade em cada atributo precisa ser calibrado com atenção (no simulador de temporadas), para nenhuma modalidade ser sempre a melhor escolha.
+
 **Treino do técnico**
 - Sempre **fora das partidas**.
-- Durante o período de treino, o técnico **fica indisponível**, dedicado ao atributo escolhido na aba de treino.
+- Durante o período de treino, o técnico **fica indisponível**, dedicado ao atributo escolhido na aba de treino. Como nas férias, o time fica sem ele nesse período.
 
 **Ainda a definir:** duração de cada treino, custos em dinheiro e o quanto cada modalidade melhora os atributos.
 
