@@ -46,7 +46,19 @@ static func criar() -> Theme:
 	for estado: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
 		tema.set_color(estado, "AcaoPrincipal", Color("#102318"))
 
+	_botoes_dificuldade(tema)
+
 	tema.set_type_variation("OpcaoMenu", "Button")
 	for estado: String in ["normal", "hover", "pressed", "disabled"]:
 		tema.set_stylebox(estado, "OpcaoMenu", StyleBoxEmpty.new())
 	return tema
+
+
+static func _botoes_dificuldade(tema: Theme) -> void:
+	var tipo: String = "BotaoDificuldade"
+	tema.set_type_variation(tipo, "Button")
+	tema.set_stylebox("normal", tipo, caixa(Color("#182722"), BORDA, 5))
+	tema.set_stylebox("hover", tipo, caixa(Color("#243b33"), VERDE, 5))
+	tema.set_stylebox("pressed", tipo, caixa(Color("#284a39"), VERDE, 5))
+	tema.set_stylebox("focus", tipo, caixa(Color.TRANSPARENT, DOURADO, 5))
+	tema.set_color("font_pressed_color", tipo, VERDE)

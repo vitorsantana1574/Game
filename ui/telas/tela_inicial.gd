@@ -1,29 +1,17 @@
 extends Control
 
-signal nova_carreira_solicitada(escolhas: Dictionary)
-signal carregamento_solicitado(slot: int)
-
-enum Tela { MENU, EQUIPE, SAVES, OPCOES, CREDITOS, CHEGADA }
+enum Tela { MENU, EQUIPE, SAVES, OPCOES, CREDITOS, CHEGADA, SUBSTITUIR }
 
 const TemaAbertura = preload("res://ui/temas/tema_abertura.gd")
+const SeletorDificuldade = preload("res://ui/componentes/seletor_dificuldade.gd")
+const ListaSaves = preload("res://ui/componentes/lista_saves.gd")
 const ARENA: Texture2D = preload("res://assets/sprites/menu/arena.webp")
 const OCLUSAO: Texture2D = preload("res://assets/sprites/menu/oclusao.webp")
-const CADEADOS: Texture2D = preload("res://assets/sprites/menu/cadeados.webp")
 const REFLETORES: Shader = preload("res://ui/componentes/refletores_abertura.gdshader")
 const PREFERENCIAS: String = "user://preferencias_apresentacao.cfg"
-const MODOS: Array[String] = ["Fácil", "Médio", "Difícil", "Personalizado"]
-const CAPITAIS_EXEMPLO: Array[int] = [40000, 80000, 120000]
-const CAIXA_EXEMPLO: Array[String] = ["Menos dinheiro", "Caixa equilibrado", "Mais dinheiro"]
-const RIVAIS_EXEMPLO: Array[String] = ["Adversários iniciantes", "Adversários equilibrados", "Adversários experientes"]
-const MAXIMO_SLOTS: int = 4
-
-## As opções e os saves abaixo servem para testar a apresentação isoladamente.
-@export var demonstracao: bool = true
-
 var _tela: Tela = Tela.MENU
 var _saves: Array[Dictionary] = []
 var _ultimo_slot: int = -1
-var _slot_editado: int = -1
 var _carreira_visivel: Dictionary = {}
 var _rascunho_equipe: Dictionary = {}
 var _animar: bool = true
@@ -35,13 +23,12 @@ var _material: ShaderMaterial
 var _painel: ScrollContainer
 var _conteudo: MarginContainer
 var _nome: LineEdit
-var _erro: Label
-var _personalizar: VBoxContainer
-var _escolha_capital: OptionButton
-var _escolha_rivais: OptionButton
-var _valor_capital: Label
-var _itens_dificuldade: Label
-var _modo_visivel: int = 1
+var _erro_nome: Label
+var _erro_acao: Label
+var _seletor: SeletorDificuldade
+var _lista_saves: ListaSaves
+var _botao_continuar: Button
+var _confirmacao: ConfirmationDialog
 var _foco_inicial: Control
 
 func _ready() -> void:
@@ -50,12 +37,12 @@ func _ready() -> void:
 	if config.load(PREFERENCIAS) == OK:
 		_animar = bool(config.get_value("abertura", "animacao", true))
 
-	if demonstracao and _saves.is_empty():
-		_saves = [
-			{"nome": "Aurora Esports", "fase": "Regional · Dia 12", "exemplo": true},
-			{"nome": "Vale Rift", "fase": "Regional · Dia 4", "exemplo": true}
-		]
-		_ultimo_slot = 0
+	_saves = Jogo.listar_saves()
+	_ultimo_slot = Jogo.ultimo_slot()
+	Eventos.carreira_iniciada.connect(_abrir_carreira)
+	Eventos.carreira_carregada.connect(_abrir_carreira)
+	Eventos.saves_mudaram.connect(exibir_slots)
+	Eventos.dificuldade_desbloqueada.connect(_atualizar_desbloqueio)
 
 	var base: ColorRect = ColorRect.new()
 	base.color = Color("#0a1718")
@@ -116,6 +103,9 @@ func abrir(tela: Tela) -> void:
 		_conteudo.add_theme_constant_override("margin_" + lado, 26 if _retrato else 48)
 	_painel.add_child(_conteudo)
 	_foco_inicial = null
+	_erro_acao = null
+	_lista_saves = null
+	_botao_continuar = null
 
 	match _tela:
 		Tela.MENU: _montar_menu()
@@ -124,6 +114,7 @@ func abrir(tela: Tela) -> void:
 		Tela.OPCOES: _montar_opcoes()
 		Tela.CREDITOS: _montar_creditos()
 		Tela.CHEGADA: _montar_chegada()
+		Tela.SUBSTITUIR: _montar_saves(true)
 
 	if _foco_inicial != null:
 		_foco_inicial.grab_focus.call_deferred()
@@ -156,7 +147,8 @@ func _montar_menu() -> void:
 		var tamanho_base: int = 27 if _retrato else 34
 		botao.add_theme_font_size_override("font_size", roundi(1.42 * tamanho_base) if indice < 3 else tamanho_base)
 		if indice == 1:
-			botao.disabled = _ultimo_slot < 0 or _ultimo_slot >= _saves.size() or _saves[_ultimo_slot].is_empty()
+			_botao_continuar = botao
+			_atualizar_continuar()
 		if _animar:
 			botao.modulate.a = 0.0
 			var entrada: Tween = create_tween().bind_node(botao)
@@ -164,102 +156,53 @@ func _montar_menu() -> void:
 		if indice == 0:
 			_foco_inicial = botao
 
+	_erro_acao = _rotulo_erro(bloco)
+
+
 func _montar_equipe() -> void:
 	var bloco: VBoxContainer = _cartao("Criar Equipe")
 	_texto(bloco, "Nome", 21)
 	_nome = LineEdit.new()
+	_nome.accessibility_name = "Nome da organização"
 	_nome.placeholder_text = "Ex.: Aurora Esports"
 	_nome.text = str(_rascunho_equipe.get("nome", ""))
 	_nome.custom_minimum_size.y = 53 if _retrato else 44
-	_nome.text_submitted.connect(func(_nome_digitado: String) -> void: _confirmar_equipe())
+	_nome.text_submitted.connect(func(_digitado: String) -> void: _confirmar_equipe())
 	bloco.add_child(_nome)
 	_foco_inicial = _nome
-	_erro = _texto(bloco, "Digite um nome.", 18, Color("#ffb9a9"))
-	_erro.hide()
+	_erro_nome = _rotulo_erro(bloco)
 	_nome.text_changed.connect(func(texto: String) -> void:
-		if not texto.strip_edges().is_empty():
-			_erro.hide()
+		if _erro_nome.visible:
+			var erro: String = Jogo.validar_nome_organizacao(texto)
+			_erro_nome.text = erro
+			_erro_nome.visible = not erro.is_empty()
 	)
 
-	var corpo: BoxContainer
-	if _retrato:
-		corpo = VBoxContainer.new()
-	else:
-		corpo = HBoxContainer.new()
-	corpo.add_theme_constant_override("separation", 24)
-	bloco.add_child(corpo)
-	var escolhas: VBoxContainer = _coluna(corpo)
-	escolhas.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_texto(escolhas, "Dificuldade", 21)
-	var grade: GridContainer = GridContainer.new()
-	grade.columns = 3
-	grade.add_theme_constant_override("h_separation", 8)
-	escolhas.add_child(grade)
-	_modo_visivel = clampi(int(_rascunho_equipe.get("modo", 1)), 0, 3)
-	var grupo: ButtonGroup = ButtonGroup.new()
-	for indice: int in range(3):
-		_modo(grade, grupo, indice)
-	for indice: int in range(2):
-		var vazio: Control = Control.new()
-		grade.add_child(vazio)
-	_montar_pesadelo(grade)
-	_modo(escolhas, grupo, 3)
-	_personalizar = _coluna(escolhas)
-	_escolha_capital = _seletor(_personalizar, "Capital", [
-		_formatar_capital(40000), _formatar_capital(80000), _formatar_capital(120000)
-	], clampi(int(_rascunho_equipe.get("capital", 1)), 0, 2))
-	_escolha_rivais = _seletor(_personalizar, "Rivais", ["Iniciantes", "Equilibrados", "Experientes"],
-		clampi(int(_rascunho_equipe.get("rivais", 1)), 0, 2))
-
-	var leitura: VBoxContainer = _coluna(corpo)
-	leitura.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	if not _retrato:
-		leitura.custom_minimum_size.x = 246
-	_texto(leitura, "Capital inicial:", 19, TemaAbertura.SUAVE)
-	_valor_capital = _texto(leitura, "", 40, TemaAbertura.DOURADO)
-	_itens_dificuldade = _texto(leitura, "", 18, TemaAbertura.SUAVE)
-	_itens_dificuldade.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_itens_dificuldade.custom_minimum_size.x = 180
-	_atualizar_dificuldade()
-
+	_seletor = SeletorDificuldade.new()
+	bloco.add_child(_seletor)
+	_seletor.montar(Jogo.listar_dificuldades(), Jogo.opcoes_personalizado(), _rascunho_equipe, _retrato)
+	_erro_acao = _rotulo_erro(bloco)
 	var acoes: HBoxContainer = _acoes(bloco)
 	_botao(acoes, "Voltar", abrir.bind(Tela.MENU))
 	_botao(acoes, "Criar equipe", _confirmar_equipe, "AcaoPrincipal")
-	if not demonstracao:
-		var aviso: Label = _texto(bloco, "Valores ilustrativos enquanto a configuração da carreira está em desenvolvimento.", 16, TemaAbertura.SUAVE)
-		aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
-func _montar_pesadelo(grade: GridContainer) -> void:
-	var painel: PanelContainer = PanelContainer.new()
-	painel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	painel.add_theme_stylebox_override("panel", TemaAbertura.caixa(Color("#070a0d"), TemaAbertura.BORDA, 4))
-	grade.add_child(painel)
-	var desenho: VBoxContainer = _coluna(painel)
-	var rotulo: Label = _texto(desenho, "Pesadelo", 16, TemaAbertura.SUAVE)
-	rotulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	rotulo.accessibility_name = "Pesadelo, bloqueado"
-	var correntes: TextureRect = TextureRect.new()
-	correntes.texture = CADEADOS
-	correntes.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	correntes.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	correntes.custom_minimum_size.y = 43
-	correntes.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	desenho.add_child(correntes)
 
-func _montar_saves() -> void:
-	var bloco: VBoxContainer = _cartao("Carregar")
-	for indice: int in range(MAXIMO_SLOTS):
-		var registro: Dictionary = _saves[indice] if indice < _saves.size() else {}
-		var legenda: String = "Save %d · Vazio" % (indice + 1)
-		if not registro.is_empty():
-			legenda = "Save %d · %s · %s" % [indice + 1, registro.get("nome", ""), registro.get("fase", "")]
-			if registro.get("exemplo", false):
-				legenda += " · Exemplo"
-		var botao: Button = _botao(bloco, legenda, _carregar.bind(indice))
-		botao.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		botao.disabled = registro.is_empty()
-	var voltar: Button = _botao(bloco, "Voltar", abrir.bind(Tela.MENU))
-	_foco_inicial = voltar
+func _montar_saves(substituir: bool = false) -> void:
+	var bloco: VBoxContainer = _cartao("Substituir save" if substituir else "Carregar")
+	if substituir:
+		var instrucao: Label = _texto(bloco, "Os quatro espaços estão ocupados. Escolha qual save substituir.", 19)
+		instrucao.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_lista_saves = ListaSaves.new()
+	_lista_saves.add_theme_constant_override("separation", 7)
+	bloco.add_child(_lista_saves)
+	if substituir:
+		_lista_saves.slot_selecionado.connect(_pedir_confirmacao)
+	else:
+		_lista_saves.slot_selecionado.connect(_carregar)
+	_lista_saves.atualizar(_saves)
+	_erro_acao = _rotulo_erro(bloco)
+	_foco_inicial = _botao(bloco, "Voltar", abrir.bind(Tela.EQUIPE if substituir else Tela.MENU))
+
 
 func _montar_opcoes() -> void:
 	var bloco: VBoxContainer = _cartao("Opções")
@@ -280,83 +223,147 @@ func _montar_creditos() -> void:
 func _montar_chegada() -> void:
 	var bloco: VBoxContainer = _coluna(_conteudo)
 	bloco.alignment = BoxContainer.ALIGNMENT_END
-	_texto(bloco, "LIGA REGIONAL", 21, TemaAbertura.DOURADO)
+	_texto(bloco, str(_carreira_visivel.get("fase", "")).to_upper(), 21, TemaAbertura.DOURADO)
 	var titulo: Label = _texto(bloco, str(_carreira_visivel.get("nome", "")), 60)
 	titulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var acoes: HBoxContainer = _acoes(bloco)
 	_foco_inicial = _botao(acoes, "Menu principal", abrir.bind(Tela.MENU))
-	if demonstracao and not _carreira_visivel.get("exemplo", false) and _ultimo_slot >= 0:
-		_botao(acoes, "Editar equipe", _editar_equipe)
+
 
 func _nova_equipe() -> void:
-	_slot_editado = -1
 	_rascunho_equipe = {}
 	abrir(Tela.EQUIPE)
 
-func _editar_equipe() -> void:
-	_slot_editado = _ultimo_slot
-	_rascunho_equipe = _carreira_visivel.duplicate()
-	abrir(Tela.EQUIPE)
 
 func _ler_formulario() -> Dictionary:
-	return {
-		"nome": _nome.text.strip_edges(),
-		"modo": _modo_visivel,
-		"capital": _escolha_capital.selected,
-		"rivais": _escolha_rivais.selected,
-	}
+	var dados: Dictionary = _seletor.rascunho()
+	dados["nome"] = _nome.text
+	return dados
+
 
 func _confirmar_equipe() -> void:
-	var escolhas: Dictionary = _ler_formulario()
-	if escolhas["nome"].is_empty():
-		_erro.text = "Digite um nome."
-		_erro.show()
+	_rascunho_equipe = _ler_formulario()
+	var escolhas: Dictionary = _seletor.escolhas()
+	escolhas["nome"] = _nome.text
+	var resultado: Dictionary = Jogo.nova_carreira(escolhas)
+	if resultado["ok"]:
+		return
+	var erros: Dictionary = resultado["erros"]
+	if erros.has("slot"):
+		_saves = Jogo.listar_saves()
+		if _todos_ocupados():
+			abrir(Tela.SUBSTITUIR)
+			return
+	if erros.has("nome"):
+		_erro_nome.text = str(erros["nome"])
+		_erro_nome.show()
 		_nome.grab_focus()
-		return
-	if not demonstracao:
-		_erro.text = "A criação de carreira depende da integração com a lógica do jogo."
-		_erro.show()
-		nova_carreira_solicitada.emit(escolhas)
-		return
+	_mostrar_erros(erros, ["nome"])
 
-	_carreira_visivel = escolhas
-	_carreira_visivel["fase"] = "Regional · Dia 1"
-	var slot: int = _slot_editado if _slot_editado >= 0 else _primeiro_slot_vazio()
-	_ultimo_slot = slot
-	if slot >= 0:
-		if slot == _saves.size():
-			_saves.append(_carreira_visivel)
-		else:
-			_saves[slot] = _carreira_visivel
-	abrir(Tela.CHEGADA)
 
-func _primeiro_slot_vazio() -> int:
-	for indice: int in range(MAXIMO_SLOTS):
-		if indice >= _saves.size() or _saves[indice].is_empty():
-			return indice
-	return -1
+func _todos_ocupados() -> bool:
+	for registro: Dictionary in _saves:
+		if registro.is_empty():
+			return false
+	return not _saves.is_empty()
+
+
+func _pedir_confirmacao(slot: int) -> void:
+	if is_instance_valid(_confirmacao) or slot < 0 or slot >= _saves.size() or _saves[slot].is_empty():
+		return
+	var registro: Dictionary = _saves[slot].duplicate()
+	var dialogo: ConfirmationDialog = ConfirmationDialog.new()
+	_confirmacao = dialogo
+	dialogo.title = "Substituir save"
+	dialogo.dialog_text = "Substituir o Save %d de %s? O progresso desse save será perdido." % [
+		slot + 1, registro["nome"]
+	]
+	dialogo.get_ok_button().text = "Substituir"
+	dialogo.get_cancel_button().text = "Cancelar"
+	dialogo.exclusive = true
+	dialogo.confirmed.connect(func() -> void:
+		_fechar_confirmacao(dialogo)
+		_substituir_save(slot, registro)
+	)
+	dialogo.canceled.connect(_fechar_confirmacao.bind(dialogo))
+	add_child(dialogo)
+	dialogo.popup_centered()
+	dialogo.get_cancel_button().grab_focus()
+
+
+func _fechar_confirmacao(dialogo: ConfirmationDialog) -> void:
+	_confirmacao = null
+	dialogo.queue_free()
+
+
+func _substituir_save(slot: int, registro: Dictionary) -> void:
+	_saves = Jogo.listar_saves()
+	if _saves[slot] != registro:
+		_lista_saves.atualizar(_saves)
+		_mostrar_erros({"slot": "O save mudou. Volte ao formulário ou escolha outro espaço."})
+		return
+	var escolhas: Dictionary = _rascunho_equipe.duplicate()
+	if escolhas["dificuldade"] != "personalizado":
+		escolhas.erase("capital")
+		escolhas.erase("rivais")
+	escolhas["slot"] = slot
+	var resultado: Dictionary = Jogo.nova_carreira(escolhas)
+	if not resultado["ok"]:
+		_mostrar_erros(resultado["erros"])
+
 
 func _continuar() -> void:
-	_carregar(_ultimo_slot)
+	var resultado: Dictionary = Jogo.continuar()
+	if not resultado["ok"]:
+		_mostrar_erros(resultado["erros"])
+
 
 func _carregar(slot: int) -> void:
-	if slot < 0 or slot >= _saves.size() or _saves[slot].is_empty():
-		return
-	if demonstracao:
-		_ultimo_slot = slot
-		_carreira_visivel = _saves[slot].duplicate()
-		abrir(Tela.CHEGADA)
-	else:
-		carregamento_solicitado.emit(slot)
+	var resultado: Dictionary = Jogo.carregar(slot)
+	if not resultado["ok"]:
+		exibir_slots(Jogo.listar_saves(), Jogo.ultimo_slot())
+		_mostrar_erros(resultado["erros"])
 
-## Recebe cópias de resumos de carreiras para exibição, com índices de 0 a 3.
+
+func _abrir_carreira(resumo: Dictionary) -> void:
+	_carreira_visivel = resumo
+	abrir(Tela.CHEGADA)
+
+
+func _atualizar_continuar() -> void:
+	if is_instance_valid(_botao_continuar):
+		_botao_continuar.disabled = _ultimo_slot < 0 or _ultimo_slot >= _saves.size() or _saves[_ultimo_slot].is_empty()
+
+
+func _atualizar_desbloqueio(_id: String) -> void:
+	if _tela == Tela.EQUIPE:
+		_rascunho_equipe = _ler_formulario()
+		abrir(Tela.EQUIPE)
+
+
 func exibir_slots(registros: Array[Dictionary], ultimo_slot: int) -> void:
-	_saves.clear()
-	for indice: int in range(mini(MAXIMO_SLOTS, registros.size())):
-		_saves.append(registros[indice].duplicate())
+	_saves = registros
 	_ultimo_slot = ultimo_slot
-	if is_node_ready() and (_tela == Tela.MENU or _tela == Tela.SAVES):
-		abrir(_tela)
+	_atualizar_continuar()
+	if is_instance_valid(_lista_saves):
+		_lista_saves.atualizar(_saves)
+
+
+func _mostrar_erros(erros: Dictionary, ignorar: Array[String] = []) -> void:
+	var mensagens: PackedStringArray = []
+	for campo: String in erros:
+		if campo not in ignorar:
+			mensagens.append(str(erros[campo]))
+	_erro_acao.text = "\n".join(mensagens)
+	_erro_acao.visible = not mensagens.is_empty()
+
+
+func _rotulo_erro(pai: Container) -> Label:
+	var rotulo: Label = _texto(pai, "", 18, Color("#ffb9a9"))
+	rotulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	rotulo.hide()
+	return rotulo
+
 
 func _guardar_animacao(ativa: bool) -> void:
 	_animar = ativa
@@ -364,41 +371,11 @@ func _guardar_animacao(ativa: bool) -> void:
 	config.set_value("abertura", "animacao", ativa)
 	config.save(PREFERENCIAS)
 
-func _modo(pai: Container, grupo: ButtonGroup, indice: int) -> void:
-	var botao: Button = _botao(pai, MODOS[indice], _mudar_modo.bind(indice))
-	botao.toggle_mode = true
-	botao.button_group = grupo
-	botao.button_pressed = indice == _modo_visivel
-	botao.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	botao.add_theme_font_size_override("font_size", 18)
-
-func _mudar_modo(indice: int) -> void:
-	_modo_visivel = indice
-	_atualizar_dificuldade()
-
-func _atualizar_dificuldade() -> void:
-	var personalizado: bool = _modo_visivel == 3
-	_personalizar.visible = personalizado
-	var indice_dinheiro: int = _escolha_capital.selected if personalizado else 2 - _modo_visivel
-	var indice_rivais: int = _escolha_rivais.selected if personalizado else _modo_visivel
-	_valor_capital.text = _formatar_capital(CAPITAIS_EXEMPLO[indice_dinheiro])
-	_itens_dificuldade.text = "• %s\n• %s" % [CAIXA_EXEMPLO[indice_dinheiro], RIVAIS_EXEMPLO[indice_rivais]]
-
-func _seletor(pai: Container, rotulo: String, valores: Array[String], selecionado: int) -> OptionButton:
-	_texto(pai, rotulo, 18)
-	var seletor: OptionButton = OptionButton.new()
-	for valor: String in valores:
-		seletor.add_item(valor)
-	seletor.selected = selecionado
-	seletor.item_selected.connect(func(_indice: int) -> void: _atualizar_dificuldade())
-	pai.add_child(seletor)
-	return seletor
-
 func _cartao(titulo: String) -> VBoxContainer:
 	var central: CenterContainer = CenterContainer.new()
 	_conteudo.add_child(central)
 	var painel: PanelContainer = PanelContainer.new()
-	painel.custom_minimum_size.x = minf(740.0, maxf(0.0, _painel.size.x - (58.0 if _retrato else 106.0)))
+	painel.custom_minimum_size.x = minf(840.0, maxf(0.0, _painel.size.x - (58.0 if _retrato else 106.0)))
 	central.add_child(painel)
 	var bloco: VBoxContainer = _coluna(painel)
 	_texto(bloco, titulo, 46 if not _retrato else 34)
@@ -434,6 +411,3 @@ func _texto(pai: Container, texto: String, tamanho: int, cor: Color = TemaAbertu
 	rotulo.add_theme_color_override("font_color", cor)
 	pai.add_child(rotulo)
 	return rotulo
-
-func _formatar_capital(valor: int) -> String:
-	return "R$ %d.%03d" % [floori(valor / 1000.0), valor % 1000]
