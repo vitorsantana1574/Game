@@ -1,0 +1,40 @@
+{
+	"_comentario": "Calendário do ano. O ano tem 12 meses de 30 dias (360 dias). A carreira começa no dia 1 de janeiro. Dias contados dentro do ano (1 a 360).",
+	"dias_por_ano": 360,
+	"meses": ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"],
+
+	"fases": [
+		{ "id": "pre_temporada", "nome": "Pré-temporada", "inicio": 1, "fim": 34, "janela_transferencias": true, "patch_novo": true },
+		{ "id": "etapa_1", "nome": "Etapa 1", "inicio": 35, "fim": 150, "janela_transferencias": false },
+		{ "id": "pausa_meio_ano", "nome": "Pausa do meio do ano", "inicio": 151, "fim": 184, "janela_transferencias": true },
+		{ "id": "etapa_2", "nome": "Etapa 2", "inicio": 185, "fim": 300, "janela_transferencias": false, "patch_novo": true, "patch_no_dia": 181 },
+		{ "id": "mundial", "nome": "Mundial", "inicio": 301, "fim": 330, "janela_transferencias": false },
+		{ "id": "fim_de_temporada", "nome": "Fim de temporada", "inicio": 331, "fim": 360, "janela_transferencias": true }
+	],
+
+	"liga": {
+		"_comentario": "Turno e returno com 8 times = 14 rodadas, uma por semana. Playoffs com 4 times: semifinais e final em MD5.",
+		"rodadas": 14,
+		"dias_entre_rodadas": 7,
+		"primeira_rodada_etapa_1": 35,
+		"primeira_rodada_etapa_2": 185,
+		"dias_ate_semifinal": 10,
+		"dias_semifinal_ate_final": 7
+	},
+
+	"mundial": {
+		"_comentario": "Mais apertado de propósito: aqui a Resistência e o rodízio pesam. Sempre pelo menos 1 dia livre entre jogos.",
+		"play_in": [303, 305],
+		"fase_suica": [308, 310, 312, 314, 316],
+		"quartas": 320,
+		"semifinal": 324,
+		"final": 328
+	},
+
+	"descanso_minimo": {
+		"_comentario": "Regras verificadas pelos testes automáticos.",
+		"dias_livres_entre_jogos_liga": 6,
+		"dias_livres_entre_jogos_mundial": 1,
+		"dias_minimos_de_preparacao": 28
+	}
+}

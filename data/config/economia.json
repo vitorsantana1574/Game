@@ -1,0 +1,23 @@
+{
+	"_comentario": "Economia da organização. Valores provisórios, pensados a partir do custo real do mercado: 5 titulares medianos da regional custam ~R$ 12.800/mês (~R$ 16.800 com técnico); elenco completo ~R$ 24.000.",
+
+	"verba_liga": {
+		"_comentario": "Recebida no primeiro dia de cada mês, antes dos salários. Multiplicada pelo desempenho na última etapa (1º lugar recebe mais, último recebe menos). Sem histórico: multiplicador 1.",
+		"regional": 12000,
+		"nacional": 30000,
+		"multiplicador_primeiro": 1.5,
+		"multiplicador_ultimo": 0.75,
+		"times_na_liga": 8
+	},
+
+	"emprestimo": {
+		"_comentario": "Parcelas fixas (tabela Price). Um empréstimo por vez. Parcela cobrada no primeiro dia de cada mês, antes dos salários.",
+		"juros_mensais": 0.05,
+		"prazos_meses": [3, 6, 12],
+		"valor_minimo": 5000,
+		"limite_em_verbas_mensais": 6,
+		"multa_atraso": 0.10,
+		"queda_reputacao_atraso": 3,
+		"parcelas_atrasadas_para_falencia": 3
+	}
+}

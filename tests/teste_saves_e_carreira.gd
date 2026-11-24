@@ -25,7 +25,7 @@ func teste_nova_carreira_cria_save() -> void:
 	executor.igual(r["slot"], 0, "usa o primeiro espaço vazio")
 	executor.igual(r["resumo"]["nome"], "Aurora Esports", "nome limpo")
 	executor.igual(r["resumo"]["dinheiro"], 80000, "capital do Normal")
-	executor.igual(r["resumo"]["fase"], "Regional · Dia 1", "começa na regional, dia 1")
+	executor.igual(r["resumo"]["fase"], "Regional · Pré-temporada · 1/jan, ano 1", "começa na regional, 1º de janeiro")
 	executor.verificar("iniciada" in _sinais and "saves" in _sinais, "emitiu carreira_iniciada e saves_mudaram")
 	var resumos: Array[Dictionary] = Jogo.listar_saves()
 	executor.igual(resumos.size(), 4, "sempre 4 espaços")

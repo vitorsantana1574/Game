@@ -39,3 +39,18 @@ signal tecnico_saiu(tecnico: Dictionary, motivo: String)
 signal salarios_pagos(total: int)
 ## Não havia dinheiro para os salários. `devido` acumula os meses em atraso.
 signal salarios_atrasados(devido: int, meses: int)
+
+# --- Economia ---
+
+## A verba mensal da liga foi recebida.
+signal verba_recebida(valor: int)
+## Um empréstimo foi contratado. `emprestimo` = Jogo.estado_emprestimo().
+signal emprestimo_contratado(emprestimo: Dictionary)
+## Uma parcela foi paga. `restantes` = parcelas que faltam.
+signal parcela_paga(valor: int, restantes: int)
+## Não havia dinheiro para a parcela. `divida_atrasada` já inclui a multa.
+signal parcela_atrasada(divida_atrasada: int, parcelas_atrasadas: int)
+## O empréstimo terminou (última parcela paga ou quitado antes).
+signal emprestimo_quitado()
+## A organização faliu e a carreira terminou. `resumo` = Jogo.resumo_carreira().
+signal falencia(resumo: Dictionary)

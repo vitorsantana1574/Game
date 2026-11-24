@@ -25,6 +25,9 @@ var anuncio_tecnico: Dictionary = {}
 var candidatos_tecnico: Array[Dictionary] = []
 ## Avisos de contrato já enviados, para não repetir: "id_jogador:dias".
 var avisos_enviados: Array[String] = []
+## Carreira encerrada (ex.: falência). Nenhuma ação é aceita depois disso.
+var encerrada: bool = false
+var motivo_encerramento: String = ""
 
 
 ## Mês atual da carreira (começa em 1).
@@ -42,7 +45,9 @@ func jogador_do_mercado(id: String) -> Jogador:
 ## Texto curto da fase atual, usado no resumo dos saves.
 func descricao_fase() -> String:
 	var nomes_liga: Dictionary = {"regional": "Regional", "nacional": "Nacional", "mundial": "Mundial"}
-	return "%s · Dia %d" % [nomes_liga.get(nivel_liga, nivel_liga), dia]
+	var data: Dictionary = Calendario.data(dia)
+	return "%s · %s · %d/%s, ano %d" % [nomes_liga.get(nivel_liga, nivel_liga), data["fase_nome"],
+		data["dia_do_mes"], data["nome_mes"].substr(0, 3), data["ano"]]
 
 
 func para_dicionario() -> Dictionary:
@@ -61,6 +66,8 @@ func para_dicionario() -> Dictionary:
 		"candidatos_tecnico": candidatos_tecnico.map(func(c: Dictionary) -> Dictionary:
 			return {"tecnico": (c["tecnico"] as Tecnico).para_dicionario(), "expira_em": c["expira_em"]}),
 		"avisos_enviados": avisos_enviados,
+		"encerrada": encerrada,
+		"motivo_encerramento": motivo_encerramento,
 	}
 
 
@@ -96,4 +103,6 @@ static func de_dicionario(dados: Dictionary) -> Carreira:
 		})
 	for aviso: Variant in dados.get("avisos_enviados", []):
 		carreira.avisos_enviados.append(str(aviso))
+	carreira.encerrada = bool(dados.get("encerrada", false))
+	carreira.motivo_encerramento = str(dados.get("motivo_encerramento", ""))
 	return carreira

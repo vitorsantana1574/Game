@@ -36,12 +36,17 @@ func resumo_carreira() -> Dictionary:
 		"dia": carreira.dia,
 		"fase": carreira.descricao_fase(),
 		"mes": carreira.mes(),
+		"data": Calendario.data(carreira.dia),
 		"slot": slot_atual,
 		"folha_mensal": carreira.organizacao.folha_mensal(),
 		"salarios_atrasados": carreira.organizacao.salarios_atrasados,
 		"meses_em_atraso": carreira.organizacao.meses_em_atraso,
 		"tamanho_elenco": carreira.organizacao.elenco.size(),
 		"tem_tecnico": carreira.organizacao.tecnico != null,
+		"verba_mensal": Financas.verba_mensal(carreira.nivel_liga, carreira.organizacao.ultima_posicao),
+		"tem_emprestimo": not carreira.organizacao.emprestimo.is_empty(),
+		"encerrada": carreira.encerrada,
+		"motivo_encerramento": carreira.motivo_encerramento,
 	}
 
 
@@ -250,6 +255,10 @@ func resumo_financeiro() -> Dictionary:
 		"meses_em_atraso": carreira.organizacao.meses_em_atraso,
 		"proximo_pagamento_dia": proximo,
 		"dias_ate_pagamento": proximo - carreira.dia,
+		"verba_mensal": Financas.verba_mensal(carreira.nivel_liga, carreira.organizacao.ultima_posicao),
+		"parcela_emprestimo": int(carreira.organizacao.emprestimo.get("parcela", 0)),
+		"saldo_mensal_previsto": Financas.verba_mensal(carreira.nivel_liga, carreira.organizacao.ultima_posicao)
+			- carreira.organizacao.folha_mensal() - int(carreira.organizacao.emprestimo.get("parcela", 0)),
 	}
 
 
@@ -300,8 +309,9 @@ func tecnico_atual() -> Dictionary:
 ## Retorno: {"ok": true, "aceita": bool, "mensagem": String, "dica_salario": int, "paciencia": int, "bloqueado": bool}
 ##       ou {"ok": false, "erros": {...}} para pedidos impossíveis (elenco cheio, sem dinheiro para as luvas...).
 func fazer_proposta(jogador_id: String, proposta: Dictionary) -> Dictionary:
-	if carreira == null:
-		return _erro("carreira", ERRO_SEM_CARREIRA, "Não há carreira ativa.")
+	var bloqueio: Dictionary = _verificar_ativa()
+	if not bloqueio.is_empty():
+		return bloqueio
 	var jogador: Jogador = carreira.jogador_do_mercado(jogador_id)
 	if jogador == null:
 		return _erro("jogador", "jogador_inexistente", "Este jogador não está no mercado.")
@@ -313,8 +323,9 @@ func fazer_proposta(jogador_id: String, proposta: Dictionary) -> Dictionary:
 ## Propõe a renovação do contrato de um jogador do elenco (a partir de 90 dias do fim).
 ## Mesmo formato de proposta e de retorno de fazer_proposta().
 func renovar_contrato(jogador_id: String, proposta: Dictionary) -> Dictionary:
-	if carreira == null:
-		return _erro("carreira", ERRO_SEM_CARREIRA, "Não há carreira ativa.")
+	var bloqueio: Dictionary = _verificar_ativa()
+	if not bloqueio.is_empty():
+		return bloqueio
 	var jogador: Jogador = carreira.organizacao.jogador_por_id(jogador_id)
 	if jogador == null:
 		return _erro("jogador", "jogador_inexistente", "Este jogador não está no elenco.")
@@ -331,8 +342,9 @@ func renovar_contrato(jogador_id: String, proposta: Dictionary) -> Dictionary:
 
 ## Dispensa um jogador do elenco, pagando a rescisão (ver custo_rescisao()). Ele volta ao mercado.
 func dispensar_jogador(jogador_id: String) -> Dictionary:
-	if carreira == null:
-		return _erro("carreira", ERRO_SEM_CARREIRA, "Não há carreira ativa.")
+	var bloqueio: Dictionary = _verificar_ativa()
+	if not bloqueio.is_empty():
+		return bloqueio
 	var jogador: Jogador = carreira.organizacao.jogador_por_id(jogador_id)
 	if jogador == null:
 		return _erro("jogador", "jogador_inexistente", "Este jogador não está no elenco.")
@@ -347,8 +359,9 @@ func dispensar_jogador(jogador_id: String) -> Dictionary:
 ## Define os titulares. titulares: {"topo": id, "selva": id, ...}. Posições ausentes ficam sem titular.
 ## Um jogador pode ser titular fora da posição principal (rende conforme a afinidade).
 func definir_titulares(novos: Dictionary) -> Dictionary:
-	if carreira == null:
-		return _erro("carreira", ERRO_SEM_CARREIRA, "Não há carreira ativa.")
+	var bloqueio: Dictionary = _verificar_ativa()
+	if not bloqueio.is_empty():
+		return bloqueio
 	var usados: Array[String] = []
 	for posicao: String in novos:
 		var id: String = str(novos[posicao])
@@ -369,8 +382,9 @@ func definir_titulares(novos: Dictionary) -> Dictionary:
 ## Publica um anúncio de vaga de técnico. Cobra o custo do anúncio na hora.
 ## tamanho: "pequeno" | "medio" | "grande". oferta_minima: salário mensal oferecido (reais).
 func publicar_anuncio(tamanho: String, oferta_minima: int) -> Dictionary:
-	if carreira == null:
-		return _erro("carreira", ERRO_SEM_CARREIRA, "Não há carreira ativa.")
+	var bloqueio: Dictionary = _verificar_ativa()
+	if not bloqueio.is_empty():
+		return bloqueio
 	var regra: Dictionary = Dados.tecnicos()
 	var anuncio: Dictionary = Dados.por_id(regra["anuncios"], tamanho)
 	if anuncio.is_empty():
@@ -389,8 +403,9 @@ func publicar_anuncio(tamanho: String, oferta_minima: int) -> Dictionary:
 
 ## Contrata um candidato a técnico pelo salário que ele pede. Exige que não haja técnico atual.
 func contratar_tecnico(candidato_id: String, duracao_meses: int) -> Dictionary:
-	if carreira == null:
-		return _erro("carreira", ERRO_SEM_CARREIRA, "Não há carreira ativa.")
+	var bloqueio: Dictionary = _verificar_ativa()
+	if not bloqueio.is_empty():
+		return bloqueio
 	if carreira.organizacao.tecnico != null:
 		return _erro("tecnico", "ja_tem_tecnico", "Dispense o técnico atual antes de contratar outro.")
 	if not float(duracao_meses) in Dados.contratos()["duracoes_meses"]:
@@ -414,7 +429,10 @@ func contratar_tecnico(candidato_id: String, duracao_meses: int) -> Dictionary:
 
 ## Dispensa o técnico atual, pagando a rescisão.
 func dispensar_tecnico() -> Dictionary:
-	if carreira == null or carreira.organizacao.tecnico == null:
+	var bloqueio: Dictionary = _verificar_ativa()
+	if not bloqueio.is_empty():
+		return bloqueio
+	if carreira.organizacao.tecnico == null:
 		return _erro("tecnico", "sem_tecnico", "Não há técnico para dispensar.")
 	var tecnico: Tecnico = carreira.organizacao.tecnico
 	var custo: int = _custo_rescisao(tecnico.contrato) if tecnico.contrato else 0
@@ -429,12 +447,15 @@ func dispensar_tecnico() -> Dictionary:
 ## Avança o calendário. Processa salários (início de cada mês), avisos e fim de contratos,
 ## chegada e validade dos candidatos a técnico e renovação do mercado.
 func avancar_dia(dias: int = 1) -> Dictionary:
-	if carreira == null:
-		return _erro("carreira", ERRO_SEM_CARREIRA, "Não há carreira ativa.")
+	var bloqueio: Dictionary = _verificar_ativa()
+	if not bloqueio.is_empty():
+		return bloqueio
 	for vez: int in range(maxi(1, dias)):
 		carreira.dia += 1
 		_processar_dia()
 		Eventos.dia_avancou.emit(resumo_carreira())
+		if carreira.encerrada:
+			break
 	return {"ok": true, "resumo": resumo_carreira()}
 
 
@@ -526,7 +547,7 @@ func _processar_dia() -> void:
 	_processar_anuncio()
 	_processar_contratos()
 	if (carreira.dia - 1) % Dados.dias_por_mes() == 0:
-		_pagar_salarios()
+		_dia_de_pagamento()
 		SistemaMercado.renovar(carreira)
 		Eventos.mercado_atualizado.emit()
 
@@ -597,6 +618,141 @@ func _pagar_salarios() -> void:
 	for jogador: Jogador in organizacao.elenco:
 		jogador.satisfacao = maxf(0.0, jogador.satisfacao - float(regra["queda_satisfacao"]))
 	Eventos.salarios_atrasados.emit(organizacao.salarios_atrasados, organizacao.meses_em_atraso)
+
+
+# --- Economia: empréstimo -------------------------------------------------------
+
+## Regras e limites para a tela de empréstimo.
+## Retorno: {"juros_mensais", "prazos_meses", "valor_minimo", "limite", "pode_contratar", "motivo"}
+func opcoes_emprestimo() -> Dictionary:
+	if carreira == null:
+		return {}
+	var regra: Dictionary = Financas.regras()["emprestimo"]
+	var prazos: Array[int] = []
+	for meses: Variant in regra["prazos_meses"]:
+		prazos.append(int(meses))
+	var motivo: String = ""
+	if not carreira.organizacao.emprestimo.is_empty():
+		motivo = "Já existe um empréstimo ativo."
+	return {
+		"juros_mensais": float(regra["juros_mensais"]),
+		"prazos_meses": prazos,
+		"valor_minimo": int(regra["valor_minimo"]),
+		"limite": Financas.limite_emprestimo(carreira.nivel_liga),
+		"pode_contratar": motivo.is_empty(),
+		"motivo": motivo,
+	}
+
+
+## Prévia de um empréstimo: {"valor", "meses", "parcela", "total", "juros_total"}.
+func simular_emprestimo(valor: int, meses: int) -> Dictionary:
+	return Financas.simular(valor, meses)
+
+
+## Empréstimo ativo: {} ou {"valor", "meses", "parcela", "parcelas_restantes", "parcelas_atrasadas", "divida_atrasada", "saldo_para_quitar"}.
+func estado_emprestimo() -> Dictionary:
+	if carreira == null or carreira.organizacao.emprestimo.is_empty():
+		return {}
+	var estado: Dictionary = carreira.organizacao.emprestimo.duplicate()
+	estado["saldo_para_quitar"] = Financas.saldo_devedor(int(estado["parcela"]), int(estado["parcelas_restantes"])) + int(estado["divida_atrasada"])
+	return estado
+
+
+## Contrata um empréstimo. O dinheiro entra na hora; as parcelas vencem no início de cada mês.
+func contratar_emprestimo(valor: int, meses: int) -> Dictionary:
+	var bloqueio: Dictionary = _verificar_ativa()
+	if not bloqueio.is_empty():
+		return bloqueio
+	var opcoes: Dictionary = opcoes_emprestimo()
+	if not opcoes["pode_contratar"]:
+		return _erro("emprestimo", "emprestimo_ativo", opcoes["motivo"])
+	if not meses in opcoes["prazos_meses"]:
+		return _erro("meses", "prazo_invalido", "Prazo inválido.")
+	if valor < int(opcoes["valor_minimo"]) or valor > int(opcoes["limite"]):
+		return _erro("valor", "valor_invalido", "O valor deve ficar entre R$ %s e R$ %s." % [
+			Negociacao._formatar(int(opcoes["valor_minimo"])), Negociacao._formatar(int(opcoes["limite"]))])
+	carreira.organizacao.emprestimo = {
+		"valor": valor,
+		"meses": meses,
+		"parcela": Financas.parcela(valor, meses),
+		"parcelas_restantes": meses,
+		"parcelas_atrasadas": 0,
+		"divida_atrasada": 0,
+	}
+	_mudar_dinheiro(valor)
+	Eventos.emprestimo_contratado.emit(estado_emprestimo())
+	return {"ok": true, "emprestimo": estado_emprestimo()}
+
+
+## Quita o empréstimo de uma vez, pagando o saldo devedor (com desconto dos juros futuros).
+func quitar_emprestimo() -> Dictionary:
+	var bloqueio: Dictionary = _verificar_ativa()
+	if not bloqueio.is_empty():
+		return bloqueio
+	var estado: Dictionary = estado_emprestimo()
+	if estado.is_empty():
+		return _erro("emprestimo", "sem_emprestimo", "Não há empréstimo ativo.")
+	var saldo: int = int(estado["saldo_para_quitar"])
+	if saldo > carreira.organizacao.dinheiro:
+		return _erro("dinheiro", "sem_dinheiro", "Não há dinheiro para quitar (R$ %s)." % Negociacao._formatar(saldo))
+	_mudar_dinheiro(-saldo)
+	carreira.organizacao.emprestimo = {}
+	Eventos.emprestimo_quitado.emit()
+	return {"ok": true, "pago": saldo}
+
+
+func _verificar_ativa() -> Dictionary:
+	if carreira == null:
+		return _erro("carreira", ERRO_SEM_CARREIRA, "Não há carreira ativa.")
+	if carreira.encerrada:
+		return _erro("carreira", "carreira_encerrada", "Esta carreira terminou.")
+	return {}
+
+
+## Primeiro dia do mês: verba da liga, parcela do empréstimo e salários, nesta ordem.
+func _dia_de_pagamento() -> void:
+	var verba: int = Financas.verba_mensal(carreira.nivel_liga, carreira.organizacao.ultima_posicao)
+	if verba > 0:
+		_mudar_dinheiro(verba)
+		Eventos.verba_recebida.emit(verba)
+	_cobrar_parcela()
+	_pagar_salarios()
+	_verificar_falencia()
+
+
+func _cobrar_parcela() -> void:
+	var emprestimo: Dictionary = carreira.organizacao.emprestimo
+	if emprestimo.is_empty():
+		return
+	var devido: int = int(emprestimo["parcela"]) + int(emprestimo["divida_atrasada"])
+	if carreira.organizacao.dinheiro >= devido:
+		_mudar_dinheiro(-devido)
+		emprestimo["parcelas_restantes"] = int(emprestimo["parcelas_restantes"]) - 1
+		emprestimo["parcelas_atrasadas"] = 0
+		emprestimo["divida_atrasada"] = 0
+		Eventos.parcela_paga.emit(devido, int(emprestimo["parcelas_restantes"]))
+		if int(emprestimo["parcelas_restantes"]) <= 0:
+			carreira.organizacao.emprestimo = {}
+			Eventos.emprestimo_quitado.emit()
+		return
+	var regra: Dictionary = Financas.regras()["emprestimo"]
+	var multa: int = int(ceil(float(emprestimo["parcela"]) * float(regra["multa_atraso"])))
+	emprestimo["divida_atrasada"] = int(emprestimo["divida_atrasada"]) + int(emprestimo["parcela"]) + multa
+	emprestimo["parcelas_restantes"] = int(emprestimo["parcelas_restantes"]) - 1
+	emprestimo["parcelas_atrasadas"] = int(emprestimo["parcelas_atrasadas"]) + 1
+	carreira.organizacao.reputacao = maxf(0.0, carreira.organizacao.reputacao - float(regra["queda_reputacao_atraso"]))
+	Eventos.parcela_atrasada.emit(int(emprestimo["divida_atrasada"]), int(emprestimo["parcelas_atrasadas"]))
+
+
+func _verificar_falencia() -> void:
+	var emprestimo: Dictionary = carreira.organizacao.emprestimo
+	if emprestimo.is_empty():
+		return
+	var limite: int = int(Financas.regras()["emprestimo"]["parcelas_atrasadas_para_falencia"])
+	if int(emprestimo["parcelas_atrasadas"]) >= limite and carreira.organizacao.dinheiro < int(emprestimo["divida_atrasada"]):
+		carreira.encerrada = true
+		carreira.motivo_encerramento = "falencia"
+		Eventos.falencia.emit(resumo_carreira())
 
 
 # --- Interno -----------------------------------------------------------------

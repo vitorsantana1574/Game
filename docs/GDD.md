@@ -166,6 +166,7 @@ O treino tem várias modalidades, cada uma voltada para atributos diferentes.
 - **Ganhos dependem de idade, potencial e nível atual:** jovens com potencial alto evoluem rápido; veteranos evoluem pouco; atributos já altos sobem devagar.
 - **Treinar demais derruba a satisfação:** agenda pesada por muitas semanas irrita os jogadores, principalmente os de ego alto.
 - O **treino puro de farm não treina domínio de campeão**, para o X1 continuar valendo a pena.
+- **Treinar Farm com o suporte quase não traz benefício** (o suporte não farma; o Farm pesa só 5% no nível dele). A tela deve avisar isso. Escolher esse treino para o suporte é um erro de gestão possível.
 - **Cuidado de balanceamento:** o ganho de cada modalidade em cada atributo precisa ser calibrado com atenção (no simulador de temporadas), para nenhuma modalidade ser sempre a melhor escolha.
 
 **Treino do técnico**
@@ -191,6 +192,11 @@ Baseado em League of Legends, mas não idêntico:
 
 **Exibição da partida:** visão **2D de cima**, com os campeões se movendo e lutando sozinhos pelo mapa, e um **painel de narração ao lado** descrevendo o que está acontecendo (abates, ganks, objetivos, torres, roubos etc.).
 
+**O jogador não é obrigado a assistir tudo.** Opções:
+- velocidades **1x, 2x, 4x e 8x**;
+- **"Só os melhores momentos"**: acelera e para nas lutas, objetivos e torres;
+- **"Ver resultado"**: pula direto para o fim, com as estatísticas.
+
 ## 7.0 Ritmo da partida (proposto e testado)
 
 Valores calibrados com 2.000 partidas simuladas no protótipo de ritmo. Relatório: `tools/relatorios/ritmo_partida.md`. Números em `data/config/partida.json`.
@@ -207,22 +213,25 @@ Valores calibrados com 2.000 partidas simuladas no protótipo de ritmo. Relatór
 | **Ouro dos minions** | Corpo a corpo 21, à distância 14, cerco 60, fortalecido 45. Ouro só para quem dá o último golpe (Farm) |
 | **Ouro passivo** | 2,4 por segundo a partir de 1:30 |
 | **Renascimento** | 6 s + 2,6 s por nível (nível 1: 9 s; nível 16: 48 s). Depois dos 25 min, +2% por minuto, até +50% |
-| **Itens (atirador típico)** | Bota aos ~4 min, 2º item aos ~13, 3º aos ~21, 4º aos ~29, 5º aos ~37 (partidas longas) |
-| **Cérbero** | Aparece aos **4:22** (nível 5 teórico) |
-| **Hydra** | Aparece aos **9:54** (nível 9 teórico) |
+| **Itens (atirador típico)** | Bota aos ~5 min, 2º item aos ~13, 3º aos ~21, 4º aos ~29, 5º aos ~37 (partidas longas). Bota custa 1.000 de ouro; itens, ~2.700 |
+| **Item de suporte** | O suporte começa com um item que gera ouro: 35% do ouro dos minions que o atirador abate por perto + 60 por participação em abate. **Não depende do Farm do suporte** — o suporte ajuda o atirador a farmar, não farma. Resultado: suporte com ~73% do ouro do atirador |
+| **Ordem dos itens** | Segue a recomendação de cada campeão. **Macro alto adapta a ordem à partida** (ex.: atrasar a bota para fechar antes um item decisivo, item contra cura). **Micro alto faz compras arriscadas renderem mais** (itens só de dano) |
+| **Reaparecimento dos monstros épicos** | **6 minutos** (Cérbero e Hydra). Bônus continua durando 2 minutos. Resultado: ~3,5 de cada por partida |
+| **Cérbero** | Aparece aos **4:22** (nível 5 teórico); na prática o 1º é abatido por volta dos 6 min |
+| **Hydra** | Aparece aos **9:54** (nível 9 teórico); na prática a 1ª é abatida por volta dos 11 min |
 
 **Progressão com farm perfeito** (rota solo / rota dupla / selva): nível 5 em 4:22 / 5:19 / 5:41; nível 9 em 9:54 / 12:42 / 13:48; nível 16 em 26:00 / 34:10 / 37:23.
 
-**Acampamentos da selva** (por time; o caçador fica cerca de 20% atrás de um laner solo, como no LoL):
+**Acampamentos da selva** (por time; XP +10% após o primeiro teste, para o caçador não ficar atrás demais):
 
 | Acampamento | XP | Ouro | Reaparece |
 |---|---|---|---|
-| Pássaro grande + 4 pássaros pequenos | 210 | 110 | 2 min |
-| Sapo vermelho enorme (bônus) | 300 | 100 | 5 min |
-| Rato médio | 150 | 70 | 2 min |
-| 3 aranhas | 190 | 90 | 2 min |
-| Polvo enorme (bônus) | 300 | 100 | 5 min |
-| Pequeno Golem de pedra | 240 | 100 | 2 min |
+| Pássaro grande + 4 pássaros pequenos | 230 | 110 | 2 min |
+| Sapo vermelho enorme (bônus) | 330 | 100 | 5 min |
+| Rato médio | 165 | 70 | 2 min |
+| 3 aranhas | 210 | 90 | 2 min |
+| Polvo enorme (bônus) | 330 | 100 | 5 min |
+| Pequeno Golem de pedra | 265 | 100 | 2 min |
 
 ## 7.1 Mapa
 
@@ -440,6 +449,27 @@ Fase de banimentos e escolhas antes de cada partida.
 
 Três níveis: **regional**, **nacional** e **mundial**.
 
+### Calendário do ano
+
+O ano tem 12 meses de 30 dias. Uma rodada da liga por semana.
+
+| Período | Dias | O que acontece |
+|---|---|---|
+| Janeiro | 1–34 | **Pré-temporada**: janela de transferências aberta, **patch novo** |
+| Fevereiro a maio | 35–150 | **Etapa 1**: 14 rodadas (1 por semana) + semifinal e final |
+| Junho | 151–184 | **Pausa do meio do ano**: janela de transferências aberta, bootcamp. **Patch novo** no dia 181 |
+| Julho a outubro | 185–300 | **Etapa 2**: 14 rodadas + semifinal e final |
+| Novembro | 301–330 | **Mundial** (para quem se classificou) |
+| Dezembro | 331–360 | **Fim de temporada**: janela de transferências aberta |
+
+- **Até três competições por ano:** etapa 1, etapa 2 e mundial. Os dois patches anuais caem no início de cada etapa.
+- **Acesso e rebaixamento ao fim de cada etapa** (2 sobem, 2 caem). Assim dá para subir para a nacional já no meio do ano.
+
+**Tempo mínimo para respirar e treinar** (verificado por testes automáticos):
+- **Liga:** 6 dias livres entre um jogo e outro (rodadas semanais); 9 dias entre a última rodada e a semifinal.
+- **Preparação:** 34 dias antes do 1º jogo do ano; 41 dias entre a final da etapa 1 e a etapa 2; mais de 2 meses entre o mundial e a temporada seguinte.
+- **Mundial:** mais apertado de propósito, com pelo menos 1 dia livre entre jogos na fase suíça e 3 dias no mata-mata. É onde a Resistência e o rodízio de reservas mais pesam. Há 9 dias entre a final da etapa 2 e o mundial.
+
 ### Ligas regional e nacional (mesmo formato)
 
 **Fase de pontos**
@@ -555,9 +585,16 @@ Definidas pelo Claude para a lógica funcionar; podem ser mudadas pelo dono do p
 
 ## 8.12 Economia da organização
 
-- **Verba mensal da liga:** cada time recebe uma verba todo mês, que **varia com o desempenho** do time. Valores: **[A DEFINIR — balanceamento]**
+- **Verba mensal da liga:** recebida no primeiro dia de cada mês, antes dos salários. **Regional: R$ 12.000; nacional: R$ 30.000** (provisório), multiplicada pela posição na última etapa: **1º lugar recebe 1,5x, último 0,75x** (sem histórico: 1x).
 - **Investimento inicial suficiente:** o capital inicial de cada dificuldade precisa permitir montar um time para começar (pelo menos os 5 titulares, mesmo sem reservas no início) e mantê-lo pelos primeiros meses.
-- **Empréstimo bancário:** o gestor pode pegar dinheiro emprestado, com **juros de 5% ao mês** enquanto a dívida existir. Prazos, limite de valor e consequências da inadimplência: **[A DEFINIR]**
+  - Custo medido no mercado: 5 titulares medianos da regional ~R$ 12.800/mês; com técnico ~R$ 16.800; elenco completo ~R$ 24.000.
+  - **Normal (R$ 80.000):** sustenta 5 titulares + técnico por mais de 1 ano. **Difícil (R$ 40.000):** por uns 8 meses. Com elenco completo, o time precisa vencer ou subir de liga.
+- **Empréstimo bancário:** **juros de 5% ao mês**, parcelas fixas.
+  - **Prazos:** 3, 6 ou 12 meses. Exemplo: R$ 50.000 em 12x = 12 parcelas de ~R$ 5.641 (~R$ 17.700 de juros). Caro de propósito: é um recurso de emergência.
+  - **Limite:** 6 verbas mensais da liga atual (regional: R$ 72.000). Mínimo R$ 5.000. **Um empréstimo por vez.**
+  - **Quitar antes:** possível a qualquer momento, pagando o saldo devedor (sem os juros futuros).
+  - **Parcela atrasada:** multa de 10% da parcela, a dívida acumula e a reputação cai 3.
+  - **Falência:** com **3 parcelas atrasadas** e sem dinheiro para pagar a dívida atrasada, a organização **vai à falência e a carreira termina**.
 
 ## 8.13 Times rivais
 
@@ -566,7 +603,12 @@ Definidas pelo Claude para a lógica funcionar; podem ser mudadas pelo dono do p
 
 ## 8.14 Experiência e idade
 
-- **Veteranos rendem mais**, principalmente em jogos decisivos, **mas sem tornar os jovens inúteis**. A vantagem da experiência deve ser pequena e compensada pelo crescimento e pelo potencial dos jovens. Valores: **[A DEFINIR — balanceamento]**
+- **Veteranos rendem mais**, principalmente em jogos decisivos, **mas sem tornar os jovens inúteis**:
+  - A experiência dá um **bônus pequeno, de no máximo ~4%**, que aparece principalmente em **playoffs e no mundial**.
+  - **A idade cobra seu preço:** a partir de ~27 anos, os atributos começam a cair devagar, com o **Micro (reflexo) caindo primeiro** e o **Macro durando mais**.
+  - **Jovens** têm potencial, **evoluem mais rápido nos treinos** e pedem salários menores.
+  - Resultado: o veterano é a peça segura para o jogo decisivo; o jovem é o investimento que pode virar craque.
+- **Ganho de experiência:** sobe com partidas jogadas, mais em playoffs e no mundial. Valores: **[A DEFINIR — balanceamento]**
 
 ## 9. Camada de negócio (Fase 2)
 
@@ -610,9 +652,5 @@ Detalhes: **[A DEFINIR]**
 - Nomes dos campeões e dos itens
 - Mundial: vagas por região, séries do play-in e da fase suíça, premiação
 - Contratos: ganho de experiência, regras de rescisão
-- Economia: verba da liga por desempenho, empréstimo (prazos, limite, inadimplência)
-- Calendário do ano e momento do acesso e rebaixamento
-- Ouro do suporte; reaparecimento dos monstros épicos; adaptação da ordem de itens
-- Velocidade de exibição da partida
 - Ego e lealdade: valores e velocidade de mudança (balanceamento)
 - Treino: duração, custos e ganhos de cada modalidade

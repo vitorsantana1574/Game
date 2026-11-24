@@ -1,12 +1,10 @@
 {
 	"_comentario": "Ritmo da partida de Crystal Legends. Valores calibrados pelo protótipo tools/prototipos/ritmo_partida.py (provisórios). Tempos em segundos, salvo indicação.",
-
 	"niveis": {
 		"maximo": 16,
 		"xp_para_nivel_2": 280,
 		"xp_incremento_por_nivel": 100
 	},
-
 	"ondas": {
 		"primeira_chegada": 90,
 		"intervalo": 30,
@@ -14,27 +12,86 @@
 		"a_distancia": 3,
 		"cerco_a_cada_ondas": 3,
 		"_comentario_xp": "XP é dividida entre os campeões aliados próximos (rota dupla divide). Ouro só para quem dá o último golpe.",
-		"xp": { "corpo_a_corpo": 60, "a_distancia": 30, "cerco": 90, "fortalecido": 100 },
-		"ouro": { "corpo_a_corpo": 21, "a_distancia": 14, "cerco": 60, "fortalecido": 45 },
+		"xp": {
+			"corpo_a_corpo": 60,
+			"a_distancia": 30,
+			"cerco": 90,
+			"fortalecido": 100
+		},
+		"ouro": {
+			"corpo_a_corpo": 21,
+			"a_distancia": 14,
+			"cerco": 60,
+			"fortalecido": 45
+		},
 		"bonus_xp_rota_dupla": 1.5
 	},
-
 	"ouro_passivo_por_segundo": 2.4,
 	"inicio_ouro_passivo": 90,
-
 	"selva": {
 		"_comentario": "Por time (selva espelhada). Tempo de limpeza é para um caçador médio (Farm 50).",
 		"primeira_aparicao": 90,
 		"acampamentos": [
-			{ "id": "passaros", "nome": "Pássaro grande + 4 pássaros pequenos", "tipo": "pequeno", "xp": 210, "ouro": 110, "limpeza": 22, "reaparece": 120 },
-			{ "id": "sapo", "nome": "Sapo vermelho enorme", "tipo": "medio", "xp": 300, "ouro": 100, "limpeza": 28, "reaparece": 300, "bonus": "vida_e_dano_fisico", "duracao_bonus": 120 },
-			{ "id": "rato", "nome": "Rato médio", "tipo": "pequeno", "xp": 150, "ouro": 70, "limpeza": 14, "reaparece": 120 },
-			{ "id": "aranhas", "nome": "3 aranhas", "tipo": "pequeno", "xp": 190, "ouro": 90, "limpeza": 20, "reaparece": 120 },
-			{ "id": "polvo", "nome": "Polvo enorme", "tipo": "medio", "xp": 300, "ouro": 100, "limpeza": 28, "reaparece": 300, "bonus": "mana_e_poder_magico", "duracao_bonus": 120 },
-			{ "id": "golem", "nome": "Pequeno Golem de pedra", "tipo": "pequeno", "xp": 240, "ouro": 100, "limpeza": 26, "reaparece": 120 }
+			{
+				"id": "passaros",
+				"nome": "Pássaro grande + 4 pássaros pequenos",
+				"tipo": "pequeno",
+				"xp": 230,
+				"ouro": 110,
+				"limpeza": 22,
+				"reaparece": 120
+			},
+			{
+				"id": "sapo",
+				"nome": "Sapo vermelho enorme",
+				"tipo": "medio",
+				"xp": 330,
+				"ouro": 100,
+				"limpeza": 28,
+				"reaparece": 300,
+				"bonus": "vida_e_dano_fisico",
+				"duracao_bonus": 120
+			},
+			{
+				"id": "rato",
+				"nome": "Rato médio",
+				"tipo": "pequeno",
+				"xp": 165,
+				"ouro": 70,
+				"limpeza": 14,
+				"reaparece": 120
+			},
+			{
+				"id": "aranhas",
+				"nome": "3 aranhas",
+				"tipo": "pequeno",
+				"xp": 210,
+				"ouro": 90,
+				"limpeza": 20,
+				"reaparece": 120
+			},
+			{
+				"id": "polvo",
+				"nome": "Polvo enorme",
+				"tipo": "medio",
+				"xp": 330,
+				"ouro": 100,
+				"limpeza": 28,
+				"reaparece": 300,
+				"bonus": "mana_e_poder_magico",
+				"duracao_bonus": 120
+			},
+			{
+				"id": "golem",
+				"nome": "Pequeno Golem de pedra",
+				"tipo": "pequeno",
+				"xp": 265,
+				"ouro": 100,
+				"limpeza": 26,
+				"reaparece": 120
+			}
 		]
 	},
-
 	"renascimento": {
 		"_comentario": "Tempo = base + por_nivel × nível; depois do minuto indicado cresce mais um pouco por minuto (até o teto).",
 		"base": 6,
@@ -43,7 +100,6 @@
 		"acrescimo_tardio_por_min": 0.02,
 		"acrescimo_tardio_maximo": 0.5
 	},
-
 	"abates": {
 		"ouro": 300,
 		"ouro_assistencia_total": 150,
@@ -52,26 +108,43 @@
 		"recompensa_por_abate_seguido": 100,
 		"recompensa_maxima": 500
 	},
-
 	"torres": {
 		"ouro_time": 250,
 		"ouro_quem_destroi": 150,
 		"defesa_inicial_min": 5
 	},
-
 	"itens": {
 		"maximo_por_campeao": 5,
 		"preco_bota": 1000,
-		"preco_item_medio": 2700
+		"preco_item_medio": 2700,
+		"item_de_suporte": {
+			"_comentario": "O suporte começa com um item que gera ouro: uma parte do ouro dos minions que o atirador abate por perto e um extra por participação em abates. Não depende do Farm do suporte.",
+			"fracao_ouro_do_atirador": 0.35,
+			"ouro_por_participacao": 60
+		},
+		"ordem_de_compra": {
+			"_comentario": "A ordem dos itens segue a recomendação do campeão. Jogadores com Macro alto adaptam a ordem à partida (ex.: atrasar a bota, item contra cura); compras arriscadas rendem mais com Micro alto.",
+			"bonus_maximo_macro": 0.06,
+			"bonus_maximo_micro_arriscado": 0.04
+		}
 	},
-
 	"monstros_epicos": {
-		"cerbero": { "aparece_no_nivel_teorico": 5, "reaparece": 240, "duracao_bonus": 120, "ouro_time": 400 },
-		"hydra": { "aparece_no_nivel_teorico": 9, "reaparece": 240, "duracao_bonus": 120, "ouro_time": 500 }
+		"cerbero": {
+			"aparece_no_nivel_teorico": 5,
+			"reaparece": 360,
+			"duracao_bonus": 120,
+			"ouro_time": 400
+		},
+		"hydra": {
+			"aparece_no_nivel_teorico": 9,
+			"reaparece": 360,
+			"duracao_bonus": 120,
+			"ouro_time": 500
+		}
 	},
-
-	"guardiao": { "renasce": 300 },
-
+	"guardiao": {
+		"renasce": 300
+	},
 	"fim_de_jogo": {
 		"_comentario": "Sem limite rígido: a partir do minuto de 'tensão final', torres, Guardião e Cristal ficam progressivamente mais frágeis, garantindo um fim antes do limite prático.",
 		"inicio_tensao_final_min": 35,

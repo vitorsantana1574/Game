@@ -24,17 +24,20 @@ func antes_de_cada() -> void:
 func teste_salario_pago_no_inicio_do_mes() -> void:
 	var id: String = _contratar_barato(12)
 	var salario: int = Jogo.detalhe_jogador(id)["contrato"]["salario"]
+	var verba: int = Jogo.resumo_financeiro()["verba_mensal"]
 	var antes: int = Jogo.carreira.organizacao.dinheiro
 	Jogo.avancar_dia(29)
 	executor.igual(Jogo.carreira.organizacao.dinheiro, antes, "nada pago antes do mês virar")
 	Jogo.avancar_dia(1)
 	executor.igual(Jogo.carreira.dia, 31, "dia 31 = início do mês 2")
-	executor.igual(Jogo.carreira.organizacao.dinheiro, antes - salario, "salário pago")
+	executor.igual(Jogo.carreira.organizacao.dinheiro, antes + verba - salario, "verba recebida e salário pago")
 	executor.verificar("pagos" in _eventos, "emitiu salarios_pagos")
 
 
 func teste_salario_atrasado_derruba_satisfacao_e_reputacao() -> void:
 	var id: String = _contratar_barato(12)
+	# Salário maior que a verba da liga, sem dinheiro em caixa: não há como pagar.
+	Jogo.carreira.organizacao.jogador_por_id(id).contrato.salario = 50000
 	Jogo.carreira.organizacao.dinheiro = 0
 	var reputacao: float = Jogo.carreira.organizacao.reputacao
 	var satisfacao: float = Jogo.carreira.organizacao.jogador_por_id(id).satisfacao

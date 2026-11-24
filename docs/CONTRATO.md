@@ -3,7 +3,7 @@
 Este documento é a **ponte entre a lógica (Claude) e a interface (GPT)**.
 A interface só pode usar o que está escrito aqui. Se precisar de algo que não existe, peça por mensagem em [comunicacao/](comunicacao/README.md).
 
-> **Status: v2.** Etapas 1 (tela inicial) e 2 (mercado, elenco, contratos, técnico, calendário) **[PRONTAS]**. Os nomes abaixo são a proposta inicial. A cada etapa de construção, o Claude atualiza este documento **antes** de o GPT começar a tela correspondente. Itens marcados **[PLANEJADO]** ainda não existem no código.
+> **Status: v3.** Etapas 1 (tela inicial), 2 (mercado, elenco, contratos, técnico) e economia/calendário **[PRONTAS]**. Os nomes abaixo são a proposta inicial. A cada etapa de construção, o Claude atualiza este documento **antes** de o GPT começar a tela correspondente. Itens marcados **[PLANEJADO]** ainda não existem no código.
 
 Regras do contrato: [ARQUITETURA.md](ARQUITETURA.md), seção 2.
 
@@ -270,6 +270,57 @@ Erros seguem o padrão: `{"ok": false, "erros": {"campo": "mensagem pronta"}}`.
 | `Eventos.tecnico_contratado(tecnico)` / `Eventos.tecnico_saiu(tecnico, motivo)` | Mudança de técnico |
 | `Eventos.salarios_pagos(total)` / `Eventos.salarios_atrasados(devido, meses)` | Folha do mês |
 | `Eventos.dinheiro_mudou(valor)` | Qualquer mudança no caixa (agora **[PRONTO]**) |
+
+## 2.3 Economia e calendário — **[PRONTO]**
+
+### Calendário
+
+`Jogo.resumo_carreira()["data"]`:
+
+```gdscript
+{
+    "ano": 1, "mes": 2, "dia_do_mes": 12, "nome_mes": "fevereiro",
+    "texto": "12 de fevereiro, ano 1",
+    "fase": "etapa_1",          # "pre_temporada" | "etapa_1" | "pausa_meio_ano" | "etapa_2" | "mundial" | "fim_de_temporada"
+    "fase_nome": "Etapa 1",
+    "janela_transferencias": false,
+}
+```
+
+O campo `fase` do resumo e dos saves agora é, por exemplo: `"Regional · Etapa 1 · 12/fev, ano 1"`.
+Calendário completo do ano: `docs/GDD.md`, seção 8.10. Os jogos da liga ainda não são disputados (etapa 6).
+
+### Verba da liga e finanças
+
+`Jogo.resumo_financeiro()` agora também traz: `verba_mensal`, `parcela_emprestimo`, `saldo_mensal_previsto` (verba − folha − parcela).
+`Jogo.resumo_carreira()` traz: `verba_mensal`, `tem_emprestimo`, `encerrada`, `motivo_encerramento` (`"falencia"`).
+
+**Ordem do dia de pagamento** (1º dia de cada mês): verba entra → parcela do empréstimo → salários.
+
+### Empréstimo
+
+| Função | Retorno |
+|---|---|
+| `Jogo.opcoes_emprestimo()` | `{juros_mensais: 0.05, prazos_meses: [3, 6, 12], valor_minimo, limite, pode_contratar, motivo}` |
+| `Jogo.simular_emprestimo(valor, meses)` | `{valor, meses, parcela, total, juros_total}`. Mostre antes de contratar |
+| `Jogo.estado_emprestimo()` | `{}` ou `{valor, meses, parcela, parcelas_restantes, parcelas_atrasadas, divida_atrasada, saldo_para_quitar}` |
+| `Jogo.contratar_emprestimo(valor, meses)` | `{"ok": true, "emprestimo": {...}}`. Peça confirmação mostrando parcela e juros totais |
+| `Jogo.quitar_emprestimo()` | `{"ok": true, "pago": int}` |
+
+### Carreira encerrada (falência)
+
+Com 3 parcelas atrasadas e sem dinheiro para a dívida atrasada, a carreira termina: `Eventos.falencia(resumo)` é emitido, `resumo_carreira()["encerrada"]` fica `true` e **todas as ações passam a devolver erro** (`erros["carreira"]`). A interface deve mostrar uma tela de fim de carreira.
+
+### Sinais
+
+| Sinal | Quando |
+|---|---|
+| `Eventos.verba_recebida(valor)` | Verba mensal recebida |
+| `Eventos.emprestimo_contratado(emprestimo)` | Empréstimo contratado |
+| `Eventos.parcela_paga(valor, restantes)` | Parcela paga |
+| `Eventos.parcela_atrasada(divida_atrasada, parcelas_atrasadas)` | Sem dinheiro para a parcela (avise o jogador com destaque) |
+| `Eventos.emprestimo_quitado()` | Última parcela paga ou quitação antecipada |
+| `Eventos.falencia(resumo)` | Fim da carreira |
 
 ## 3. Dados que a interface pode ler **[PLANEJADO]**
 

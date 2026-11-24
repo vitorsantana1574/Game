@@ -206,7 +206,9 @@ class Partida:
     def poder(self, c):
         nivel = self.nivel(c)
         habilidade = AJUSTE["habilidade_base"] + AJUSTE["habilidade_peso"] * (0.5 * c.micro + 0.3 * c.macro + 0.2 * c.farm) / 100.0
-        p = habilidade * (1 + 0.075 * (nivel - 1)) * (1 + self.ouro_itens(c) / 5000.0)
+        oc = self.cfg["itens"]["ordem_de_compra"]
+        eficiencia_itens = 1 + oc["bonus_maximo_macro"] * (c.macro - 50) / 50 + oc["bonus_maximo_micro_arriscado"] * (c.micro - 50) / 50
+        p = habilidade * (1 + 0.075 * (nivel - 1)) * (1 + eficiencia_itens * self.ouro_itens(c) / 5000.0)
         if self.t < self.e.bonus_hydra[c.time]:
             p *= 1.10
         return p
@@ -241,6 +243,8 @@ class Partida:
             vivos = [c for c in self.time(assassino.time) if c is not assassino and c.vivo(self.t)]
             for c in vivos[:2]:
                 c.ouro_total += ab["ouro_assistencia_total"] / 2
+                if c.posicao == "suporte":
+                    c.ouro_total += self.cfg["itens"]["item_de_suporte"]["ouro_por_participacao"]
         self.registrar("abate")
 
     # --- renda contínua ---
@@ -274,8 +278,13 @@ class Partida:
             ouro_seg = self.ouro_onda / o["intervalo"]
             if c.posicao in ("atirador", "suporte"):
                 xp_seg *= o["bonus_xp_rota_dupla"] / 2
-                ouro_seg *= 0.9 if c.posicao == "atirador" else 0.1
-                if c.posicao == "suporte":
+                if c.posicao == "atirador":
+                    ouro_seg *= 0.9
+                else:
+                    # Item de suporte: parte do ouro que o atirador gera por perto, sem depender do Farm.
+                    atirador = next(a for a in self.time(c.time) if a.posicao == "atirador")
+                    efic_atirador = min(1.0, 0.45 + 0.5 * atirador.farm / 100.0)
+                    ouro_seg *= 0.9 * efic_atirador * self.cfg["itens"]["item_de_suporte"]["fracao_ouro_do_atirador"] if atirador.vivo(self.t) else 0.0
                     eficiencia = 1.0
             c.xp += xp_seg * PASSO * presenca
             c.ouro_total += ouro_seg * PASSO * presenca * min(1.0, eficiencia)

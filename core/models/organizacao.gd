@@ -15,6 +15,10 @@ var titulares: Dictionary = {}
 ## Salários que deveriam ter sido pagos e não foram (reais) e há quantos meses.
 var salarios_atrasados: int = 0
 var meses_em_atraso: int = 0
+## Posição na última etapa disputada (1 a 8), ou 0 sem histórico. Define a verba da liga.
+var ultima_posicao: int = 0
+## Empréstimo ativo: {} ou {"valor", "meses", "parcela", "parcelas_restantes", "parcelas_atrasadas", "divida_atrasada"}
+var emprestimo: Dictionary = {}
 
 
 func jogador_por_id(id: String) -> Jogador:
@@ -52,6 +56,8 @@ func para_dicionario() -> Dictionary:
 		"titulares": titulares,
 		"salarios_atrasados": salarios_atrasados,
 		"meses_em_atraso": meses_em_atraso,
+		"ultima_posicao": ultima_posicao,
+		"emprestimo": emprestimo,
 	}
 
 
@@ -69,4 +75,8 @@ static func de_dicionario(dados: Dictionary) -> Organizacao:
 		organizacao.titulares[posicao] = str(dados["titulares"][posicao])
 	organizacao.salarios_atrasados = int(dados.get("salarios_atrasados", 0))
 	organizacao.meses_em_atraso = int(dados.get("meses_em_atraso", 0))
+	organizacao.ultima_posicao = int(dados.get("ultima_posicao", 0))
+	var emprestimo_dados: Dictionary = dados.get("emprestimo", {})
+	for chave: String in emprestimo_dados:
+		organizacao.emprestimo[chave] = int(emprestimo_dados[chave])
 	return organizacao
