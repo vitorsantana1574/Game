@@ -132,14 +132,16 @@ Exemplo: um mago com atordoamento em área e um salto deve causar uns 60 a 65% d
 
 ### 4.1 Faixas de mana (valores iniciais, serão testados com os campeões)
 
+*Correção (24/11):* a primeira versão desta tabela tinha regeneração baixa demais (recuperar uma rotação levava ~70 s, em conflito com a regra de 20–30 s). Corrigido abaixo: regeneração a cada 5 s ≈ **6% da mana máxima**, o que recupera uma rotação de 30% em ~25 s.
+
 | Classe | Mana máxima (nível 1, +por nível) | Regeneração a cada 5 s (nível 1, +por nível) |
 |---|---|---|
-| Mago | 420 (+28) | 8 (+0,6) |
-| Suporte | 400 (+25) | 9 (+0,6) |
-| Atirador | 320 (+22) | 7 (+0,5) |
-| Tanque | 330 (+24) | 7 (+0,5) |
-| Lutador | 300 (+20) | 7 (+0,5) |
-| Assassino | 280 (+20) | 7 (+0,5) |
+| Mago | 420 (+28) | 25 (+1,7) |
+| Suporte | 400 (+25) | 24 (+1,5) |
+| Atirador | 320 (+22) | 19 (+1,3) |
+| Tanque | 330 (+24) | 20 (+1,4) |
+| Lutador | 300 (+20) | 18 (+1,2) |
+| Assassino | 280 (+20) | 17 (+1,2) |
 
 **Regras para o custo das habilidades:**
 - **Uma rotação completa** (as 3 habilidades) deve custar **25% a 35% da mana máxima** em qualquer nível. Assim, com mana cheia, o campeão faz ~3 rotações numa luta longa.
