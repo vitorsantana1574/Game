@@ -63,8 +63,14 @@ func salvar(slot: int, carreira: Carreira) -> bool:
 	}
 	if not _gravar_json(_caminho_slot(slot), registro):
 		return false
-	_gravar_json(_caminho_meta(), {"ultimo_slot": slot})
+	marcar_ultimo(slot)
 	return true
+
+
+## Registra o espaço como último jogado (usado ao salvar e ao carregar).
+func marcar_ultimo(slot: int) -> void:
+	if slot_valido(slot):
+		_gravar_json(_caminho_meta(), {"ultimo_slot": slot})
 
 
 ## Lê a carreira de um espaço. Devolve null se estiver vazio ou corrompido.

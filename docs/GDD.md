@@ -501,6 +501,21 @@ Formato das séries no play-in e na fase suíça, valores de premiação: **[A D
 - **Os outros times também fazem propostas** pelos seus jogadores, principalmente os que se destacaram. Você pode aceitar, recusar ou fazer uma contraproposta.
 - **O jogador precisa aceitar a troca:** ele pode recusar ir para um time com reputação muito menor que a do atual.
 
+### Regras provisórias da implementação (etapa 2)
+
+Definidas pelo Claude para a lógica funcionar; podem ser mudadas pelo dono do projeto. Números em `data/config/contratos.json`, `mercado.json` e `tecnicos.json`.
+
+- **Calendário:** 1 mês = 30 dias. Salários cobrados no primeiro dia de cada mês.
+- **Negociação:** cada jogador tem uma **paciência** (iniciantes 4, estrelas 2). Proposta recusada tira 1; proposta muito baixa (abaixo de 60% do esperado) tira 2. Sem paciência, ele encerra a negociação por **15 dias**. Cada recusa vem com uma dica do salário esperado.
+- **Tolerância:** iniciantes aceitam até ~15% abaixo do pedido; estrelas, só ~2%.
+- **Valor da proposta:** luvas valem um pouco mais que salário (dinheiro na mão) e bônus valem só uma parte do valor (são incertos).
+- **Reputação:** jogadores mais famosos que a organização cobram mais.
+- **Ego:** a partir de ego 75, o jogador só assina com cláusula de titular.
+- **Rescisão:** dispensar custa **metade do salário que ainda seria pago**.
+- **Salário atrasado:** se não há dinheiro, nada é pago, o valor acumula, a satisfação de cada jogador cai 15 e a reputação cai 5 por mês.
+- **Mercado:** 40 agentes livres (8 por posição); 25% são trocados todo mês.
+- **Técnico:** um anúncio por vez; candidatos desistem 14 dias depois de chegar; contratado pelo salário que pede (sem negociação nesta versão).
+
 ## 9. Camada de negócio (Fase 2)
 
 Entra depois que o núcleo estiver divertido. Feita em menus e painéis, não em 3D.

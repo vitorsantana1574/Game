@@ -35,7 +35,13 @@ func resumo_carreira() -> Dictionary:
 		"nivel_liga": carreira.nivel_liga,
 		"dia": carreira.dia,
 		"fase": carreira.descricao_fase(),
+		"mes": carreira.mes(),
 		"slot": slot_atual,
+		"folha_mensal": carreira.organizacao.folha_mensal(),
+		"salarios_atrasados": carreira.organizacao.salarios_atrasados,
+		"meses_em_atraso": carreira.organizacao.meses_em_atraso,
+		"tamanho_elenco": carreira.organizacao.elenco.size(),
+		"tem_tecnico": carreira.organizacao.tecnico != null,
 	}
 
 
@@ -99,6 +105,7 @@ func nova_carreira(escolhas: Dictionary) -> Dictionary:
 	nova.semente = randi() & 0x7fffffff
 	nova.organizacao.nome = config["nome"]
 	nova.organizacao.dinheiro = int(config["capital_valor"])
+	SistemaMercado.gerar_inicial(nova)
 
 	if not saves.salvar(slot, nova):
 		return _erro("slot", ERRO_FALHA_GRAVACAO, "Não foi possível gravar o save.")
@@ -121,8 +128,10 @@ func carregar(slot: int) -> Dictionary:
 		return _erro("slot", ERRO_SLOT_VAZIO, "Este espaço está vazio.")
 	carreira = carregada
 	slot_atual = slot
+	saves.marcar_ultimo(slot)
 	var resumo: Dictionary = resumo_carreira()
 	Eventos.carreira_carregada.emit(resumo)
+	_avisar_saves()
 	return {"ok": true, "resumo": resumo}
 
 
@@ -163,6 +172,431 @@ func desbloquear_pesadelo() -> void:
 	progresso["pesadelo_desbloqueado"] = true
 	saves.gravar_progresso(progresso)
 	Eventos.dificuldade_desbloqueada.emit("pesadelo")
+
+
+# --- Etapa 2: leitura de elenco, mercado e técnico ---------------------------
+
+## Opções para montar uma proposta de contrato.
+func opcoes_contrato() -> Dictionary:
+	var regras: Dictionary = Dados.contratos()
+	var duracoes: Array[int] = []
+	for meses: Variant in regras["duracoes_meses"]:
+		duracoes.append(int(meses))
+	return {
+		"duracoes_meses": duracoes,
+		"multa_padrao_meses": int(regras["multa_padrao_meses"]),
+		"ego_exige_titular": int(regras["negociacao"]["ego_exige_titular"]),
+	}
+
+
+## Agentes livres. filtros: {"posicao": "meio", "ordenar": "nivel" | "salario" | "idade"} (opcionais).
+func listar_mercado(filtros: Dictionary = {}) -> Array[Dictionary]:
+	if carreira == null:
+		return []
+	return SistemaMercado.listar(carreira, filtros)
+
+
+## Jogadores do elenco, com contrato e indicação de titular.
+func listar_elenco() -> Array[Dictionary]:
+	if carreira == null:
+		return []
+	var lista: Array[Dictionary] = []
+	for jogador: Jogador in carreira.organizacao.elenco:
+		lista.append(_resumo_elenco(jogador))
+	return lista
+
+
+## Titulares atuais: posição -> id do jogador.
+func titulares() -> Dictionary:
+	return carreira.organizacao.titulares.duplicate() if carreira else {}
+
+
+## Detalhe de um jogador do elenco ou do mercado. {} se não existir.
+func detalhe_jogador(id: String) -> Dictionary:
+	if carreira == null:
+		return {}
+	var jogador: Jogador = carreira.organizacao.jogador_por_id(id)
+	if jogador:
+		return _resumo_elenco(jogador)
+	jogador = carreira.jogador_do_mercado(id)
+	if jogador:
+		var resumo: Dictionary = jogador.resumo_publico(carreira.dia)
+		resumo["negociacao"] = SistemaMercado.estado_negociacao(carreira, jogador)
+		resumo["no_elenco"] = false
+		return resumo
+	return {}
+
+
+## Quanto custa dispensar um jogador do elenco agora. -1 se ele não estiver no elenco.
+func custo_rescisao(id: String) -> int:
+	if carreira == null:
+		return -1
+	var jogador: Jogador = carreira.organizacao.jogador_por_id(id)
+	if jogador == null or jogador.contrato == null:
+		return -1
+	return _custo_rescisao(jogador.contrato)
+
+
+## Resumo das finanças da organização.
+func resumo_financeiro() -> Dictionary:
+	if carreira == null:
+		return {}
+	var dias_por_mes: int = Dados.dias_por_mes()
+	var proximo: int = carreira.mes() * dias_por_mes + 1
+	return {
+		"dinheiro": carreira.organizacao.dinheiro,
+		"folha_mensal": carreira.organizacao.folha_mensal(),
+		"salarios_atrasados": carreira.organizacao.salarios_atrasados,
+		"meses_em_atraso": carreira.organizacao.meses_em_atraso,
+		"proximo_pagamento_dia": proximo,
+		"dias_ate_pagamento": proximo - carreira.dia,
+	}
+
+
+## Tamanhos de anúncio para técnico: [{id, nome, candidatos, custo, dias_espera}].
+func listar_anuncios() -> Array[Dictionary]:
+	return SistemaTecnicos.listar_anuncios()
+
+
+## Prévia de quantos dias os candidatos levariam para chegar com esta oferta.
+func prever_espera_anuncio(tamanho: String, oferta_minima: int) -> int:
+	return SistemaTecnicos.dias_de_espera(tamanho, oferta_minima)
+
+
+## Anúncio em andamento: {} se não houver, ou {"tamanho", "oferta_minima", "dia_chegada", "dias_restantes"}.
+func estado_anuncio() -> Dictionary:
+	if carreira == null or carreira.anuncio_tecnico.is_empty():
+		return {}
+	var estado: Dictionary = carreira.anuncio_tecnico.duplicate()
+	estado["dias_restantes"] = maxi(0, int(estado["dia_chegada"]) - carreira.dia)
+	return estado
+
+
+## Candidatos a técnico disponíveis (já responderam ao anúncio).
+func listar_candidatos_tecnico() -> Array[Dictionary]:
+	if carreira == null:
+		return []
+	var lista: Array[Dictionary] = []
+	for candidato: Dictionary in carreira.candidatos_tecnico:
+		var resumo: Dictionary = (candidato["tecnico"] as Tecnico).resumo(carreira.dia)
+		resumo["expira_em"] = candidato["expira_em"]
+		resumo["dias_para_expirar"] = maxi(0, int(candidato["expira_em"]) - carreira.dia)
+		lista.append(resumo)
+	return lista
+
+
+## Técnico atual, ou {} se não houver.
+func tecnico_atual() -> Dictionary:
+	if carreira == null or carreira.organizacao.tecnico == null:
+		return {}
+	return carreira.organizacao.tecnico.resumo(carreira.dia)
+
+
+# --- Etapa 2: ações ----------------------------------------------------------
+
+## Faz uma proposta de contrato a um agente livre.
+## proposta: {"salario", "duracao_meses", "luvas", "multa_rescisoria", "bonus_titulo", "bonus_mundial", "clausula_titular"}
+## Campos ausentes usam o padrão (salário pedido, 12 meses, sem luvas, multa de 12 salários, sem bônus).
+## Retorno: {"ok": true, "aceita": bool, "mensagem": String, "dica_salario": int, "paciencia": int, "bloqueado": bool}
+##       ou {"ok": false, "erros": {...}} para pedidos impossíveis (elenco cheio, sem dinheiro para as luvas...).
+func fazer_proposta(jogador_id: String, proposta: Dictionary) -> Dictionary:
+	if carreira == null:
+		return _erro("carreira", ERRO_SEM_CARREIRA, "Não há carreira ativa.")
+	var jogador: Jogador = carreira.jogador_do_mercado(jogador_id)
+	if jogador == null:
+		return _erro("jogador", "jogador_inexistente", "Este jogador não está no mercado.")
+	if carreira.organizacao.elenco.size() >= Organizacao.MAXIMO_ELENCO:
+		return _erro("elenco", "elenco_cheio", "O elenco já tem %d jogadores." % Organizacao.MAXIMO_ELENCO)
+	return _negociar(jogador, proposta, false)
+
+
+## Propõe a renovação do contrato de um jogador do elenco (a partir de 90 dias do fim).
+## Mesmo formato de proposta e de retorno de fazer_proposta().
+func renovar_contrato(jogador_id: String, proposta: Dictionary) -> Dictionary:
+	if carreira == null:
+		return _erro("carreira", ERRO_SEM_CARREIRA, "Não há carreira ativa.")
+	var jogador: Jogador = carreira.organizacao.jogador_por_id(jogador_id)
+	if jogador == null:
+		return _erro("jogador", "jogador_inexistente", "Este jogador não está no elenco.")
+	var regra: Dictionary = Dados.contratos()["renovacao"]
+	var restantes: int = jogador.contrato.dias_restantes(carreira.dia) if jogador.contrato else 0
+	if restantes > int(regra["dias_restantes_para_renovar"]):
+		return _erro("jogador", "cedo_para_renovar",
+			"A renovação só pode ser proposta a partir de %d dias do fim do contrato." % int(regra["dias_restantes_para_renovar"]))
+	if jogador.satisfacao < float(regra["satisfacao_minima"]):
+		return {"ok": true, "aceita": false, "mensagem": "%s está insatisfeito e não quer renovar." % jogador.apelido,
+			"dica_salario": 0, "paciencia": 0, "bloqueado": false}
+	return _negociar(jogador, proposta, true)
+
+
+## Dispensa um jogador do elenco, pagando a rescisão (ver custo_rescisao()). Ele volta ao mercado.
+func dispensar_jogador(jogador_id: String) -> Dictionary:
+	if carreira == null:
+		return _erro("carreira", ERRO_SEM_CARREIRA, "Não há carreira ativa.")
+	var jogador: Jogador = carreira.organizacao.jogador_por_id(jogador_id)
+	if jogador == null:
+		return _erro("jogador", "jogador_inexistente", "Este jogador não está no elenco.")
+	var custo: int = _custo_rescisao(jogador.contrato) if jogador.contrato else 0
+	if custo > carreira.organizacao.dinheiro:
+		return _erro("dinheiro", "sem_dinheiro", "Não há dinheiro para pagar a rescisão (R$ %s)." % Negociacao._formatar(custo))
+	_mudar_dinheiro(-custo)
+	_remover_do_elenco(jogador, "dispensado")
+	return {"ok": true, "custo": custo}
+
+
+## Define os titulares. titulares: {"topo": id, "selva": id, ...}. Posições ausentes ficam sem titular.
+## Um jogador pode ser titular fora da posição principal (rende conforme a afinidade).
+func definir_titulares(novos: Dictionary) -> Dictionary:
+	if carreira == null:
+		return _erro("carreira", ERRO_SEM_CARREIRA, "Não há carreira ativa.")
+	var usados: Array[String] = []
+	for posicao: String in novos:
+		var id: String = str(novos[posicao])
+		if not posicao in Jogador.POSICOES:
+			return _erro("titulares", "posicao_invalida", "Posição inválida: %s." % posicao)
+		if carreira.organizacao.jogador_por_id(id) == null:
+			return _erro("titulares", "jogador_inexistente", "Um dos jogadores não está no elenco.")
+		if id in usados:
+			return _erro("titulares", "jogador_repetido", "Um jogador não pode ocupar duas posições.")
+		usados.append(id)
+	carreira.organizacao.titulares.clear()
+	for posicao: String in novos:
+		carreira.organizacao.titulares[posicao] = str(novos[posicao])
+	Eventos.elenco_mudou.emit()
+	return {"ok": true}
+
+
+## Publica um anúncio de vaga de técnico. Cobra o custo do anúncio na hora.
+## tamanho: "pequeno" | "medio" | "grande". oferta_minima: salário mensal oferecido (reais).
+func publicar_anuncio(tamanho: String, oferta_minima: int) -> Dictionary:
+	if carreira == null:
+		return _erro("carreira", ERRO_SEM_CARREIRA, "Não há carreira ativa.")
+	var regra: Dictionary = Dados.tecnicos()
+	var anuncio: Dictionary = Dados.por_id(regra["anuncios"], tamanho)
+	if anuncio.is_empty():
+		return _erro("tamanho", "tamanho_invalido", "Escolha o tamanho do anúncio.")
+	if not carreira.anuncio_tecnico.is_empty():
+		return _erro("anuncio", "anuncio_ativo", "Já existe um anúncio em andamento.")
+	if oferta_minima < int(regra["oferta"]["minima"]):
+		return _erro("oferta_minima", "oferta_baixa", "A oferta mínima é R$ %s." % Negociacao._formatar(int(regra["oferta"]["minima"])))
+	if int(anuncio["custo"]) > carreira.organizacao.dinheiro:
+		return _erro("dinheiro", "sem_dinheiro", "Não há dinheiro para o anúncio.")
+	_mudar_dinheiro(-int(anuncio["custo"]))
+	var espera: int = SistemaTecnicos.dias_de_espera(tamanho, oferta_minima)
+	carreira.anuncio_tecnico = {"tamanho": tamanho, "oferta_minima": oferta_minima, "dia_chegada": carreira.dia + espera}
+	return {"ok": true, "dias_espera": espera}
+
+
+## Contrata um candidato a técnico pelo salário que ele pede. Exige que não haja técnico atual.
+func contratar_tecnico(candidato_id: String, duracao_meses: int) -> Dictionary:
+	if carreira == null:
+		return _erro("carreira", ERRO_SEM_CARREIRA, "Não há carreira ativa.")
+	if carreira.organizacao.tecnico != null:
+		return _erro("tecnico", "ja_tem_tecnico", "Dispense o técnico atual antes de contratar outro.")
+	if not float(duracao_meses) in Dados.contratos()["duracoes_meses"]:
+		return _erro("duracao_meses", "duracao_invalida", "Duração inválida.")
+	for indice: int in range(carreira.candidatos_tecnico.size()):
+		var tecnico: Tecnico = carreira.candidatos_tecnico[indice]["tecnico"]
+		if tecnico.id == candidato_id:
+			var contrato: Contrato = Contrato.new()
+			contrato.salario = tecnico.salario_pedido
+			contrato.duracao_meses = duracao_meses
+			contrato.dia_inicio = carreira.dia
+			contrato.dia_fim = carreira.dia + duracao_meses * Dados.dias_por_mes() - 1
+			contrato.multa_rescisoria = tecnico.salario_pedido * int(Dados.contratos()["multa_padrao_meses"])
+			tecnico.contrato = contrato
+			carreira.organizacao.tecnico = tecnico
+			carreira.candidatos_tecnico.clear()
+			Eventos.tecnico_contratado.emit(tecnico.resumo(carreira.dia))
+			return {"ok": true}
+	return _erro("candidato", "candidato_inexistente", "Este candidato não está mais disponível.")
+
+
+## Dispensa o técnico atual, pagando a rescisão.
+func dispensar_tecnico() -> Dictionary:
+	if carreira == null or carreira.organizacao.tecnico == null:
+		return _erro("tecnico", "sem_tecnico", "Não há técnico para dispensar.")
+	var tecnico: Tecnico = carreira.organizacao.tecnico
+	var custo: int = _custo_rescisao(tecnico.contrato) if tecnico.contrato else 0
+	if custo > carreira.organizacao.dinheiro:
+		return _erro("dinheiro", "sem_dinheiro", "Não há dinheiro para pagar a rescisão (R$ %s)." % Negociacao._formatar(custo))
+	_mudar_dinheiro(-custo)
+	carreira.organizacao.tecnico = null
+	Eventos.tecnico_saiu.emit(tecnico.resumo(carreira.dia), "dispensado")
+	return {"ok": true, "custo": custo}
+
+
+## Avança o calendário. Processa salários (início de cada mês), avisos e fim de contratos,
+## chegada e validade dos candidatos a técnico e renovação do mercado.
+func avancar_dia(dias: int = 1) -> Dictionary:
+	if carreira == null:
+		return _erro("carreira", ERRO_SEM_CARREIRA, "Não há carreira ativa.")
+	for vez: int in range(maxi(1, dias)):
+		carreira.dia += 1
+		_processar_dia()
+		Eventos.dia_avancou.emit(resumo_carreira())
+	return {"ok": true, "resumo": resumo_carreira()}
+
+
+# --- Etapa 2: interno --------------------------------------------------------
+
+func _negociar(jogador: Jogador, proposta: Dictionary, renovacao: bool) -> Dictionary:
+	var estado: Dictionary = carreira.negociacoes.get(jogador.id,
+		{"paciencia": Negociacao.paciencia_inicial(jogador), "bloqueado_ate": 0})
+	if int(estado["bloqueado_ate"]) >= carreira.dia:
+		return _erro("jogador", "negociacao_bloqueada",
+			"%s não quer conversar até o dia %d." % [jogador.apelido, int(estado["bloqueado_ate"]) + 1])
+
+	var normalizada: Dictionary = Negociacao.normalizar(proposta, jogador)
+	var erro_proposta: String = Negociacao.validar(normalizada)
+	if not erro_proposta.is_empty():
+		return _erro("proposta", Negociacao.MOTIVO_INVALIDA, erro_proposta)
+	if normalizada["luvas"] > carreira.organizacao.dinheiro:
+		return _erro("dinheiro", "sem_dinheiro", "Não há dinheiro para pagar as luvas.")
+
+	var avaliacao: Dictionary = Negociacao.avaliar(jogador, normalizada, carreira.organizacao.reputacao, renovacao)
+	if avaliacao["aceita"]:
+		carreira.negociacoes.erase(jogador.id)
+		_mudar_dinheiro(-int(normalizada["luvas"]))
+		jogador.contrato = Negociacao.criar_contrato(jogador, normalizada, carreira.dia)
+		_limpar_avisos(jogador.id)
+		if not renovacao:
+			carreira.mercado.erase(jogador)
+			carreira.organizacao.elenco.append(jogador)
+			Eventos.jogador_contratado.emit(_resumo_elenco(jogador))
+		Eventos.elenco_mudou.emit()
+		return {"ok": true, "aceita": true, "mensagem": avaliacao["mensagem"], "dica_salario": avaliacao["dica_salario"],
+			"paciencia": 0, "bloqueado": false, "jogador": _resumo_elenco(jogador)}
+
+	var custo_paciencia: int = 2 if avaliacao["ofensiva"] else 1
+	estado["paciencia"] = int(estado["paciencia"]) - custo_paciencia
+	var mensagem: String = avaliacao["mensagem"]
+	var bloqueado: bool = false
+	if int(estado["paciencia"]) <= 0:
+		var dias_bloqueio: int = int(Dados.contratos()["negociacao"]["bloqueio_dias"])
+		estado["bloqueado_ate"] = carreira.dia + dias_bloqueio - 1
+		estado["paciencia"] = Negociacao.paciencia_inicial(jogador)
+		mensagem += " Ele encerrou a negociação por %d dias." % dias_bloqueio
+		bloqueado = true
+	carreira.negociacoes[jogador.id] = estado
+	return {"ok": true, "aceita": false, "mensagem": mensagem, "dica_salario": avaliacao["dica_salario"],
+		"paciencia": 0 if bloqueado else int(estado["paciencia"]), "bloqueado": bloqueado}
+
+
+func _custo_rescisao(contrato: Contrato) -> int:
+	var fracao: float = float(Dados.contratos()["rescisao"]["fracao_salario_restante"])
+	return int(round(float(contrato.salario_restante(carreira.dia)) * fracao / 100.0) * 100.0)
+
+
+func _resumo_elenco(jogador: Jogador) -> Dictionary:
+	var resumo: Dictionary = jogador.resumo_publico(carreira.dia)
+	resumo["no_elenco"] = true
+	resumo["titular"] = carreira.organizacao.eh_titular(jogador.id)
+	resumo["posicao_titular"] = carreira.organizacao.titulares.find_key(jogador.id) if resumo["titular"] else ""
+	resumo["custo_rescisao"] = _custo_rescisao(jogador.contrato) if jogador.contrato else 0
+	return resumo
+
+
+func _remover_do_elenco(jogador: Jogador, motivo: String) -> void:
+	var resumo: Dictionary = _resumo_elenco(jogador)
+	carreira.organizacao.elenco.erase(jogador)
+	var posicao: Variant = carreira.organizacao.titulares.find_key(jogador.id)
+	if posicao != null:
+		carreira.organizacao.titulares.erase(posicao)
+	jogador.contrato = null
+	jogador.lealdade = float(Dados.balanceamento()["geracao"]["lealdade_inicial"])
+	_limpar_avisos(jogador.id)
+	carreira.mercado.append(jogador)
+	Eventos.jogador_saiu.emit(resumo, motivo)
+	Eventos.elenco_mudou.emit()
+
+
+func _mudar_dinheiro(variacao: int) -> void:
+	if variacao == 0:
+		return
+	carreira.organizacao.dinheiro += variacao
+	Eventos.dinheiro_mudou.emit(carreira.organizacao.dinheiro)
+
+
+func _limpar_avisos(id: String) -> void:
+	carreira.avisos_enviados = carreira.avisos_enviados.filter(func(aviso: String) -> bool: return not aviso.begins_with(id + ":"))
+
+
+func _processar_dia() -> void:
+	_processar_anuncio()
+	_processar_contratos()
+	if (carreira.dia - 1) % Dados.dias_por_mes() == 0:
+		_pagar_salarios()
+		SistemaMercado.renovar(carreira)
+		Eventos.mercado_atualizado.emit()
+
+
+func _processar_anuncio() -> void:
+	# Candidatos vencidos desistem.
+	carreira.candidatos_tecnico = carreira.candidatos_tecnico.filter(
+		func(candidato: Dictionary) -> bool: return int(candidato["expira_em"]) >= carreira.dia)
+	if carreira.anuncio_tecnico.is_empty() or carreira.dia < int(carreira.anuncio_tecnico["dia_chegada"]):
+		return
+	var anuncio: Dictionary = carreira.anuncio_tecnico
+	carreira.anuncio_tecnico = {}
+	var validade: int = int(Dados.tecnicos()["validade_candidatos_dias"])
+	var resumos: Array[Dictionary] = []
+	for tecnico: Tecnico in SistemaTecnicos.gerar_candidatos(carreira, anuncio["tamanho"], int(anuncio["oferta_minima"])):
+		carreira.candidatos_tecnico.append({"tecnico": tecnico, "expira_em": carreira.dia + validade})
+		resumos.append(tecnico.resumo(carreira.dia))
+	Eventos.candidatos_chegaram.emit(resumos)
+
+
+func _processar_contratos() -> void:
+	var avisos: Array = Dados.contratos()["avisos_dias_restantes"]
+	for jogador: Jogador in carreira.organizacao.elenco.duplicate():
+		if jogador.contrato == null:
+			continue
+		# TODO (etapa 6): se houver competição em andamento, o contrato vai até o fim dela.
+		if carreira.dia > jogador.contrato.dia_fim:
+			_remover_do_elenco(jogador, "contrato_encerrado")
+			continue
+		_avisar_contrato(jogador.id, jogador.resumo_publico(carreira.dia), "jogador", jogador.contrato, avisos)
+	var tecnico: Tecnico = carreira.organizacao.tecnico
+	if tecnico and tecnico.contrato:
+		if carreira.dia > tecnico.contrato.dia_fim:
+			carreira.organizacao.tecnico = null
+			_limpar_avisos(tecnico.id)
+			Eventos.tecnico_saiu.emit(tecnico.resumo(carreira.dia), "contrato_encerrado")
+		else:
+			_avisar_contrato(tecnico.id, tecnico.resumo(carreira.dia), "tecnico", tecnico.contrato, avisos)
+
+
+func _avisar_contrato(id: String, resumo: Dictionary, tipo: String, contrato: Contrato, avisos: Array) -> void:
+	var restantes: int = contrato.dias_restantes(carreira.dia)
+	for limite: Variant in avisos:
+		var chave: String = "%s:%d" % [id, int(limite)]
+		if restantes <= int(limite) and not chave in carreira.avisos_enviados:
+			carreira.avisos_enviados.append(chave)
+			# Envia só o aviso mais urgente que ainda não foi dado.
+			if restantes <= int(avisos.min()) and int(limite) != int(avisos.min()):
+				continue
+			Eventos.contrato_vencendo.emit(resumo, tipo, restantes)
+
+
+func _pagar_salarios() -> void:
+	var organizacao: Organizacao = carreira.organizacao
+	var devido: int = organizacao.folha_mensal() + organizacao.salarios_atrasados
+	if devido == 0:
+		return
+	if organizacao.dinheiro >= devido:
+		organizacao.salarios_atrasados = 0
+		organizacao.meses_em_atraso = 0
+		_mudar_dinheiro(-devido)
+		Eventos.salarios_pagos.emit(devido)
+		return
+	var regra: Dictionary = Dados.contratos()["atraso_salarial"]
+	organizacao.salarios_atrasados = devido
+	organizacao.meses_em_atraso += 1
+	organizacao.reputacao = maxf(0.0, organizacao.reputacao - float(regra["queda_reputacao"]))
+	for jogador: Jogador in organizacao.elenco:
+		jogador.satisfacao = maxf(0.0, jogador.satisfacao - float(regra["queda_satisfacao"]))
+	Eventos.salarios_atrasados.emit(organizacao.salarios_atrasados, organizacao.meses_em_atraso)
 
 
 # --- Interno -----------------------------------------------------------------

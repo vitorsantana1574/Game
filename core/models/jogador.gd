@@ -38,6 +38,9 @@ var salario_pedido: int = 0
 ## Domínio de campeões (id do campeão -> nível). Preenchido na etapa dos campeões.
 var dominio_campeoes: Dictionary = {}
 
+## Contrato atual, ou null para agentes livres.
+var contrato: Contrato = null
+
 
 ## Nível geral do jogador numa posição (1 a 100), ponderando os atributos pelos pesos da posição.
 func nivel_geral(posicao: String = "") -> float:
@@ -53,8 +56,19 @@ func traco_revelado(traco: String) -> bool:
 	return traco in tracos_revelados
 
 
+## Fama de 0 a 1: quão bom e conhecido o jogador é. Quanto maior, mais difícil negociar.
+func fama() -> float:
+	var regra: Dictionary = Dados.contratos()["fama"]
+	var parte_nivel: float = inverse_lerp(float(regra["nivel_minimo"]), float(regra["nivel_maximo"]), nivel_geral())
+	var parte_experiencia: float = float(experiencia) / float(regra["experiencia_maxima"])
+	var valor: float = clampf(parte_nivel, 0.0, 1.0) * float(regra["peso_nivel"])
+	valor += clampf(parte_experiencia, 0.0, 1.0) * float(regra["peso_experiencia"])
+	return clampf(valor, 0.0, 1.0)
+
+
 ## Dados que a interface pode exibir. Traços ocultos só aparecem se revelados.
-func resumo_publico() -> Dictionary:
+## `dia_atual` é usado para calcular os dias restantes do contrato.
+func resumo_publico(dia_atual: int = 1) -> Dictionary:
 	var resumo: Dictionary = {
 		"id": id,
 		"apelido": apelido,
@@ -69,6 +83,8 @@ func resumo_publico() -> Dictionary:
 		"lealdade": roundi(lealdade),
 		"experiencia": experiencia,
 		"salario_pedido": salario_pedido,
+		"fama": snappedf(fama(), 0.01),
+		"contrato": contrato.resumo(dia_atual) if contrato else {},
 	}
 	if traco_revelado("potencial"):
 		resumo["potencial"] = potencial
@@ -96,6 +112,7 @@ func para_dicionario() -> Dictionary:
 		"tracos_revelados": tracos_revelados,
 		"salario_pedido": salario_pedido,
 		"dominio_campeoes": dominio_campeoes,
+		"contrato": contrato.para_dicionario() if contrato else {},
 	}
 
 
@@ -121,4 +138,7 @@ static func de_dicionario(dados: Dictionary) -> Jogador:
 		jogador.tracos_revelados.append(str(traco))
 	jogador.salario_pedido = int(dados["salario_pedido"])
 	jogador.dominio_campeoes = dados.get("dominio_campeoes", {}).duplicate()
+	var contrato_dados: Dictionary = dados.get("contrato", {})
+	if not contrato_dados.is_empty():
+		jogador.contrato = Contrato.de_dicionario(contrato_dados)
 	return jogador

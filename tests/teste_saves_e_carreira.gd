@@ -65,6 +65,17 @@ func teste_carregar_e_continuar() -> void:
 	executor.igual(Jogo.continuar()["resumo"]["nome"], "Vale Rift", "continuar abre o último salvo")
 
 
+func teste_carregar_atualiza_ultimo_jogado() -> void:
+	# Caso relatado pelo GPT: salvar no espaço 2, carregar o 3, e Continuar deve abrir o 3.
+	Jogo.nova_carreira({"nome": "Time Dois", "dificuldade": "normal", "slot": 1})
+	Jogo.nova_carreira({"nome": "Time Tres", "dificuldade": "normal", "slot": 2})
+	Jogo.carregar(1)
+	executor.igual(Jogo.ultimo_slot(), 1, "carregar o espaço 2 o torna o último jogado")
+	Jogo.carregar(2)
+	executor.igual(Jogo.ultimo_slot(), 2, "carregar o espaço 3 o torna o último jogado")
+	executor.igual(Jogo.continuar()["resumo"]["nome"], "Time Tres", "continuar abre o último carregado")
+
+
 func teste_save_preserva_elenco() -> void:
 	Jogo.nova_carreira({"nome": "Vale Rift", "dificuldade": "normal"})
 	var gerador: GeradorJogadores = GeradorJogadores.new(Jogo.carreira.semente)

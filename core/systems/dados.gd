@@ -6,6 +6,9 @@ extends RefCounted
 const DIFICULDADES: String = "res://data/config/dificuldades.json"
 const BALANCEAMENTO: String = "res://data/config/balanceamento.json"
 const NOMES_JOGADORES: String = "res://data/nomes/jogadores.json"
+const CONTRATOS: String = "res://data/config/contratos.json"
+const MERCADO: String = "res://data/config/mercado.json"
+const TECNICOS: String = "res://data/config/tecnicos.json"
 
 static var _cache: Dictionary = {}
 
@@ -32,6 +35,22 @@ static func balanceamento() -> Dictionary:
 
 static func nomes_jogadores() -> Dictionary:
 	return carregar(NOMES_JOGADORES)
+
+
+static func contratos() -> Dictionary:
+	return carregar(CONTRATOS)
+
+
+static func mercado() -> Dictionary:
+	return carregar(MERCADO)
+
+
+static func tecnicos() -> Dictionary:
+	return carregar(TECNICOS)
+
+
+static func dias_por_mes() -> int:
+	return int(contratos()["dias_por_mes"])
 
 
 ## Procura, numa lista de dicionários, o item com o `id` informado. Devolve {} se não achar.

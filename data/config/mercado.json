@@ -1,0 +1,11 @@
+{
+	"_comentario": "Mercado de agentes livres. Valores provisórios.",
+	"jogadores_por_posicao": 8,
+	"qualidade_por_liga": {
+		"regional": { "media": 42, "variacao": 15 },
+		"nacional": { "media": 55, "variacao": 15 },
+		"mundial": { "media": 65, "variacao": 15 }
+	},
+	"renovacao_dias": 30,
+	"fracao_renovada": 0.25
+}

@@ -153,7 +153,7 @@ As cenas da Godot dão conflito quando duas pessoas editam o mesmo arquivo. Por 
 | Etapa | Claude (lógica) | GPT (apresentação) |
 |---|---|---|
 | 1 ✅ | Modelos de dados, gerador de jogadores, estado do jogo, saves | Tema visual, tela inicial, tela de configuração da carreira |
-| 2 | Contratos, contratação, técnico | Telas de mercado, contratação e elenco |
+| 2 ✅ | Contratos, contratação, técnico, calendário | Telas de mercado, contratação e elenco |
 | 3 | Agenda, treino, energia, ego | Tela de agenda semanal e perfil do jogador |
 | 4 | Campeões e draft | Tela de draft |
 | 5 | Simulação da partida (linha do tempo) | Cena visual da partida e painel de narração |

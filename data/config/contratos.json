@@ -1,0 +1,50 @@
+{
+	"_comentario": "Regras provisórias de contratos e negociação. Serão calibradas com o simulador de temporadas.",
+	"dias_por_mes": 30,
+	"duracoes_meses": [6, 12, 24, 36],
+	"multa_padrao_meses": 12,
+
+	"fama": {
+		"_comentario": "Fama de 0 a 1: quão bom e conhecido o jogador é. Define a dificuldade da negociação.",
+		"nivel_minimo": 30,
+		"nivel_maximo": 90,
+		"peso_nivel": 0.7,
+		"experiencia_maxima": 200,
+		"peso_experiencia": 0.3
+	},
+
+	"negociacao": {
+		"_comentario": "O jogador aceita se o valor mensal da proposta for pelo menos (exigência × tolerância). Iniciantes (fama 0) aceitam menos que o pedido; estrelas (fama 1) quase nada abaixo.",
+		"tolerancia_iniciante": 0.85,
+		"tolerancia_estrela": 0.98,
+		"paciencia_iniciante": 4,
+		"paciencia_estrela": 2,
+		"oferta_ofensiva": 0.6,
+		"bloqueio_dias": 15,
+		"peso_luvas": 1.25,
+		"peso_bonus": 0.25,
+		"multa_acrescimo_por_ano_extra": 0.08,
+		"multa_acrescimo_maximo": 0.25,
+		"reputacao_acrescimo_por_ponto": 0.006,
+		"lealdade_desconto_maximo": 0.15,
+		"ego_exige_titular": 75,
+		"arredondar_dica": 500
+	},
+
+	"renovacao": {
+		"dias_restantes_para_renovar": 90,
+		"satisfacao_minima": 40
+	},
+
+	"rescisao": {
+		"_comentario": "Custo para dispensar antes do fim: fração do salário que ainda seria pago.",
+		"fracao_salario_restante": 0.5
+	},
+
+	"avisos_dias_restantes": [90, 7],
+
+	"atraso_salarial": {
+		"queda_satisfacao": 15,
+		"queda_reputacao": 5
+	}
+}

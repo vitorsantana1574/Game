@@ -3,7 +3,7 @@
 Este documento é a **ponte entre a lógica (Claude) e a interface (GPT)**.
 A interface só pode usar o que está escrito aqui. Se precisar de algo que não existe, peça por mensagem em [comunicacao/](comunicacao/README.md).
 
-> **Status: v1.** A etapa 1 (tela inicial e Criar Equipe) está **[PRONTA]**. Os nomes abaixo são a proposta inicial. A cada etapa de construção, o Claude atualiza este documento **antes** de o GPT começar a tela correspondente. Itens marcados **[PLANEJADO]** ainda não existem no código.
+> **Status: v2.** Etapas 1 (tela inicial) e 2 (mercado, elenco, contratos, técnico, calendário) **[PRONTAS]**. Os nomes abaixo são a proposta inicial. A cada etapa de construção, o Claude atualiza este documento **antes** de o GPT começar a tela correspondente. Itens marcados **[PLANEJADO]** ainda não existem no código.
 
 Regras do contrato: [ARQUITETURA.md](ARQUITETURA.md), seção 2.
 
@@ -128,11 +128,148 @@ Campos possíveis em `erros`: `nome`, `dificuldade`, `capital`, `rivais`, `slot`
 | `Eventos.carreira_salva(slot)` | Depois de `salvar` |
 | `Eventos.saves_mudaram(resumos, ultimo_slot)` | Sempre que a lista de saves muda. Os parâmetros têm o mesmo formato de `listar_saves()` e `ultimo_slot()` |
 | `Eventos.dificuldade_desbloqueada(id)` | Quando o Pesadelo é desbloqueado |
-| `Eventos.dinheiro_mudou(valor)` | **[PLANEJADO]** quando o caixa mudar |
+| `Eventos.dinheiro_mudou(valor)` | Quando o caixa mudar (ver 2.2) |
 
 ### Formato de dinheiro
 
 Real brasileiro, com ponto nos milhares: **R$ 80.000**. Os valores chegam como `int` em reais.
+
+## 2.2 Mercado, elenco, contratos, técnico e calendário — **[PRONTO]**
+
+Todas as funções abaixo exigem uma carreira ativa (depois de `nova_carreira`, `carregar` ou `continuar`).
+
+### Formato de um jogador (resumo)
+
+Usado por `listar_mercado()`, `listar_elenco()`, `detalhe_jogador()` e pelos sinais.
+
+```gdscript
+{
+    "id": "j000123",
+    "apelido": "Kazen",
+    "nome_real": "Lucas Almeida",
+    "idade": 19,
+    "posicao_principal": "meio",            # "topo" | "selva" | "meio" | "atirador" | "suporte"
+    "afinidade_posicao": {"topo": 0.4, "meio": 0.97, ...},   # 0 a 1: rendimento em cada posição
+    "atributos": {"resistencia": 55, "mental": 61, "farm": 70, "micro": 66, "macro": 52},  # 1 a 100
+    "nivel_geral": 63,                       # 1 a 100, na posição principal
+    "energia": 100, "satisfacao": 70, "lealdade": 20,       # 0 a 100
+    "experiencia": 40,
+    "salario_pedido": 5200,                  # reais por mês
+    "fama": 0.42,                            # 0 a 1: quanto maior, mais difícil negociar
+    "contrato": {},                          # {} para agente livre; ver formato abaixo
+    # Só aparecem quando revelados (traços ocultos):
+    "potencial": 78, "ego": 55,
+
+    # Só em jogadores do MERCADO:
+    "negociacao": {"paciencia": 3, "bloqueado": false, "bloqueado_ate": 0},
+    # Só em jogadores do ELENCO:
+    "no_elenco": true, "titular": true, "posicao_titular": "meio", "custo_rescisao": 31200,
+}
+```
+
+**Contrato:**
+
+```gdscript
+{
+    "salario": 5200, "luvas": 0, "multa_rescisoria": 62400,
+    "bonus_titulo": 0, "bonus_mundial": 0, "clausula_titular": false,
+    "duracao_meses": 12, "dia_inicio": 1, "dia_fim": 360, "dias_restantes": 359,
+}
+```
+
+**Técnico (resumo):**
+
+```gdscript
+{
+    "id": "t00004", "nome": "Paula Rocha", "idade": 41,
+    "atributos": {"macro": 55, "conhecimento": 48, "olheiro": 60},
+    "nivel_geral": 54, "cansaco": 0, "salario_pedido": 4300,
+    "contrato": {...},                       # {} para candidatos
+    # Só em candidatos:
+    "expira_em": 26, "dias_para_expirar": 12,
+}
+```
+
+### Leitura
+
+| Função | Retorno |
+|---|---|
+| `Jogo.listar_mercado(filtros)` | Agentes livres. `filtros` opcional: `{"posicao": "meio", "ordenar": "nivel" \| "salario" \| "idade"}` (padrão: nível, do melhor para o pior) |
+| `Jogo.listar_elenco()` | Jogadores do elenco (até 10) |
+| `Jogo.detalhe_jogador(id)` | Resumo de um jogador do elenco ou do mercado, ou `{}` |
+| `Jogo.titulares()` | `{"topo": id, "meio": id, ...}` (posições sem titular ficam de fora) |
+| `Jogo.opcoes_contrato()` | `{"duracoes_meses": [6, 12, 24, 36], "multa_padrao_meses": 12, "ego_exige_titular": 75}` |
+| `Jogo.custo_rescisao(id)` | Custo para dispensar o jogador agora, ou `-1` |
+| `Jogo.resumo_financeiro()` | `{dinheiro, folha_mensal, salarios_atrasados, meses_em_atraso, proximo_pagamento_dia, dias_ate_pagamento}` |
+| `Jogo.listar_anuncios()` | `[{id: "pequeno" \| "medio" \| "grande", nome, candidatos, custo, dias_espera}]` |
+| `Jogo.prever_espera_anuncio(tamanho, oferta_minima)` | Dias até os candidatos chegarem, para mostrar antes de publicar |
+| `Jogo.estado_anuncio()` | `{}` ou `{tamanho, oferta_minima, dia_chegada, dias_restantes}` |
+| `Jogo.listar_candidatos_tecnico()` | Candidatos que já responderam |
+| `Jogo.tecnico_atual()` | Técnico contratado, ou `{}` |
+
+`Jogo.resumo_carreira()` agora também traz: `mes`, `folha_mensal`, `salarios_atrasados`, `meses_em_atraso`, `tamanho_elenco`, `tem_tecnico`.
+
+### Ações
+
+| Ação | Sucesso |
+|---|---|
+| `Jogo.fazer_proposta(jogador_id, proposta)` | `{"ok": true, "aceita": bool, "mensagem", "dica_salario", "paciencia", "bloqueado", "jogador"?}` |
+| `Jogo.renovar_contrato(jogador_id, proposta)` | Igual a `fazer_proposta`. Só a partir de **90 dias** do fim do contrato; jogador insatisfeito recusa |
+| `Jogo.dispensar_jogador(jogador_id)` | `{"ok": true, "custo": int}`. Paga a rescisão; o jogador volta ao mercado |
+| `Jogo.definir_titulares({"topo": id, ...})` | `{"ok": true}`. Substitui todos os titulares |
+| `Jogo.publicar_anuncio(tamanho, oferta_minima)` | `{"ok": true, "dias_espera": int}`. Cobra o custo na hora; um anúncio por vez |
+| `Jogo.contratar_tecnico(candidato_id, duracao_meses)` | `{"ok": true}`. Pelo salário pedido; exige não ter técnico |
+| `Jogo.dispensar_tecnico()` | `{"ok": true, "custo": int}` |
+| `Jogo.avancar_dia(dias = 1)` | `{"ok": true, "resumo": {...}}` |
+
+Erros seguem o padrão: `{"ok": false, "erros": {"campo": "mensagem pronta"}}`.
+
+**Proposta** (campos ausentes usam o padrão):
+
+```gdscript
+{
+    "salario": 5200,            # padrão: salário pedido
+    "duracao_meses": 12,        # 6, 12, 24 ou 36 (opcoes_contrato())
+    "luvas": 0,                 # pago na hora; precisa haver dinheiro em caixa
+    "multa_rescisoria": 62400,  # padrão: 12 salários. Multa acima de 1 ano de salário encarece a exigência
+    "bonus_titulo": 0,
+    "bonus_mundial": 0,
+    "clausula_titular": false,  # jogadores com ego alto só assinam com ela
+}
+```
+
+**Como a negociação funciona (para a tela explicar ao jogador):**
+- Recusa normal: o jogador perde **1** de paciência e a resposta traz `dica_salario` (o salário mensal que ele espera, arredondado).
+- Proposta muito baixa (abaixo de 60% do esperado): perde **2** de paciência.
+- Paciência zerada: ele **encerra a negociação por 15 dias** (`bloqueado: true`).
+- Iniciantes têm mais paciência e aceitam um pouco abaixo do pedido; estrelas, quase nada.
+- Luvas e bônus aumentam o valor da proposta. Reputação baixa da organização encarece jogadores famosos.
+- `mensagem` vem pronta para exibir.
+
+### Calendário
+
+- **1 mês = 30 dias.** O dia 1 é o início da carreira; dia 31 começa o mês 2, e assim por diante.
+- **Salários** são cobrados no primeiro dia de cada mês (dias 31, 61, 91...). Sem dinheiro, nada é pago, o valor acumula e a satisfação e a reputação caem.
+- **Avisos de contrato:** 90 e 7 dias antes do fim.
+- **Fim de contrato:** o jogador sai no dia seguinte ao `dia_fim`.
+- **Mercado:** cerca de 25% dos agentes livres são trocados todo início de mês.
+- **Candidatos a técnico** desistem 14 dias depois de chegar.
+- A lógica **não salva sozinha**: a interface decide quando chamar `Jogo.salvar()`.
+
+### Sinais desta etapa
+
+| Sinal | Quando |
+|---|---|
+| `Eventos.dia_avancou(resumo)` | A cada dia que passa |
+| `Eventos.elenco_mudou()` | Contratação, saída, renovação ou mudança de titulares |
+| `Eventos.jogador_contratado(jogador)` | Jogador entrou no elenco |
+| `Eventos.jogador_saiu(jogador, motivo)` | `motivo`: `"dispensado"` \| `"contrato_encerrado"` |
+| `Eventos.contrato_vencendo(pessoa, tipo, dias_restantes)` | `tipo`: `"jogador"` \| `"tecnico"` |
+| `Eventos.mercado_atualizado()` | Mercado renovado (início do mês) |
+| `Eventos.candidatos_chegaram(candidatos)` | Candidatos do anúncio chegaram |
+| `Eventos.tecnico_contratado(tecnico)` / `Eventos.tecnico_saiu(tecnico, motivo)` | Mudança de técnico |
+| `Eventos.salarios_pagos(total)` / `Eventos.salarios_atrasados(devido, meses)` | Folha do mês |
+| `Eventos.dinheiro_mudou(valor)` | Qualquer mudança no caixa (agora **[PRONTO]**) |
 
 ## 3. Dados que a interface pode ler **[PLANEJADO]**
 

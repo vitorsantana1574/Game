@@ -14,3 +14,28 @@ signal saves_mudaram(resumos: Array[Dictionary], ultimo_slot: int)
 signal dinheiro_mudou(valor: int)
 ## Uma dificuldade foi desbloqueada (ex.: "pesadelo").
 signal dificuldade_desbloqueada(id: String)
+
+# --- Etapa 2: tempo, elenco, mercado, técnico, finanças ---
+
+## Um dia passou. `resumo` = Jogo.resumo_carreira().
+signal dia_avancou(resumo: Dictionary)
+## O elenco mudou (contratação, saída, renovação ou titulares). Releia Jogo.listar_elenco().
+signal elenco_mudou()
+## Um jogador entrou no elenco. `jogador` = resumo do jogador.
+signal jogador_contratado(jogador: Dictionary)
+## Um jogador saiu do elenco. motivo: "dispensado" | "contrato_encerrado".
+signal jogador_saiu(jogador: Dictionary, motivo: String)
+## Aviso de contrato perto do fim (90 e 7 dias). Vale para jogadores e técnico (`tipo`: "jogador" | "tecnico").
+signal contrato_vencendo(pessoa: Dictionary, tipo: String, dias_restantes: int)
+## O mercado de agentes livres foi renovado.
+signal mercado_atualizado()
+## Os candidatos do anúncio de técnico chegaram.
+signal candidatos_chegaram(candidatos: Array[Dictionary])
+## Um técnico foi contratado.
+signal tecnico_contratado(tecnico: Dictionary)
+## O técnico saiu. motivo: "dispensado" | "contrato_encerrado".
+signal tecnico_saiu(tecnico: Dictionary, motivo: String)
+## Os salários do mês foram pagos (total em reais).
+signal salarios_pagos(total: int)
+## Não havia dinheiro para os salários. `devido` acumula os meses em atraso.
+signal salarios_atrasados(devido: int, meses: int)

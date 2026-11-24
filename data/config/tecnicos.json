@@ -1,0 +1,30 @@
+{
+	"_comentario": "Contratação de técnicos por anúncio. Valores provisórios.",
+	"anuncios": [
+		{ "id": "pequeno", "nome": "Anúncio pequeno", "candidatos": 1, "custo": 1000, "dias_espera": 5 },
+		{ "id": "medio", "nome": "Anúncio médio", "candidatos": 3, "custo": 3000, "dias_espera": 7 },
+		{ "id": "grande", "nome": "Anúncio grande", "candidatos": 5, "custo": 6000, "dias_espera": 10 }
+	],
+	"oferta": {
+		"_comentario": "Oferta mínima = salário mensal oferecido no anúncio. Quanto maior em relação à referência, mais rápido os candidatos chegam e melhores eles tendem a ser.",
+		"minima": 1500,
+		"referencia": 4000,
+		"fator_espera_minimo": 0.3,
+		"fator_espera_maximo": 1.5
+	},
+	"validade_candidatos_dias": 14,
+	"qualidade": {
+		"base": 35,
+		"por_ponto_reputacao": 0.4,
+		"por_dobro_da_oferta": 10,
+		"desvio": 10
+	},
+	"idade_minima": 28,
+	"idade_maxima": 60,
+	"salario": {
+		"base": 4000,
+		"referencia": 50,
+		"expoente": 1.8,
+		"minimo": 1500
+	}
+}
