@@ -1,0 +1,747 @@
+{
+	"_comentario": "Itens de Crystal Legends. Cada campeão carrega até 5 itens: 1 bota + 4 itens. Passivas com o mesmo 'grupo' não se acumulam (vale a mais forte). Preços calculados pelo laboratório a partir do valor dos atributos (eficiência-alvo) e testados em combate.",
+	"item_inicial_suporte": {
+		"id": "medalhao_do_tributo",
+		"nome": "Medalhão do Tributo",
+		"preco": 400,
+		"ideia": "Moeda antiga que os guardiões davam aos escudeiros. O suporte ganha ouro ajudando o atirador a farmar.",
+		"estatisticas": {
+			"vida": 50
+		},
+		"passiva": {
+			"nome": "Tributo",
+			"tipo": "ouro_suporte",
+			"descricao": "Recebe 35% do ouro dos minions abatidos pelo atirador por perto e 60 de ouro por participação em abate."
+		}
+	},
+	"botas": [
+		{
+			"id": "botas_do_andarilho",
+			"nome": "Botas do Andarilho",
+			"ideia": "Botas leves de mensageiro. Para quem precisa chegar primeiro.",
+			"estatisticas": {
+				"velocidade_movimento": 60
+			},
+			"eficiencia_alvo": 1.0,
+			"classes": [
+				"todas"
+			],
+			"preco": 725
+		},
+		{
+			"id": "grevas_de_ferro",
+			"nome": "Grevas de Ferro",
+			"ideia": "Placas de ferro forjadas nas minas do Golem. Contra times de ataque físico.",
+			"estatisticas": {
+				"velocidade_movimento": 45,
+				"armadura": 20
+			},
+			"eficiencia_alvo": 0.9,
+			"passiva": {
+				"nome": "Aparar",
+				"tipo": "reducao_dano_ataques",
+				"valor": 0.1,
+				"descricao": "Reduz em 10% o dano de ataques básicos recebidos."
+			},
+			"classes": [
+				"tanque",
+				"lutador",
+				"suporte",
+				"assassino"
+			],
+			"preco": 1050
+		},
+		{
+			"id": "sandalias_da_sabedoria",
+			"nome": "Sandálias da Sabedoria",
+			"ideia": "Tecidas por monges do vale das névoas. Contra magia e controle.",
+			"estatisticas": {
+				"velocidade_movimento": 45,
+				"resistencia_magica": 25,
+				"tenacidade": 25
+			},
+			"eficiencia_alvo": 1.0,
+			"classes": [
+				"todas"
+			],
+			"preco": 1300
+		},
+		{
+			"id": "botas_do_cacador",
+			"nome": "Botas do Caçador",
+			"ideia": "Couro silencioso para emboscadas.",
+			"estatisticas": {
+				"velocidade_movimento": 45,
+				"letalidade": 12
+			},
+			"eficiencia_alvo": 1.0,
+			"classes": [
+				"assassino",
+				"lutador"
+			],
+			"preco": 900
+		},
+		{
+			"id": "botas_arcanas",
+			"nome": "Botas Arcanas",
+			"ideia": "Runas costuradas na sola que abrem brechas na defesa mágica.",
+			"estatisticas": {
+				"velocidade_movimento": 45,
+				"penetracao_magica": 12
+			},
+			"eficiencia_alvo": 1.0,
+			"classes": [
+				"mago",
+				"suporte"
+			],
+			"preco": 1025
+		},
+		{
+			"id": "botas_da_furia",
+			"nome": "Botas da Fúria",
+			"ideia": "Para quem não para de atacar.",
+			"estatisticas": {
+				"velocidade_movimento": 45,
+				"velocidade_ataque": 35
+			},
+			"eficiencia_alvo": 1.0,
+			"classes": [
+				"atirador",
+				"lutador"
+			],
+			"preco": 1425
+		}
+	],
+	"itens": [
+		{
+			"id": "presa_da_serpente",
+			"nome": "Presa da Serpente",
+			"categoria": "fisico",
+			"ideia": "Adaga com veneno de serpente das dunas. Para terminar o serviço.",
+			"estatisticas": {
+				"dano_fisico": 50,
+				"letalidade": 20,
+				"aceleracao": 15
+			},
+			"eficiencia_alvo": 0.9,
+			"passiva": {
+				"nome": "Emboscada",
+				"tipo": "dano_extra_vida_baixa",
+				"limite": 0.4,
+				"bonus": 0.08,
+				"grupo": "execucao",
+				"descricao": "+8% de dano contra alvos com menos de 40% de vida."
+			},
+			"classes": [
+				"assassino",
+				"lutador"
+			],
+			"preco": 3050
+		},
+		{
+			"id": "lamina_do_eclipse",
+			"nome": "Lâmina do Eclipse",
+			"categoria": "fisico",
+			"ideia": "Forjada durante um eclipse. O primeiro golpe vem da escuridão.",
+			"estatisticas": {
+				"dano_fisico": 50,
+				"letalidade": 20,
+				"aceleracao": 10
+			},
+			"eficiencia_alvo": 0.88,
+			"passiva": {
+				"nome": "Golpe Sombrio",
+				"tipo": "primeiro_golpe",
+				"dano": 90,
+				"proporcao_df_bonus": 0.3,
+				"dano_tipo": "fisico",
+				"grupo": "primeiro_golpe",
+				"descricao": "O primeiro ataque após usar uma habilidade causa 90 (+30% do dano físico bônus) de dano físico extra. Uma vez por combate."
+			},
+			"classes": [
+				"assassino"
+			],
+			"preco": 2975
+		},
+		{
+			"id": "manto_da_noite_eterna",
+			"nome": "Manto da Noite Eterna",
+			"categoria": "fisico",
+			"ideia": "Capa de sombra viva. Dá ao assassino fôlego para sair vivo.",
+			"estatisticas": {
+				"dano_fisico": 40,
+				"letalidade": 16,
+				"vida": 300
+			},
+			"eficiencia_alvo": 0.92,
+			"passiva": {
+				"nome": "Véu",
+				"tipo": "escudo_vida_baixa",
+				"limite": 0.3,
+				"escudo": 180,
+				"proporcao_vida_bonus": 0.1,
+				"grupo": "escudo_vida_baixa",
+				"descricao": "Ao ficar com menos de 30% de vida, ganha um escudo de 180 (+10% da vida bônus). Uma vez por combate."
+			},
+			"classes": [
+				"assassino",
+				"lutador"
+			],
+			"preco": 2925
+		},
+		{
+			"id": "lanca_quebra_escudos",
+			"nome": "Lança Quebra-Escudos",
+			"categoria": "fisico",
+			"ideia": "Ponta de cristal capaz de rachar armaduras de titã.",
+			"estatisticas": {
+				"dano_fisico": 40,
+				"penetracao_armadura_pct": 20,
+				"vida": 200
+			},
+			"eficiencia_alvo": 0.95,
+			"classes": [
+				"lutador",
+				"assassino",
+				"atirador"
+			],
+			"preco": 2675
+		},
+		{
+			"id": "arco_do_juizo_final",
+			"nome": "Arco do Juízo Final",
+			"categoria": "fisico",
+			"ideia": "Dizem que cada flecha carrega a sentença de um gigante.",
+			"estatisticas": {
+				"dano_fisico": 35,
+				"critico": 25,
+				"penetracao_armadura_pct": 30
+			},
+			"eficiencia_alvo": 0.88,
+			"classes": [
+				"atirador"
+			],
+			"preco": 3550
+		},
+		{
+			"id": "lamina_cristalina",
+			"nome": "Lâmina Cristalina",
+			"categoria": "fisico",
+			"ideia": "Lapidada de um fragmento do Cristal. O fio mais perfeito já visto.",
+			"estatisticas": {
+				"dano_fisico": 60,
+				"critico": 25
+			},
+			"eficiencia_alvo": 0.9,
+			"passiva": {
+				"nome": "Fio Perfeito",
+				"tipo": "critico_aprimorado",
+				"dano_critico": 1.95,
+				"grupo": "critico_aprimorado",
+				"descricao": "Acertos críticos causam 195% de dano em vez de 175%."
+			},
+			"classes": [
+				"atirador"
+			],
+			"preco": 3450
+		},
+		{
+			"id": "asas_do_vento_veloz",
+			"nome": "Asas do Vento Veloz",
+			"categoria": "fisico",
+			"ideia": "Penas de um pássaro gigante da selva. Leveza e cadência.",
+			"estatisticas": {
+				"velocidade_ataque": 40,
+				"critico": 25,
+				"velocidade_movimento": 20
+			},
+			"eficiencia_alvo": 0.92,
+			"passiva": {
+				"nome": "Rajada",
+				"tipo": "a_cada_3_ataques",
+				"dano": 60,
+				"proporcao_df_bonus": 0.25,
+				"dano_tipo": "magico",
+				"grupo": "rajada",
+				"descricao": "A cada 3 ataques, o próximo causa 60 (+25% do dano físico bônus) de dano mágico extra."
+			},
+			"classes": [
+				"atirador"
+			],
+			"preco": 2425
+		},
+		{
+			"id": "sanguessuga_rubra",
+			"nome": "Sanguessuga Rubra",
+			"categoria": "fisico",
+			"ideia": "Espada que bebe o sangue de quem fere.",
+			"estatisticas": {
+				"dano_fisico": 60,
+				"roubo_vida": 15
+			},
+			"eficiencia_alvo": 0.9,
+			"passiva": {
+				"nome": "Escudo de Sangue",
+				"tipo": "escudo_excesso_cura",
+				"maximo": 250,
+				"grupo": "escudo_excesso_cura",
+				"descricao": "A cura acima da vida máxima vira escudo, até 250."
+			},
+			"classes": [
+				"atirador",
+				"lutador",
+				"assassino"
+			],
+			"preco": 3000
+		},
+		{
+			"id": "cetro_lamina_do_crepusculo",
+			"nome": "Cetro-Lâmina do Crepúsculo",
+			"categoria": "hibrido",
+			"ideia": "Metade espada, metade cajado. Para quem ataca com aço e magia.",
+			"estatisticas": {
+				"dano_fisico": 30,
+				"poder_magico": 50,
+				"velocidade_ataque": 25
+			},
+			"eficiencia_alvo": 0.9,
+			"passiva": {
+				"nome": "Duplo Golpe",
+				"tipo": "ao_acertar",
+				"dano": 15,
+				"proporcao_pm": 0.15,
+				"dano_tipo": "magico",
+				"grupo": "ao_acertar",
+				"descricao": "Ataques causam 15 (+15% do poder mágico) de dano mágico extra."
+			},
+			"classes": [
+				"atirador",
+				"lutador"
+			],
+			"preco": 3075
+		},
+		{
+			"id": "machado_do_gigante",
+			"nome": "Machado do Gigante",
+			"categoria": "fisico",
+			"ideia": "Machado de um gigante das montanhas. Quanto mais ferido, mais perigoso.",
+			"estatisticas": {
+				"dano_fisico": 45,
+				"vida": 350,
+				"aceleracao": 15
+			},
+			"eficiencia_alvo": 0.88,
+			"passiva": {
+				"nome": "Fúria",
+				"tipo": "furia_vida_perdida",
+				"por_10pct": 0.02,
+				"maximo": 0.12,
+				"grupo": "furia",
+				"descricao": "+2% de dano para cada 10% de vida perdida (máximo +12%)."
+			},
+			"classes": [
+				"lutador",
+				"assassino"
+			],
+			"preco": 3300
+		},
+		{
+			"id": "lamina_do_guerreiro",
+			"nome": "Lâmina Sanguinária do Guerreiro",
+			"categoria": "fisico",
+			"ideia": "Arma de quem luta na linha de frente e não cai fácil.",
+			"estatisticas": {
+				"dano_fisico": 40,
+				"vida": 300,
+				"roubo_vida": 8
+			},
+			"eficiencia_alvo": 0.9,
+			"passiva": {
+				"nome": "Fôlego",
+				"tipo": "escudo_vida_baixa",
+				"limite": 0.3,
+				"escudo": 200,
+				"proporcao_vida_bonus": 0.15,
+				"grupo": "escudo_vida_baixa",
+				"descricao": "Ao ficar com menos de 30% de vida, ganha um escudo de 200 (+15% da vida bônus). Uma vez por combate."
+			},
+			"classes": [
+				"lutador"
+			],
+			"preco": 2800
+		},
+		{
+			"id": "martelo_das_montanhas",
+			"nome": "Martelo das Montanhas",
+			"categoria": "fisico",
+			"ideia": "Cada golpe é um tremor de terra. Feito para derrubar tanques.",
+			"estatisticas": {
+				"dano_fisico": 30,
+				"vida": 400,
+				"armadura": 25
+			},
+			"eficiencia_alvo": 0.9,
+			"passiva": {
+				"nome": "Tremor",
+				"tipo": "dano_pct_vida_maxima",
+				"pct": 0.04,
+				"dano_tipo": "fisico",
+				"grupo": "pct_vida_maxima",
+				"descricao": "Habilidades causam dano físico extra igual a 4% da vida máxima do alvo."
+			},
+			"classes": [
+				"lutador",
+				"tanque"
+			],
+			"preco": 2900
+		},
+		{
+			"id": "grimorio_cristalino",
+			"nome": "Grimório Cristalino",
+			"categoria": "magico",
+			"ideia": "Livro escrito com tinta de cristal. Amplifica todo o poder de quem lê.",
+			"estatisticas": {
+				"poder_magico": 90,
+				"aceleracao": 10
+			},
+			"eficiencia_alvo": 0.88,
+			"passiva": {
+				"nome": "Sabedoria",
+				"tipo": "multiplicador_pm",
+				"pct": 0.12,
+				"grupo": "multiplicador_pm",
+				"descricao": "Aumenta o poder mágico total em 12%."
+			},
+			"classes": [
+				"mago"
+			],
+			"preco": 2525
+		},
+		{
+			"id": "cajado_do_abismo",
+			"nome": "Cajado do Abismo",
+			"categoria": "magico",
+			"ideia": "Cajado que suga a magia ao redor. Nenhuma barreira resiste.",
+			"estatisticas": {
+				"poder_magico": 60,
+				"penetracao_magica_pct": 25
+			},
+			"eficiencia_alvo": 0.88,
+			"classes": [
+				"mago"
+			],
+			"preco": 2325
+		},
+		{
+			"id": "foice_da_lua_negra",
+			"nome": "Foice da Lua Negra",
+			"categoria": "magico",
+			"ideia": "Colhe a vida e a resistência dos inimigos sob a lua.",
+			"estatisticas": {
+				"poder_magico": 55,
+				"penetracao_magica_pct": 20,
+				"vida": 250
+			},
+			"eficiencia_alvo": 0.89,
+			"classes": [
+				"mago"
+			],
+			"preco": 2775
+		},
+		{
+			"id": "orbe_da_tempestade",
+			"nome": "Orbe da Tempestade",
+			"categoria": "magico",
+			"ideia": "Um raio preso numa esfera. A primeira magia vem como um trovão.",
+			"estatisticas": {
+				"poder_magico": 65,
+				"penetracao_magica": 15,
+				"aceleracao": 10
+			},
+			"eficiencia_alvo": 0.88,
+			"passiva": {
+				"nome": "Raio",
+				"tipo": "primeiro_golpe",
+				"dano": 70,
+				"proporcao_pm": 0.1,
+				"dano_tipo": "magico",
+				"grupo": "primeiro_golpe",
+				"descricao": "O primeiro dano de habilidade em um combate causa 70 (+10% do poder mágico) de dano mágico extra."
+			},
+			"classes": [
+				"mago"
+			],
+			"preco": 2600
+		},
+		{
+			"id": "coroa_da_hydra",
+			"nome": "Coroa da Hydra",
+			"categoria": "magico",
+			"ideia": "Coroa feita de escamas da Hydra. Quem a usa demora a cair.",
+			"estatisticas": {
+				"poder_magico": 60,
+				"vida": 300
+			},
+			"eficiencia_alvo": 0.9,
+			"passiva": {
+				"nome": "Proteção da Hydra",
+				"tipo": "escudo_vida_baixa",
+				"limite": 0.35,
+				"escudo": 120,
+				"proporcao_vida_bonus": 0.15,
+				"grupo": "escudo_vida_baixa",
+				"descricao": "Ao ficar com menos de 35% de vida, ganha um escudo de 120 (+15% da vida bônus). Uma vez por combate."
+			},
+			"classes": [
+				"mago",
+				"suporte"
+			],
+			"preco": 2350
+		},
+		{
+			"id": "veu_celestial",
+			"nome": "Véu Celestial",
+			"categoria": "magico",
+			"ideia": "Tecido das estrelas. Bloqueia a primeira magia que vier.",
+			"estatisticas": {
+				"poder_magico": 55,
+				"resistencia_magica": 45
+			},
+			"eficiencia_alvo": 0.92,
+			"passiva": {
+				"nome": "Barreira",
+				"tipo": "escudo_magico",
+				"valor": 300,
+				"grupo": "escudo_magico",
+				"descricao": "Começa cada combate com um escudo de 300 que só absorve dano mágico."
+			},
+			"classes": [
+				"mago",
+				"suporte"
+			],
+			"preco": 2175
+		},
+		{
+			"id": "tocha_do_tormento",
+			"nome": "Tocha do Tormento",
+			"categoria": "magico",
+			"ideia": "Chama que não se apaga. Queima tanques e corta a cura dos inimigos.",
+			"estatisticas": {
+				"poder_magico": 70,
+				"vida": 250
+			},
+			"eficiencia_alvo": 0.85,
+			"passiva": {
+				"nome": "Queimadura",
+				"tipo": "queimadura",
+				"pct_por_segundo": 0.006,
+				"duracao": 3,
+				"anti_cura": true,
+				"grupo": "queimadura",
+				"descricao": "Habilidades queimam o alvo por 3 s, causando 0,6% da vida máxima dele por segundo como dano mágico, e reduzem as curas dele em 40%."
+			},
+			"classes": [
+				"mago",
+				"suporte"
+			],
+			"preco": 2575
+		},
+		{
+			"id": "egide_de_aco",
+			"nome": "Égide de Aço",
+			"categoria": "defesa",
+			"ideia": "Escudo coberto de espinhos. Quem bate, se machuca.",
+			"estatisticas": {
+				"armadura": 60,
+				"vida": 300
+			},
+			"eficiencia_alvo": 0.9,
+			"passiva": {
+				"nome": "Espinhos",
+				"tipo": "espinhos",
+				"reflexo": 0.12,
+				"anti_cura": true,
+				"grupo": "espinhos",
+				"descricao": "Devolve 12% do dano de ataques recebidos como dano mágico e reduz as curas do atacante em 40%."
+			},
+			"classes": [
+				"tanque",
+				"lutador",
+				"suporte"
+			],
+			"preco": 2225
+		},
+		{
+			"id": "couraca_de_pedra",
+			"nome": "Couraça do Gigante de Pedra",
+			"categoria": "defesa",
+			"ideia": "Placas de rocha viva. Críticos simplesmente escorregam.",
+			"estatisticas": {
+				"vida": 400,
+				"armadura": 50
+			},
+			"eficiencia_alvo": 0.84,
+			"passiva": {
+				"nome": "Pele de Pedra",
+				"tipo": "reducao_critico",
+				"pct": 0.2,
+				"grupo": "reducao_critico",
+				"descricao": "Recebe 20% menos dano de acertos críticos."
+			},
+			"classes": [
+				"tanque",
+				"lutador"
+			],
+			"preco": 2450
+		},
+		{
+			"id": "manto_dos_ventos_gelidos",
+			"nome": "Manto dos Ventos Gélidos",
+			"categoria": "defesa",
+			"ideia": "O frio do norte envolve quem o veste e entorpece os atacantes.",
+			"estatisticas": {
+				"armadura": 40,
+				"resistencia_magica": 40
+			},
+			"eficiencia_alvo": 0.86,
+			"passiva": {
+				"nome": "Frio",
+				"tipo": "reducao_va_inimigos",
+				"pct": 0.08,
+				"grupo": "frio",
+				"descricao": "Inimigos que atacam o portador têm a velocidade de ataque reduzida em 8%."
+			},
+			"classes": [
+				"tanque",
+				"lutador",
+				"suporte"
+			],
+			"preco": 1775
+		},
+		{
+			"id": "escudo_do_guardiao",
+			"nome": "Escudo do Guardião",
+			"categoria": "defesa",
+			"ideia": "Réplica do escudo da estátua que guarda o Cristal.",
+			"estatisticas": {
+				"vida": 400,
+				"resistencia_magica": 50
+			},
+			"eficiencia_alvo": 0.9,
+			"passiva": {
+				"nome": "Bastião",
+				"tipo": "escudo_magico",
+				"valor": 220,
+				"grupo": "escudo_magico",
+				"descricao": "Começa cada combate com um escudo de 220 que só absorve dano mágico."
+			},
+			"classes": [
+				"tanque",
+				"lutador",
+				"suporte",
+				"mago",
+				"assassino",
+				"atirador"
+			],
+			"preco": 2175
+		},
+		{
+			"id": "coracao_do_tita",
+			"nome": "Coração do Titã",
+			"categoria": "defesa",
+			"ideia": "O coração de pedra de um titã ainda bate. Quanto maior o portador, mais forte o golpe.",
+			"estatisticas": {
+				"vida": 700,
+				"aceleracao": 10
+			},
+			"eficiencia_alvo": 0.88,
+			"passiva": {
+				"nome": "Colosso",
+				"tipo": "colosso",
+				"vida_pct": 0.025,
+				"dano_ataque_pct_vida": 0.006,
+				"grupo": "colosso",
+				"descricao": "Aumenta a vida máxima em 2,5%. Ataques causam dano físico extra igual a 0,6% da vida máxima do portador."
+			},
+			"classes": [
+				"tanque",
+				"lutador"
+			],
+			"preco": 2425
+		},
+		{
+			"id": "armadura_viva_de_cristal",
+			"nome": "Armadura Viva de Cristal",
+			"categoria": "defesa",
+			"ideia": "Cristal que cresce sobre a pele e se regenera em combate.",
+			"estatisticas": {
+				"vida": 350,
+				"armadura": 30,
+				"resistencia_magica": 30
+			},
+			"eficiencia_alvo": 0.9,
+			"passiva": {
+				"nome": "Regeneração Cristalina",
+				"tipo": "regeneracao_combate",
+				"pct_vida": 0.025,
+				"a_cada": 5,
+				"grupo": "regeneracao",
+				"descricao": "Em combate, recupera 2,5% da vida máxima a cada 5 segundos."
+			},
+			"classes": [
+				"tanque",
+				"lutador"
+			],
+			"preco": 2300
+		},
+		{
+			"id": "lanterna_do_vigia",
+			"nome": "Lanterna do Vigia",
+			"categoria": "suporte",
+			"ideia": "Luz que guia e fortalece os aliados.",
+			"estatisticas": {
+				"poder_magico": 45,
+				"vida": 250,
+				"aceleracao": 15
+			},
+			"eficiencia_alvo": 0.85,
+			"passiva": {
+				"nome": "Bênção",
+				"tipo": "bencao",
+				"va_aliado": 0.1,
+				"grupo": "bencao",
+				"descricao": "Curas e escudos do portador em aliados também dão 10% de velocidade de ataque ao aliado por 4 s."
+			},
+			"classes": [
+				"suporte"
+			],
+			"preco": 2400
+		},
+		{
+			"id": "medalhao_dos_eternos",
+			"nome": "Medalhão dos Eternos",
+			"categoria": "suporte",
+			"ideia": "Relíquia dos primeiros defensores do Cristal. Protege todo o time de uma vez.",
+			"estatisticas": {
+				"armadura": 30,
+				"resistencia_magica": 30,
+				"aceleracao": 15
+			},
+			"eficiencia_alvo": 0.85,
+			"passiva": {
+				"nome": "Égide Coletiva",
+				"tipo": "escudo_aliados",
+				"escudo": 140,
+				"proporcao_vida_bonus": 0.08,
+				"alvos": 5,
+				"grupo": "escudo_aliados",
+				"descricao": "No início de cada luta, dá um escudo de 140 (+8% da vida bônus do portador) a todo o time."
+			},
+			"classes": [
+				"suporte",
+				"tanque"
+			],
+			"preco": 1800
+		}
+	]
+}

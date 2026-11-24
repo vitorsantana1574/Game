@@ -344,6 +344,108 @@ Gank é quando o caçador sai da selva para ajudar uma rota a abater o inimigo.
 - Ajuda o time que está atrás e conversa com o atributo Mental.
 - Valores: **[A DEFINIR]**
 
+## 7.2 Itens
+
+Catálogo completo em `data/itens/itens.json`; modelo de combate em `data/config/combate.json`. Testado no laboratório de itens (`tools/prototipos/laboratorio_itens.py`); relatório em `tools/relatorios/laboratorio_itens.md`. Esta seção é gerada por `tools/documentacao/gerar_itens_gdd.py`.
+
+### Regras
+
+- **Até 5 itens por campeão: 1 bota + 4 itens.** A compra segue a ordem recomendada do campeão; o Macro adapta a ordem e o Micro faz compras arriscadas renderem mais (seção 7.0).
+- **Dano recebido** = dano × 100 / (100 + resistência efetiva). A resistência efetiva nunca fica abaixo de 0.
+- **Letalidade e penetração mágica:**
+  - **Valor fixo** tira um número da armadura/resistência: 30 de letalidade contra 300 de armadura = o alvo fica com 270.
+  - **Porcentagem** tira uma parte: 30% contra 300 = 90 a menos, o alvo fica com 210.
+  - **Com os dois, primeiro a porcentagem e depois o fixo:** 300 × 0,7 = 210; 210 − 30 = 180.
+  - **Ponto de virada** = valor fixo ÷ porcentagem. Abaixo dele, o fixo rende mais (alvos frágeis); acima, a porcentagem (lutadores e tanques). Calibrado para: 20 de letalidade × 20% (Lança) = **100 de armadura**; 15 de penetração mágica × 25% (Cajado) = **60 de resistência mágica**. No fim de jogo, frágeis têm ~85 de armadura e ~48 de RM; lutadores ~170 de armadura; tanques ~220 de armadura e ~140 de RM.
+  - **Só 2 itens têm letalidade %** (Lança Quebra-Escudos 20%, Arco do Juízo Final 30%) e **só 2 têm penetração mágica %** (Cajado do Abismo 25%, Foice da Lua Negra 20%).
+  - **Porcentagens não se somam:** com dois itens de %, vale a maior. Valores fixos se somam.
+- **Passivas do mesmo grupo não se acumulam** (ex.: dois escudos de vida baixa): vale a primeira.
+- **Anticura:** reduz as curas do alvo em 40% (Égide de Aço contra quem bate; Tocha do Tormento contra quem é queimado).
+- **Crítico** causa 175% de dano (195% com a Lâmina Cristalina).
+
+### Item inicial do suporte
+
+| Item | Preço | Atributos | Passiva |
+|---|---|---|---|
+| **Medalhão do Tributo** — Moeda antiga que os guardiões davam aos escudeiros. O suporte ganha ouro ajudando o atirador a farmar. | 400 | 50 Vida | **Tributo:** Recebe 35% do ouro dos minions abatidos pelo atirador por perto e 60 de ouro por participação em abate. |
+
+### Botas (escolha 1)
+
+| Bota | Preço | Atributos | Passiva | Classes |
+|---|---|---|---|---|
+| **Botas do Andarilho** — Botas leves de mensageiro. Para quem precisa chegar primeiro. | 725 | 60 Vel. movimento | — | Todas |
+| **Grevas de Ferro** — Placas de ferro forjadas nas minas do Golem. Contra times de ataque físico. | 1050 | 45 Vel. movimento, 20 Armadura | **Aparar:** Reduz em 10% o dano de ataques básicos recebidos. | Tanque, Lutador, Suporte, Assassino |
+| **Sandálias da Sabedoria** — Tecidas por monges do vale das névoas. Contra magia e controle. | 1300 | 45 Vel. movimento, 25 RM, 25% Tenacidade | — | Todas |
+| **Botas do Caçador** — Couro silencioso para emboscadas. | 900 | 45 Vel. movimento, 12 Letalidade | — | Assassino, Lutador |
+| **Botas Arcanas** — Runas costuradas na sola que abrem brechas na defesa mágica. | 1025 | 45 Vel. movimento, 12 Pen. mágica | — | Mago, Suporte |
+| **Botas da Fúria** — Para quem não para de atacar. | 1425 | 45 Vel. movimento, 35% Vel. ataque | — | Atirador, Lutador |
+
+### Dano físico
+
+| Item | Preço | Atributos | Passiva | Classes |
+|---|---|---|---|---|
+| **Presa da Serpente** — Adaga com veneno de serpente das dunas. Para terminar o serviço. | 3050 | 50 DF, 20 Letalidade, 15 Aceleração | **Emboscada:** +8% de dano contra alvos com menos de 40% de vida. | Assassino, Lutador |
+| **Lâmina do Eclipse** — Forjada durante um eclipse. O primeiro golpe vem da escuridão. | 2975 | 50 DF, 20 Letalidade, 10 Aceleração | **Golpe Sombrio:** O primeiro ataque após usar uma habilidade causa 90 (+30% do dano físico bônus) de dano físico extra. Uma vez por combate. | Assassino |
+| **Manto da Noite Eterna** — Capa de sombra viva. Dá ao assassino fôlego para sair vivo. | 2925 | 40 DF, 16 Letalidade, 300 Vida | **Véu:** Ao ficar com menos de 30% de vida, ganha um escudo de 180 (+10% da vida bônus). Uma vez por combate. | Assassino, Lutador |
+| **Lança Quebra-Escudos** — Ponta de cristal capaz de rachar armaduras de titã. | 2675 | 40 DF, 20% Letalidade, 200 Vida | — | Lutador, Assassino, Atirador |
+| **Arco do Juízo Final** — Dizem que cada flecha carrega a sentença de um gigante. | 3550 | 35 DF, 25% Crítico, 30% Letalidade | — | Atirador |
+| **Lâmina Cristalina** — Lapidada de um fragmento do Cristal. O fio mais perfeito já visto. | 3450 | 60 DF, 25% Crítico | **Fio Perfeito:** Acertos críticos causam 195% de dano em vez de 175%. | Atirador |
+| **Asas do Vento Veloz** — Penas de um pássaro gigante da selva. Leveza e cadência. | 2425 | 40% Vel. ataque, 25% Crítico, 20 Vel. movimento | **Rajada:** A cada 3 ataques, o próximo causa 60 (+25% do dano físico bônus) de dano mágico extra. | Atirador |
+| **Sanguessuga Rubra** — Espada que bebe o sangue de quem fere. | 3000 | 60 DF, 15% Roubo de vida | **Escudo de Sangue:** A cura acima da vida máxima vira escudo, até 250. | Atirador, Lutador, Assassino |
+| **Machado do Gigante** — Machado de um gigante das montanhas. Quanto mais ferido, mais perigoso. | 3300 | 45 DF, 350 Vida, 15 Aceleração | **Fúria:** +2% de dano para cada 10% de vida perdida (máximo +12%). | Lutador, Assassino |
+| **Lâmina Sanguinária do Guerreiro** — Arma de quem luta na linha de frente e não cai fácil. | 2800 | 40 DF, 300 Vida, 8% Roubo de vida | **Fôlego:** Ao ficar com menos de 30% de vida, ganha um escudo de 200 (+15% da vida bônus). Uma vez por combate. | Lutador |
+| **Martelo das Montanhas** — Cada golpe é um tremor de terra. Feito para derrubar tanques. | 2900 | 30 DF, 400 Vida, 25 Armadura | **Tremor:** Habilidades causam dano físico extra igual a 4% da vida máxima do alvo. | Lutador, Tanque |
+
+### Híbrido (físico + mágico)
+
+| Item | Preço | Atributos | Passiva | Classes |
+|---|---|---|---|---|
+| **Cetro-Lâmina do Crepúsculo** — Metade espada, metade cajado. Para quem ataca com aço e magia. | 3075 | 30 DF, 50 PM, 25% Vel. ataque | **Duplo Golpe:** Ataques causam 15 (+15% do poder mágico) de dano mágico extra. | Atirador, Lutador |
+
+### Dano mágico
+
+| Item | Preço | Atributos | Passiva | Classes |
+|---|---|---|---|---|
+| **Grimório Cristalino** — Livro escrito com tinta de cristal. Amplifica todo o poder de quem lê. | 2525 | 90 PM, 10 Aceleração | **Sabedoria:** Aumenta o poder mágico total em 12%. | Mago |
+| **Cajado do Abismo** — Cajado que suga a magia ao redor. Nenhuma barreira resiste. | 2325 | 60 PM, 25% Pen. mágica | — | Mago |
+| **Foice da Lua Negra** — Colhe a vida e a resistência dos inimigos sob a lua. | 2775 | 55 PM, 20% Pen. mágica, 250 Vida | — | Mago |
+| **Orbe da Tempestade** — Um raio preso numa esfera. A primeira magia vem como um trovão. | 2600 | 65 PM, 15 Pen. mágica, 10 Aceleração | **Raio:** O primeiro dano de habilidade em um combate causa 70 (+10% do poder mágico) de dano mágico extra. | Mago |
+| **Coroa da Hydra** — Coroa feita de escamas da Hydra. Quem a usa demora a cair. | 2350 | 60 PM, 300 Vida | **Proteção da Hydra:** Ao ficar com menos de 35% de vida, ganha um escudo de 120 (+15% da vida bônus). Uma vez por combate. | Mago, Suporte |
+| **Véu Celestial** — Tecido das estrelas. Bloqueia a primeira magia que vier. | 2175 | 55 PM, 45 RM | **Barreira:** Começa cada combate com um escudo de 300 que só absorve dano mágico. | Mago, Suporte |
+| **Tocha do Tormento** — Chama que não se apaga. Queima tanques e corta a cura dos inimigos. | 2575 | 70 PM, 250 Vida | **Queimadura:** Habilidades queimam o alvo por 3 s, causando 0,6% da vida máxima dele por segundo como dano mágico, e reduzem as curas dele em 40%. | Mago, Suporte |
+
+### Defesa
+
+| Item | Preço | Atributos | Passiva | Classes |
+|---|---|---|---|---|
+| **Égide de Aço** — Escudo coberto de espinhos. Quem bate, se machuca. | 2225 | 60 Armadura, 300 Vida | **Espinhos:** Devolve 12% do dano de ataques recebidos como dano mágico e reduz as curas do atacante em 40%. | Tanque, Lutador, Suporte |
+| **Couraça do Gigante de Pedra** — Placas de rocha viva. Críticos simplesmente escorregam. | 2450 | 400 Vida, 50 Armadura | **Pele de Pedra:** Recebe 20% menos dano de acertos críticos. | Tanque, Lutador |
+| **Manto dos Ventos Gélidos** — O frio do norte envolve quem o veste e entorpece os atacantes. | 1775 | 40 Armadura, 40 RM | **Frio:** Inimigos que atacam o portador têm a velocidade de ataque reduzida em 8%. | Tanque, Lutador, Suporte |
+| **Escudo do Guardião** — Réplica do escudo da estátua que guarda o Cristal. | 2175 | 400 Vida, 50 RM | **Bastião:** Começa cada combate com um escudo de 220 que só absorve dano mágico. | Tanque, Lutador, Suporte, Mago, Assassino, Atirador |
+| **Coração do Titã** — O coração de pedra de um titã ainda bate. Quanto maior o portador, mais forte o golpe. | 2425 | 700 Vida, 10 Aceleração | **Colosso:** Aumenta a vida máxima em 2,5%. Ataques causam dano físico extra igual a 0,6% da vida máxima do portador. | Tanque, Lutador |
+| **Armadura Viva de Cristal** — Cristal que cresce sobre a pele e se regenera em combate. | 2300 | 350 Vida, 30 Armadura, 30 RM | **Regeneração Cristalina:** Em combate, recupera 2,5% da vida máxima a cada 5 segundos. | Tanque, Lutador |
+
+### Suporte
+
+| Item | Preço | Atributos | Passiva | Classes |
+|---|---|---|---|---|
+| **Lanterna do Vigia** — Luz que guia e fortalece os aliados. | 2400 | 45 PM, 250 Vida, 15 Aceleração | **Bênção:** Curas e escudos do portador em aliados também dão 10% de velocidade de ataque ao aliado por 4 s. | Suporte |
+| **Medalhão dos Eternos** — Relíquia dos primeiros defensores do Cristal. Protege todo o time de uma vez. | 1800 | 30 Armadura, 30 RM, 15 Aceleração | **Égide Coletiva:** No início de cada luta, dá um escudo de 140 (+8% da vida bônus do portador) a todo o time. | Suporte, Tanque |
+
+### Resultados dos testes de equilíbrio
+
+- **Assassino com bota + 3 itens de dano + 1 item de vida** (Botas do Caçador, Presa da Serpente, Lâmina do Eclipse, Lança Quebra-Escudos, Escudo do Guardião): em 3 s tira ~**79%** da vida de um atirador, ~**68%** de um mago com item defensivo e só ~**18%** de um tanque.
+- **Atirador completo** derruba um mago em ~**3,3 s** e um tanque completo em ~**12 s**.
+- **Tanque** aguenta ~**3,2×** mais que um frágil contra o mesmo time.
+- **Lutador × atirador** no duelo corpo a corpo: equilibrado.
+- **Interações:** anticura corta ~30% da cura do roubo de vida; a Couraça segura atiradores de crítico; Escudo do Guardião + Sandálias reduzem a explosão do mago de ~56% para ~33% da vida; a letalidade % não rende contra frágeis e dá +12% de dano contra tanques.
+- **Nenhuma passiva carrega o item sozinha** (peso máximo ~44% do valor).
+- **Eficiência em ouro** de todos os itens entre 84% e 101% (o resto do valor está na passiva).
+
+**Pontos a revisar quando os campeões existirem:**
+- A **Orbe da Tempestade** apareceu em todas as melhores builds do mago (item central). Com habilidades diferentes por campeão, outras opções devem competir.
+- Para o **suporte**, itens de vida e defesa rendem mais que os de poder mágico, porque as curas e escudos em aliados ainda não estão no modelo (dependem dos kits dos campeões).
+
 ## 8. Draft (pick & ban)
 
 Fase de banimentos e escolhas antes de cada partida.
@@ -649,7 +751,7 @@ Detalhes: **[A DEFINIR]**
 - Técnico: custos e tempos dos anúncios, efeitos do cansaço e duração das férias
 - Reputação: outros efeitos e exibição
 - Como o conhecimento do meta é exibido e evolui
-- Nomes dos campeões e dos itens
+- Nomes e habilidades dos campeões
 - Mundial: vagas por região, séries do play-in e da fase suíça, premiação
 - Contratos: ganho de experiência, regras de rescisão
 - Ego e lealdade: valores e velocidade de mudança (balanceamento)

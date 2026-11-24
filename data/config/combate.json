@@ -1,0 +1,48 @@
+{
+	"_comentario": "Modelo de combate de Crystal Legends: atributos, valor de cada atributo em ouro, base das classes e regras de penetração. Valores provisórios, testados em tools/prototipos/laboratorio_itens.py.",
+
+	"atributos": {
+		"_comentario": "Valor de referência de 1 ponto de cada atributo em ouro (usado para medir a eficiência dos itens).",
+		"dano_fisico":            { "nome": "Dano físico", "ouro_por_ponto": 35 },
+		"poder_magico":           { "nome": "Poder mágico", "ouro_por_ponto": 21.75 },
+		"vida":                   { "nome": "Vida", "ouro_por_ponto": 2.67 },
+		"armadura":               { "nome": "Armadura", "ouro_por_ponto": 20 },
+		"resistencia_magica":     { "nome": "Resistência mágica", "ouro_por_ponto": 18 },
+		"velocidade_ataque":      { "nome": "Velocidade de ataque (%)", "ouro_por_ponto": 25 },
+		"critico":                { "nome": "Chance de crítico (%)", "ouro_por_ponto": 40 },
+		"aceleracao":             { "nome": "Aceleração de habilidade", "ouro_por_ponto": 26.67 },
+		"roubo_vida":             { "nome": "Roubo de vida (%)", "ouro_por_ponto": 40 },
+		"letalidade":             { "nome": "Letalidade", "ouro_por_ponto": 30 },
+		"penetracao_armadura_pct":{ "nome": "Letalidade (%)", "ouro_por_ponto": 30 },
+		"penetracao_magica":      { "nome": "Penetração mágica", "ouro_por_ponto": 40 },
+		"penetracao_magica_pct":  { "nome": "Penetração mágica (%)", "ouro_por_ponto": 30 },
+		"velocidade_movimento":   { "nome": "Velocidade de movimento", "ouro_por_ponto": 12 },
+		"tenacidade":             { "nome": "Tenacidade (%)", "ouro_por_ponto": 12 }
+	},
+
+	"regras": {
+		"_comentario_dano": "Dano recebido = dano × 100 / (100 + resistência efetiva). Resistência efetiva nunca fica abaixo de 0.",
+		"_comentario_penetracao": "Primeiro aplica a porcentagem e depois o valor fixo. Ex.: 300 de armadura, 30% e 30 de letalidade: 300 × 0,7 = 210; 210 − 30 = 180.",
+		"penetracao_pct_acumula": false,
+		"_comentario_acumula": "Letalidade (%) e penetração mágica (%) de itens diferentes não se somam: vale a maior. Os valores fixos se somam.",
+		"dano_critico": 1.75,
+		"velocidade_ataque_maxima": 2.5,
+		"cura_anti_cura": 0.6
+	},
+
+	"classes": {
+		"_comentario": "Atributos base no nível 1 e ganho por nível (nível máximo 16). Velocidade de ataque cresce 2,5% por nível (atirador: 3,5%). Habilidades: dano do conjunto de habilidades (combo) por ciclo de recarga.",
+		"assassino": { "vida": [600, 100], "armadura": [30, 4.2], "resistencia_magica": [30, 1.3], "dano_fisico": [62, 3.3], "velocidade_ataque": 0.65,
+			"habilidades": { "tipo": "fisico", "base": [150, 30], "proporcao_df_bonus": 1.7, "recarga": 7 } },
+		"mago":      { "vida": [560, 95],  "armadura": [26, 4.0], "resistencia_magica": [30, 1.3], "dano_fisico": [52, 3.0], "velocidade_ataque": 0.63,
+			"habilidades": { "tipo": "magico", "base": [150, 28], "proporcao_pm": 1.1, "recarga": 7 } },
+		"atirador":  { "vida": [560, 95],  "armadura": [26, 4.0], "resistencia_magica": [30, 1.3], "dano_fisico": [60, 4.0], "velocidade_ataque": 0.70, "crescimento_velocidade_ataque": 0.035,
+			"habilidades": { "tipo": "fisico", "base": [40, 10], "proporcao_df_bonus": 0.6, "recarga": 8 } },
+		"lutador":   { "vida": [640, 105], "armadura": [34, 4.5], "resistencia_magica": [32, 1.8], "dano_fisico": [64, 3.5], "velocidade_ataque": 0.65,
+			"habilidades": { "tipo": "fisico", "base": [80, 16], "proporcao_df_bonus": 1.0, "recarga": 6 } },
+		"tanque":    { "vida": [660, 110], "armadura": [38, 5.0], "resistencia_magica": [32, 2.0], "dano_fisico": [60, 3.5], "velocidade_ataque": 0.62,
+			"habilidades": { "tipo": "magico", "base": [60, 12], "proporcao_vida_bonus": 0.04, "recarga": 8 } },
+		"suporte":   { "vida": [580, 95],  "armadura": [30, 4.2], "resistencia_magica": [30, 1.3], "dano_fisico": [50, 3.0], "velocidade_ataque": 0.62,
+			"habilidades": { "tipo": "magico", "base": [60, 12], "proporcao_pm": 0.4, "recarga": 8 } }
+	}
+}

@@ -73,11 +73,12 @@ A partida é **simulada primeiro e exibida depois**. O visual "reproduz" a linha
 │   └── simulation/        Simulação da partida e do draft
 ├── data/                  ── DADOS (Claude) ──
 │   ├── campeoes/          Definição dos campeões
+│   ├── itens/             Itens e botas (data/itens/itens.json)
 │   ├── config/            Dificuldades, balanceamento, constantes
 │   ├── nomes/             Listas para gerar nomes de jogadores, times e regiões
 │   └── narracao/          Modelos de frase da narração
 ├── tests/                 ── TESTES (Claude) ── testes automáticos da lógica
-├── tools/                 ── FERRAMENTAS (Claude) ── simulador de temporadas e balanceamento
+├── tools/                 ── FERRAMENTAS (Claude) ── protótipos de balanceamento (prototipos/), relatórios (relatorios/) e geradores de documentação (documentacao/)
 │
 ├── ui/                    ── INTERFACE (GPT) ──
 │   ├── telas/             Telas: menu, elenco, contratação, agenda, draft, tabela da liga...
