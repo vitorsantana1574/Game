@@ -553,6 +553,21 @@ Definidas pelo Claude para a lógica funcionar; podem ser mudadas pelo dono do p
 - **Mercado:** 40 agentes livres (8 por posição); 25% são trocados todo mês.
 - **Técnico:** um anúncio por vez; candidatos desistem 14 dias depois de chegar; contratado pelo salário que pede (sem negociação nesta versão).
 
+## 8.12 Economia da organização
+
+- **Verba mensal da liga:** cada time recebe uma verba todo mês, que **varia com o desempenho** do time. Valores: **[A DEFINIR — balanceamento]**
+- **Investimento inicial suficiente:** o capital inicial de cada dificuldade precisa permitir montar um time para começar (pelo menos os 5 titulares, mesmo sem reservas no início) e mantê-lo pelos primeiros meses.
+- **Empréstimo bancário:** o gestor pode pegar dinheiro emprestado, com **juros de 5% ao mês** enquanto a dívida existir. Prazos, limite de valor e consequências da inadimplência: **[A DEFINIR]**
+
+## 8.13 Times rivais
+
+- **Cada rival tem sua própria gestão:** contrata, renova, dispensa e administra o dinheiro, como o jogador.
+- **Quanto maior a dificuldade, melhor a administração dos rivais.**
+
+## 8.14 Experiência e idade
+
+- **Veteranos rendem mais**, principalmente em jogos decisivos, **mas sem tornar os jovens inúteis**. A vantagem da experiência deve ser pequena e compensada pelo crescimento e pelo potencial dos jovens. Valores: **[A DEFINIR — balanceamento]**
+
 ## 9. Camada de negócio (Fase 2)
 
 Entra depois que o núcleo estiver divertido. Feita em menus e painéis, não em 3D.
@@ -595,5 +610,9 @@ Detalhes: **[A DEFINIR]**
 - Nomes dos campeões e dos itens
 - Mundial: vagas por região, séries do play-in e da fase suíça, premiação
 - Contratos: ganho de experiência, regras de rescisão
+- Economia: verba da liga por desempenho, empréstimo (prazos, limite, inadimplência)
+- Calendário do ano e momento do acesso e rebaixamento
+- Ouro do suporte; reaparecimento dos monstros épicos; adaptação da ordem de itens
+- Velocidade de exibição da partida
 - Ego e lealdade: valores e velocidade de mudança (balanceamento)
 - Treino: duração, custos e ganhos de cada modalidade
