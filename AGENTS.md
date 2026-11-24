@@ -6,7 +6,7 @@ Dois assistentes trabalham aqui, cada um na sua área:
 | Assistente | Área | Pastas onde escreve |
 |---|---|---|
 | **Claude** | Lógica: arquitetura, regras, dados, simulação, save | `core/`, `data/`, `tests/`, `tools/`, `docs/`, arquivos da raiz |
-| **GPT** | Apresentação: telas, arte, animações, movimento visual, sons | `ui/`, `assets/`, `audio/` |
+| **GPT** | Apresentação: telas, arte, animações, movimento visual, sons; propostas de conteúdo (ex.: campeões) | `ui/`, `assets/`, `audio/`, `docs/propostas/` |
 
 **Todos podem ler tudo. Cada um só escreve na sua área.**
 
@@ -16,6 +16,7 @@ Dois assistentes trabalham aqui, cada um na sua área:
 2. [docs/CONTRATO.md](docs/CONTRATO.md): ponte entre lógica e interface
 3. [docs/GDD.md](docs/GDD.md): design completo do jogo
 4. [docs/comunicacao/README.md](docs/comunicacao/README.md): como trocar mensagens entre os assistentes
+5. [docs/GUIA_CAMPEOES.md](docs/GUIA_CAMPEOES.md): como foram as simulações e regras para criar campeões
 
 ## Ao começar cada sessão
 

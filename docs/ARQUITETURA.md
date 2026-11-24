@@ -62,6 +62,8 @@ A partida é **simulada primeiro e exibida depois**. O visual "reproduz" a linha
 │   ├── GDD.md             O que o jogo é (design)
 │   ├── ARQUITETURA.md     Este documento
 │   ├── CONTRATO.md        Ponte entre lógica e interface
+│   ├── GUIA_CAMPEOES.md   Como foram as simulações e regras para criar campeões
+│   ├── propostas/         Propostas de conteúdo do GPT (ex.: campeões)
 │   └── comunicacao/       Mensagens entre Claude e GPT
 │       ├── README.md      Como usar
 │       └── mensagens/     Uma mensagem por arquivo
@@ -109,6 +111,7 @@ Todos podem **ler** tudo. Cada pasta tem **um único dono que escreve**.
 | `project.godot` | **Claude** | Pedir mudanças por mensagem (ex.: tamanho da janela, cena inicial). |
 | `AGENTS.md`, `CLAUDE.md`, `README.md` | **Claude** | Pedir mudanças por mensagem. |
 | `docs/comunicacao/mensagens/` | **Todos** | Criar mensagens novas. Só altera a linha de status de mensagens endereçadas a si. |
+| `docs/propostas/` | **GPT** (e o dono do projeto) | Claude lê e converte para `data/`. Ex.: proposta dos campeões. |
 
 **O dono do projeto pode mudar qualquer regra deste documento.** A palavra dele vale mais que qualquer regra aqui.
 
