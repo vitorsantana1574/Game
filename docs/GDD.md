@@ -11,7 +11,9 @@
 
 - **Gênero:** gerenciamento de equipe de e-sports (manager), com foco em administração e estratégia.
 - **Referências:** CS Manager, Teamfight Manager, Football Manager (gestão de time); Big Ambitions e Supermarket Simulator (gestão de negócio, como inspiração temática — não em 3D).
-- **Premissa:** o jogador é dono e gestor de uma organização de e-sports que disputa ligas de um **MOBA fictício**, inspirado em League of Legends.
+- **Nome do jogo:** **MOBA Manager**.
+- **Nome do MOBA fictício:** **Crystal Legends**.
+- **Premissa:** o jogador é dono e gestor de uma organização de e-sports que disputa ligas de **Crystal Legends**, um MOBA fictício inspirado em League of Legends.
 - **Pilar do design:** um jogo de **pura administração de pessoas e números**. Toda mecânica nova deve gerar decisões de gestão.
 - **Estrutura em duas camadas:**
   1. **Núcleo (Fase 1):** gerenciar o time — elenco, treinos, draft, partidas simuladas, liga, transferências.
@@ -174,7 +176,7 @@ O treino tem várias modalidades, cada uma voltada para atributos diferentes.
 
 **Futuro:** contratar um **treinador auxiliar** que aumenta a eficiência dos treinos.
 
-## 7. O MOBA fictício
+## 7. O MOBA fictício: Crystal Legends
 
 Baseado em League of Legends, mas não idêntico:
 
@@ -182,10 +184,45 @@ Baseado em League of Legends, mas não idêntico:
 - **Minions** nas rotas: abatê-los dá **experiência** (nível do personagem) e **ouro** (para comprar **itens**).
 - Quem farma pouco chega às lutas e aos duelos de rota com **nível mais baixo e menos itens**.
 - **Objetivos de mapa** que podem ser disputados ou abandonados (decisão de Macro) — ver 7.1.
-- **Campeões** fictícios, com características próprias.
-- **Patches:** mudam a força dos campeões e o meta ao longo da temporada.
+- **Campeões** fictícios, com características próprias, divididos em **6 classes**: **tanques, assassinos, lutadores, magos, suportes e atiradores**.
+- **Itens:** criados como os campeões, com identidade própria. **Cada campeão carrega no máximo 5 itens por partida, sendo um deles uma bota** (movimentação).
+- **Renascimento:** o tempo para renascer depois de morrer **aumenta com o nível** do campeão (como no LoL).
+- **Patches:** mudam a força dos campeões e o meta **a cada 6 meses**.
 
 **Exibição da partida:** visão **2D de cima**, com os campeões se movendo e lutando sozinhos pelo mapa, e um **painel de narração ao lado** descrevendo o que está acontecendo (abates, ganks, objetivos, torres, roubos etc.).
+
+## 7.0 Ritmo da partida (proposto e testado)
+
+Valores calibrados com 2.000 partidas simuladas no protótipo de ritmo. Relatório: `tools/relatorios/ritmo_partida.md`. Números em `data/config/partida.json`.
+
+**Metas atingidas:** duração mediana de **32 min** (80% entre 25 e 39 min), cerca de **33 abates** por partida, **1 em cada 3 partidas** com virada de um time que estava bem atrás aos 15 min, e o time mais forte vencendo na medida certa (5 pontos melhor: 62%; 20 pontos: 92%).
+
+| Item | Valor proposto |
+|---|---|
+| **Duração** | Sem limite rígido. A partir dos **35 min** entra a **tensão final**: torres, Guardião e Cristal ficam 8% mais frágeis a cada minuto. Na prática, nenhuma partida passa de ~50 min |
+| **Nível máximo** | **16** |
+| **XP por nível** | 280 para o nível 2, e +100 a cada nível seguinte |
+| **Ondas de minions** | Primeira chega a **1:30**, depois a cada **30 s**: 3 corpo a corpo + 3 à distância, e 1 de cerco a cada 3 ondas |
+| **XP dos minions** | Corpo a corpo **60**, à distância **30**, cerco **90**, fortalecido **100**. A XP é dividida entre os aliados próximos; a rota dupla recebe 50% a mais no total, para não ficar muito atrás |
+| **Ouro dos minions** | Corpo a corpo 21, à distância 14, cerco 60, fortalecido 45. Ouro só para quem dá o último golpe (Farm) |
+| **Ouro passivo** | 2,4 por segundo a partir de 1:30 |
+| **Renascimento** | 6 s + 2,6 s por nível (nível 1: 9 s; nível 16: 48 s). Depois dos 25 min, +2% por minuto, até +50% |
+| **Itens (atirador típico)** | Bota aos ~4 min, 2º item aos ~13, 3º aos ~21, 4º aos ~29, 5º aos ~37 (partidas longas) |
+| **Cérbero** | Aparece aos **4:22** (nível 5 teórico) |
+| **Hydra** | Aparece aos **9:54** (nível 9 teórico) |
+
+**Progressão com farm perfeito** (rota solo / rota dupla / selva): nível 5 em 4:22 / 5:19 / 5:41; nível 9 em 9:54 / 12:42 / 13:48; nível 16 em 26:00 / 34:10 / 37:23.
+
+**Acampamentos da selva** (por time; o caçador fica cerca de 20% atrás de um laner solo, como no LoL):
+
+| Acampamento | XP | Ouro | Reaparece |
+|---|---|---|---|
+| Pássaro grande + 4 pássaros pequenos | 210 | 110 | 2 min |
+| Sapo vermelho enorme (bônus) | 300 | 100 | 5 min |
+| Rato médio | 150 | 70 | 2 min |
+| 3 aranhas | 190 | 90 | 2 min |
+| Polvo enorme (bônus) | 300 | 100 | 5 min |
+| Pequeno Golem de pedra | 240 | 100 | 2 min |
 
 ## 7.1 Mapa
 
@@ -551,12 +588,11 @@ Detalhes: **[A DEFINIR]**
 - Penalidade por jogar fora da posição principal
 - Fórmula das lutas em equipe (Micro + Macro)
 - Balanceamento de torres, Guardião, monstros épicos e acampamentos
-- Curva de experiência (define os tempos de aparição da Hydra e do Cérbero)
 - Detalhes dos acampamentos da selva (posição, reaparição, bônus)
 - Técnico: custos e tempos dos anúncios, efeitos do cansaço e duração das férias
 - Reputação: outros efeitos e exibição
 - Como o conhecimento do meta é exibido e evolui
-- Nome do jogo, do MOBA fictício e dos campeões
+- Nomes dos campeões e dos itens
 - Mundial: vagas por região, séries do play-in e da fase suíça, premiação
 - Contratos: ganho de experiência, regras de rescisão
 - Ego e lealdade: valores e velocidade de mudança (balanceamento)
