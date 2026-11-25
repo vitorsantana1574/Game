@@ -63,6 +63,7 @@ A partida é **simulada primeiro e exibida depois**. O visual "reproduz" a linha
 │   ├── ARQUITETURA.md     Este documento
 │   ├── CONTRATO.md        Ponte entre lógica e interface
 │   ├── GUIA_CAMPEOES.md   Como foram as simulações e regras para criar campeões
+│   ├── balanceamento/     Propostas de ajuste de equilíbrio da lógica (para o dono decidir)
 │   ├── propostas/         Propostas de conteúdo do GPT (ex.: campeões)
 │   └── comunicacao/       Mensagens entre Claude e GPT
 │       ├── README.md      Como usar

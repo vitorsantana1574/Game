@@ -455,7 +455,7 @@ O dono do projeto aprovou os **30 campeões** propostos pelo GPT (`docs/proposta
 - **Recursos:**
   - **Mana:** a regeneração a cada 5 s é cerca de 6% da mana máxima.
   - **Energia:** 200, volta 10 por segundo.
-  - **Fúria:** as habilidades **não exigem** fúria. Lançar com a barra cheia fortalece a habilidade e gasta o custo dela. *(Interpretação do Claude; aguarda confirmação do dono do projeto.)*
+  - **Fúria:** as habilidades **não exigem** fúria. Lançar com a barra cheia fortalece a habilidade e gasta o custo dela. *(Confirmado pelo dono do projeto em 25/11.)*
   - **Vida:** a habilidade custa % da vida máxima.
   - **Sem recurso:** recargas 15% maiores.
 - **Itens alternativos:** cada ficha traz trocas situacionais ("contra muita magia", "contra crítico", "contra cura"…). A lógica marcou cada troca com uma condição. Na partida, quem decide a troca é o **Macro** do jogador; no laboratório, um Macro médio troca sempre que a condição vale.
@@ -465,7 +465,7 @@ O dono do projeto aprovou os **30 campeões** propostos pelo GPT (`docs/proposta
   3. dois botões por campeão (sem itens / com itens).
 
   Resultado: médias por classe entre 47% e 54% em todos os momentos, e curvas na direção certa (fortes no início 56% → 49%; fortes no fim 45% → 53%).
-- **Fora do alvo:** Clavento e Prismora (fortes), Vedrassa e Nalcora (fracas). A correção desses quatro depende de mudança de kit (texto), com o dono do projeto e o GPT.
+- **Fora do alvo:** Clavento e Prismora (fortes), Vedrassa e Nalcora (fracas). O dono pediu uma proposta criativa, que compense as fraquezas de outras formas em vez de só mexer em dano. Ela está em `docs/balanceamento/proposta_kits_1.md`, aguardando decisão.
 - **Valor de nível:** com os atributos dos campeões, 1 nível a mais vale cerca de +6 a 8% de força, como no protótipo de ritmo. **A simulação da partida não soma um bônus genérico por nível** quando usar os atributos dos campeões, para não contar o nível duas vezes.
 
 ## 8. Draft (pick & ban)
@@ -775,7 +775,6 @@ Detalhes: **[A DEFINIR]**
 - Reputação: outros efeitos e exibição
 - Como o conhecimento do meta é exibido e evolui
 - Kits de Clavento, Prismora, Vedrassa e Nalcora (fora do alvo no laboratório de campeões)
-- Regra da fúria: confirmar que as habilidades não exigem fúria
 - Mundial: vagas por região, séries do play-in e da fase suíça, premiação
 - Contratos: ganho de experiência, regras de rescisão
 - Ego e lealdade: valores e velocidade de mudança (balanceamento)

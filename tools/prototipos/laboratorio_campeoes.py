@@ -150,6 +150,7 @@ class Ficha:
             p = TODOS[item_id].get("passiva")
             if p:
                 self.passivas_item.setdefault(p.get("grupo", p["tipo"]), p)
+        self.itens_completos = len([i for i in self.ids if i in LI.ITENS])  # itens completos, sem contar a bota
         self.pen_arm_pct = max([TODOS[i]["estatisticas"].get("penetracao_armadura_pct", 0) for i in self.ids] + [0]) / 100
         self.pen_mag_pct = max([TODOS[i]["estatisticas"].get("penetracao_magica_pct", 0) for i in self.ids] + [0]) / 100
         self.letalidade = e["letalidade"]
@@ -244,6 +245,9 @@ class Unidade:
         self.ultima_ficha = -99.0
         self.zona_ate = -1.0       # especial de zona ativa (Ocravia)
         self.curativo = None       # (aliado, ate) Sutéria
+        self.exposto = (0.0, -1.0)  # (redução de armadura e RM, até)
+        self.redirecao = None      # (quem divide o dano, fração, até)
+        self.atacantes = {}        # unidade -> último instante em que causou dano (participação em abates)
         self.primeiro_golpe_usado = False
         self.primeiro_golpe_pendente = False
         self.escudo_vida_baixa_usado = False
@@ -339,10 +343,11 @@ class Luta:
             alvo.va_bonus.append([p["va_aliado"], self.t + 4])
 
     def mitigar(self, atq, alvo, dano, tipo):
+        exp = 1 - alvo.exposto[0] if alvo.exposto[1] > self.t else 1.0
         if tipo == "fisico":
-            res = LI.resistencia_efetiva(alvo.f.armadura, atq.f.pen_arm_pct, atq.f.letalidade)
+            res = LI.resistencia_efetiva(alvo.f.armadura * exp, atq.f.pen_arm_pct, atq.f.letalidade)
         elif tipo == "magico":
-            res = LI.resistencia_efetiva(alvo.f.rm, atq.f.pen_mag_pct, atq.f.pen_mag)
+            res = LI.resistencia_efetiva(alvo.f.rm * exp, atq.f.pen_mag_pct, atq.f.pen_mag)
         else:
             res = 0
         return LI.mitigar(dano, res)
@@ -364,6 +369,12 @@ class Luta:
         """Aplica dano já com a parcela crua; devolve o dano efetivo."""
         if dano <= 0 or not alvo.vivo():
             return 0.0
+        r = alvo.redirecao
+        if r and r[2] > self.t and r[0] is not alvo and r[0].vivo():
+            parte = dano * r[1]
+            dano -= parte
+            self.golpear(atq, r[0], parte, tipo, ataque_basico)
+        alvo.atacantes[atq] = self.t
         final = self.mitigar(atq, alvo, dano, tipo) * self.multiplicador(atq, alvo)
         if ataque_basico:
             p = alvo.f.p("reducao_dano_ataques")
@@ -371,7 +382,7 @@ class Luta:
                 final *= 1 - p["valor"]
         self.antes_de_receber(alvo, atq)
         restante = final
-        if tipo == "magico" and alvo.escudo_magico > 0:
+        if tipo == "magico" and alvo.escudo_magico > 0 and not getattr(atq, "ignora_escudo_magico", False):
             absorvido = min(alvo.escudo_magico, restante)
             alvo.escudo_magico -= absorvido
             restante -= absorvido
@@ -391,6 +402,10 @@ class Luta:
         self.depois_de_receber(alvo, atq, vida_antes)
         if not alvo.vivo() and alvo.morte is None:
             alvo.morte = self.t
+            for quem, quando in alvo.atacantes.items():
+                if self.t - quando <= 3 and quem.f.passiva.get("reinicia_ao_abater"):
+                    quem.ultimo_combate = -99.0  # participação em abate reabre a passiva de abertura
+                    quem.passiva_pronta = min(quem.passiva_pronta, self.t)
             atq.abates += 1
         return final
 
@@ -411,7 +426,9 @@ class Luta:
 
     def causar(self, atq, alvo, valor, tipo_dano, mec=None):
         if mec and mec.get("divisao_mista"):
-            d = mec["divisao_mista"]
+            d = dict(mec["divisao_mista"])
+            if mec.get("divisao_adaptativa") and alvo.f.rm < alvo.f.armadura and d["magico"] < d["fisico"]:
+                d = {"fisico": d["magico"], "magico": d["fisico"]}  # a maior parte vai para a resistência mais baixa
             return self.golpear(atq, alvo, valor * d["fisico"], "fisico") + self.golpear(atq, alvo, valor * d["magico"], "magico")
         if tipo_dano == "misto":
             return self.golpear(atq, alvo, valor * 0.5, "fisico") + self.golpear(atq, alvo, valor * 0.5, "magico")
@@ -459,7 +476,7 @@ class Luta:
             pas = v.f.passiva
             g = pas.get("gatilho")
             if g == "aliado_vida_baixa" and self.t >= v.passiva_pronta and alvo.vida < alvo.f.vida * pas["limite"] <= vida_antes and v.dist(alvo) <= pas["raio"]:
-                self.dar_escudo(v, alvo, pas["pct_vida"] * alvo.f.vida, pas["duracao"])
+                self.dar_escudo(v, alvo, pas["pct_vida"] * alvo.f.vida + pas.get("pct_vida_bonus_propria", 0) * v.f.vida_bonus, pas["duracao"])
                 v.passiva_pronta = self.t + pas["recarga"]
                 v.passiva_disparos += 1
             if g == "curativo_preparado" and v.curativo and v.curativo[0] is alvo and v.curativo[1] >= self.t:
@@ -513,7 +530,8 @@ class Luta:
                     self.dar_escudo(u, u, pas["pct_vida"] * u.f.vida, pas["duracao"])
                     u.passiva_disparos += 1
                 u.passiva_pronta = t + pas["recarga"]
-        elif g == "abertura" and principal and pos == pas["habilidade"] and pronto and t - u.combate_antes_do_lancamento >= pas["fora_combate"]:
+        elif g == "abertura" and principal and pos == pas["habilidade"] and pronto and (t - u.combate_antes_do_lancamento >= pas["fora_combate"] or getattr(u, "combate_reaberto", False)):
+            u.combate_reaberto = False
             self.dano_passiva(u, alvo)
             u.passiva_pronta = t + pas["recarga"]
         elif g == "acumulo_de_acertos" and principal and pos == pas["habilidade"]:
@@ -714,6 +732,7 @@ class Luta:
 
     def usar_dano(self, u, h, alvo):
         mec = h["mecanica"]
+        u.ignora_escudo_magico = bool(mec.get("ignora_escudo_magico"))
         u.combate_antes_do_lancamento = u.ultimo_combate
         u.fonte = "hab%d" % h["posicao"]
         u.usos[u.fonte] += 1
@@ -723,7 +742,15 @@ class Luta:
             self.efeito_furia_cheia(u, h)
         if mec.get("avanco"):
             self.mover_para(u, alvo, mec["avanco"], ignorar_lentidao=True)
+        if mec.get("exposto_apos_uso"):
+            u.exposto = (mec["exposto_apos_uso"]["pct"], self.t + mec["exposto_apos_uso"]["duracao"])
+        if mec.get("imobiliza_ao_lancar"):
+            u.atordoado_ate = max(u.atordoado_ate, self.t + mec["imobiliza_ao_lancar"])
+        distancia_lancamento = u.dist(alvo)
+        if mec.get("recuo"):
+            u.recuo_pendente = (alvo, mec["recuo"])
         if self.rng.random() > chance_acerto(mec):
+            self.recuar(u)
             return
         alvos = self.alvos_da_habilidade(u, h, alvo)
         if mec.get("primeiro_alvo") or mec["alvos"] == "um":
@@ -745,6 +772,13 @@ class Luta:
                     prop["vida_maxima_propria_pct"] = mec["vida_propria_sem_furia"]
                 d["proporcoes"] = prop
                 valor = self.dano_cru(u, o, d, mec, secundario=not principal)
+                if mec.get("bonus_se_lento") and o.lento(self.t) > 0:
+                    valor *= 1 + mec["bonus_se_lento"]
+                if mec.get("bonus_por_item"):
+                    valor *= 1 + mec["bonus_por_item"] * u.f.itens_completos
+                dd = mec.get("dano_por_distancia")
+                if dd and distancia_lancamento < dd["distancia"]:
+                    valor *= dd["perto"]
                 self.causar(u, o, valor, h["tipo_dano"], mec)
                 # Itens que reagem a habilidades
                 p = u.f.p("pct_vida_maxima")
@@ -768,9 +802,12 @@ class Luta:
                 self.desacelerar(u, o, mec["lentidao"]["forca"], mec["lentidao"]["duracao"] + extra)
             if "atordoamento" in mec:
                 dur = mec.get("furia_cheia", {}).get("atordoamento", mec["atordoamento"]) if cheia else mec["atordoamento"]
+                if mec.get("atordoamento_extra_se_lento") and o.lento(self.t) > 0:
+                    dur += mec["atordoamento_extra_se_lento"]
                 self.atordoar(u, o, dur)
             acertados.append(o)
             self.ao_acertar_habilidade(u, h, o, principal)
+        self.recuar(u)
         if mec.get("marca") and acertados:
             u.marca = (acertados[0], self.t + mec["marca"]["duracao"])
         if mec.get("consome_marca"):
@@ -793,6 +830,18 @@ class Luta:
                 pct = min(pas["teto_pct"], pas["pct_vida"] + pas["pct_por_acumulo_extra"] * (u.f.acumulos - pas["acumulos_minimos"]))
                 self.dar_escudo(u, a, pct * a.f.vida, pas["duracao"])
                 u.passiva_disparos += 1
+
+    def recuar(self, u):
+        rp = getattr(u, "recuo_pendente", None)
+        if rp:
+            alvo, dist = rp
+            dx, dy = u.x - alvo.x, u.y - alvo.y
+            n = math.hypot(dx, dy) or 1
+            u.x += dx / n * dist
+            u.y += dy / n * dist
+            u.recuo_pendente = None
+            if u.f.passiva.get("recuo_reabre_passiva"):
+                u.combate_reaberto = True
 
     def efeito_furia_cheia(self, u, h):
         bc = u.f.passiva.get("barra_cheia", {})
@@ -847,6 +896,8 @@ class Luta:
                 if pas.get("gatilho") == "especial_cura_vida_baixa" and h["posicao"] == 3:
                     self.dar_escudo(u, alvo, pas["pct_vida"] * alvo.f.vida, pas["duracao"])
                     u.passiva_disparos += 1
+        if "redireciona" in mec and alvo is not u:
+            alvo.redirecao = (u, mec["redireciona"]["pct"], self.t + mec["redireciona"]["duracao"])
         if "reduz_lentidao" in mec:
             u.reduz_lentidao = (mec["reduz_lentidao"]["pct"], self.t + mec["reduz_lentidao"]["duracao"])
         if "zona" in mec:
@@ -956,6 +1007,8 @@ class Luta:
                     self.pagar(u, h)
                     u.recargas[h["posicao"]] = t + f.recarga(h)
                     self.mover_para(u, alvo, mec["avanco"], ignorar_lentidao=True, manter=f.alcance * 0.8)
+                    if mec.get("exposto_apos_uso"):
+                        u.exposto = (mec["exposto_apos_uso"]["pct"], t + mec["exposto_apos_uso"]["duracao"])
                     return
                 continue
             if mec.get("centro") == "si":
@@ -983,6 +1036,7 @@ class Luta:
 
     def ataque_basico(self, u, alvo):
         f = u.f
+        u.ignora_escudo_magico = False
         u.fonte = "ataque"
         dano = f.df * (1 + f.critico * (f.dano_critico - 1))
         p = alvo.f.p("reducao_critico")
