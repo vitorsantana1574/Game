@@ -1,10 +1,13 @@
 extends Control
 
-enum Tela { MENU, EQUIPE, SAVES, OPCOES, CREDITOS, SUBSTITUIR }
+enum Tela { MENU, EQUIPE, SAVES, OPCOES, CREDITOS, SUBSTITUIR, BANDEIRA }
 
 const TemaAbertura = preload("res://ui/temas/tema_abertura.gd")
 const SeletorDificuldade = preload("res://ui/componentes/seletor_dificuldade.gd")
 const ListaSaves = preload("res://ui/componentes/lista_saves.gd")
+const EditorBandeira = preload("res://ui/componentes/editor_bandeira.gd")
+const ArteBandeira = preload("res://ui/componentes/arte_bandeira.gd")
+const Bandeiras = preload("res://ui/componentes/bandeira_da_carreira.gd")
 const ARENA: Texture2D = preload("res://assets/sprites/menu/arena.webp")
 const OCLUSAO: Texture2D = preload("res://assets/sprites/menu/oclusao.webp")
 const REFLETORES: Shader = preload("res://ui/componentes/refletores_abertura.gdshader")
@@ -13,6 +16,9 @@ var _tela: Tela = Tela.MENU
 var _saves: Array[Dictionary] = []
 var _ultimo_slot: int = -1
 var _rascunho_equipe: Dictionary = {}
+var _rascunho_bandeira: Dictionary = {}
+var _imagem_bandeira: Image
+var _editor_bandeira: EditorBandeira
 var _animar: bool = true
 var _tempo_luzes: float = 0.0
 var _retrato: bool = false
@@ -75,6 +81,8 @@ func _ao_redimensionar() -> void:
 		abrir(_tela)
 	else:
 		_posicionar_painel()
+		if _tela == Tela.BANDEIRA:
+			_editor_bandeira.ajustar(_retrato)
 
 func redimensionar() -> void:
 	_retrato = size.x < size.y * 1.06
@@ -113,10 +121,16 @@ func abrir(tela: Tela) -> void:
 		Tela.OPCOES: _montar_opcoes()
 		Tela.CREDITOS: _montar_creditos()
 		Tela.SUBSTITUIR: _montar_saves(true)
+		Tela.BANDEIRA: _montar_bandeira()
 
 	if _foco_inicial != null:
-		_foco_inicial.grab_focus.call_deferred()
+		_focar_inicio.call_deferred()
 	set_process(_animar and _tela == Tela.MENU)
+
+
+func _focar_inicio() -> void:
+	if is_instance_valid(_foco_inicial) and _foco_inicial.is_inside_tree():
+		_foco_inicial.grab_focus()
 
 func _posicionar_painel() -> void:
 	var topo: float = _fundo.size.y if _retrato and _tela == Tela.MENU else 0.0
@@ -180,9 +194,34 @@ func _montar_equipe() -> void:
 	bloco.add_child(_seletor)
 	_seletor.montar(Jogo.listar_dificuldades(), Jogo.opcoes_personalizado(), _rascunho_equipe, _retrato)
 	_erro_acao = _rotulo_erro(bloco)
-	var acoes: HBoxContainer = _acoes(bloco)
+	var acoes: Container = _acoes(bloco)
 	_botao(acoes, "Voltar", abrir.bind(Tela.MENU))
+	var bandeira: Button = _botao(acoes, "Bandeira", _abrir_bandeira)
+	if _imagem_bandeira != null:
+		bandeira.icon = ImageTexture.create_from_image(_imagem_bandeira)
+		bandeira.add_theme_constant_override("icon_max_width", 30)
 	_botao(acoes, "Criar equipe", _confirmar_equipe, "AcaoPrincipal")
+
+
+func _abrir_bandeira() -> void:
+	_rascunho_equipe = _ler_formulario()
+	abrir(Tela.BANDEIRA)
+
+
+func _montar_bandeira() -> void:
+	var bloco: VBoxContainer = _cartao("Bandeira da equipe")
+	_editor_bandeira = EditorBandeira.new()
+	bloco.add_child(_editor_bandeira)
+	_editor_bandeira.montar(_rascunho_bandeira, _retrato)
+	var acoes: Container = _acoes(bloco)
+	_foco_inicial = _botao(acoes, "Voltar", abrir.bind(Tela.EQUIPE))
+	_botao(acoes, "Usar bandeira", _escolher_bandeira, "AcaoPrincipal")
+
+
+func _escolher_bandeira() -> void:
+	_rascunho_bandeira = _editor_bandeira.rascunho()
+	_imagem_bandeira = _editor_bandeira.imagem()
+	abrir(Tela.EQUIPE)
 
 
 func _montar_saves(substituir: bool = false) -> void:
@@ -214,12 +253,14 @@ func _montar_opcoes() -> void:
 
 func _montar_creditos() -> void:
 	var bloco: VBoxContainer = _cartao("Créditos")
-	var creditos: Label = _texto(bloco, "Arena, equipe e sede geradas com IA para o MOBA Manager.\nCorrentes e cadeados modelados e renderizados no Blender.", 21)
+	var creditos: Label = _texto(bloco, "Arena, equipe, sede e emblemas gerados com IA para o MOBA Manager.\nCorrentes e cadeados modelados e renderizados no Blender.", 21)
 	creditos.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_foco_inicial = _botao(bloco, "Voltar", abrir.bind(Tela.MENU))
 
 func _nova_equipe() -> void:
 	_rascunho_equipe = {}
+	_rascunho_bandeira = {}
+	_imagem_bandeira = null
 	abrir(Tela.EQUIPE)
 
 
@@ -233,7 +274,7 @@ func _confirmar_equipe() -> void:
 	_rascunho_equipe = _ler_formulario()
 	var escolhas: Dictionary = _seletor.escolhas()
 	escolhas["nome"] = _nome.text
-	var resultado: Dictionary = Jogo.nova_carreira(escolhas)
+	var resultado: Dictionary = _criar_carreira(escolhas)
 	if resultado["ok"]:
 		return
 	var erros: Dictionary = resultado["erros"]
@@ -295,9 +336,21 @@ func _substituir_save(slot: int, registro: Dictionary) -> void:
 		escolhas.erase("capital")
 		escolhas.erase("rivais")
 	escolhas["slot"] = slot
-	var resultado: Dictionary = Jogo.nova_carreira(escolhas)
+	var resultado: Dictionary = _criar_carreira(escolhas)
 	if not resultado["ok"]:
 		_mostrar_erros(resultado["erros"])
+
+
+func _criar_carreira(escolhas: Dictionary) -> Dictionary:
+	var resultado: Dictionary = Jogo.nova_carreira(escolhas)
+	if not resultado["ok"]:
+		return resultado
+	var slot: int = int(resultado["slot"])
+	var imagem: Image = _imagem_bandeira if _imagem_bandeira != null else ArteBandeira.padrao()
+	var erro: Error = Bandeiras.guardar(slot, Jogo.listar_saves()[slot], imagem)
+	if erro != OK:
+		push_warning("Não foi possível guardar a bandeira do Save %d. Código %d." % [slot + 1, erro])
+	return resultado
 
 
 func _continuar() -> void:
@@ -374,7 +427,12 @@ func _coluna(pai: Container) -> VBoxContainer:
 	pai.add_child(coluna)
 	return coluna
 
-func _acoes(pai: Container) -> HBoxContainer:
+func _acoes(pai: Container) -> Container:
+	if _retrato:
+		var fluxo: HFlowContainer = HFlowContainer.new()
+		fluxo.add_theme_constant_override("h_separation", 8)
+		pai.add_child(fluxo)
+		return fluxo
 	var acoes: HBoxContainer = HBoxContainer.new()
 	acoes.add_theme_constant_override("separation", 12)
 	pai.add_child(acoes)
