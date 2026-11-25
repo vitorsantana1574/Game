@@ -839,15 +839,17 @@ Detalhes: **[A DEFINIR]**
 ## 10. Roteiro
 
 ### Fase 1 — Núcleo
-- [ ] Tela inicial com configuração de dinheiro e dificuldade (predefinições + personalizado)
-- [ ] Geração de jogadores com posição, atributos, lista de campeões e traços ocultos
-- [ ] Contratação do elenco (5 titulares + 5 reservas)
-- [ ] Sistema de energia, descanso e treino
+- [x] Tela inicial com configuração de dinheiro e dificuldade (predefinições + personalizado)
+- [x] Geração de jogadores com posição, atributos, domínio de campeões e traços ocultos
+- [x] Contratação do elenco, técnico, contratos e economia (salários, verba, empréstimo)
+- [x] Calendário do ano (dias de jogo das etapas e do mundial)
+- [ ] Agenda semanal, treino e ego (energia nas partidas já existe)
 - [x] Campeões fictícios (30, catálogo e laboratório de equilíbrio)
 - [x] Draft (sistema, IA e patch escondido; tela com o GPT)
 - [x] Simulação de partida (lógica e narração; tela com o GPT)
-- [ ] Liga e calendário
-- [ ] Salvar e carregar
+- [ ] Liga: times rivais, rodadas, tabela, playoffs, acesso e rebaixamento
+- [ ] Mundial
+- [x] Salvar e carregar (lógica; menus com o GPT)
 - [ ] Versão de navegador publicada no itch.io
 
 ### Fase 2 — Negócio
