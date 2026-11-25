@@ -119,8 +119,8 @@
 		"preco_item_medio": 2700,
 		"item_de_suporte": {
 			"_comentario": "O suporte começa com um item que gera ouro: uma parte do ouro dos minions que o atirador abate por perto e um extra por participação em abates. Não depende do Farm do suporte.",
-			"fracao_ouro_do_atirador": 0.35,
-			"ouro_por_participacao": 60
+			"fracao_ouro_do_atirador": 0.25,
+			"ouro_por_participacao": 35
 		},
 		"ordem_de_compra": {
 			"_comentario": "A ordem dos itens segue a recomendação do campeão. Jogadores com Macro alto adaptam a ordem à partida (ex.: atrasar a bota, item contra cura); compras arriscadas rendem mais com Micro alto.",
@@ -150,5 +150,32 @@
 		"inicio_tensao_final_min": 35,
 		"fragilidade_por_min": 0.08,
 		"limite_pratico_min": 50
+	},
+	"simulacao": {
+		"_comentario": "Constantes internas da simulação da partida (core/systems/partida/simulador_partida.gd), herdadas do protótipo de ritmo e recalibradas com campeões e domínio. Não são regras do jogo: dizem como o modelo responde.",
+		"passo": 5,
+		"fim_fase_de_rotas_min": 14,
+		"troca_rota_a_cada": 520,
+		"gank_base": 330,
+		"ganks_ate_min": 20,
+		"luta_sensibilidade": 3.1,
+		"habilidade_base": 0.75,
+		"habilidade_peso": 0.35,
+		"forca_por_nivel": 0.075,
+		"defesa_base": 1.15,
+		"dano_torre_rota": 0.075,
+		"cerco_torre": 1.0,
+		"cerco_guardiao": 0.45,
+		"cerco_cristal": 0.75,
+		"intervalo_luta_meio": 165,
+		"intervalo_luta_fim": 140,
+		"espera_luta_objetivo": 120,
+		"chance_disputar_objetivo": 0.5,
+		"renda_super_minions": 1.0,
+		"peso_curva_campeao": 0.9,
+		"chance_roubo_base": 0.12,
+		"forma_desvio_base": 0.02,
+		"forma_desvio_mental": 0.06,
+		"quadro_a_cada": 5
 	}
 }

@@ -61,4 +61,6 @@ signal patch_novo(numero: int)
 signal draft_mudou(estado: Dictionary)
 ## O draft terminou: estado final com as posições de cada campeão.
 signal draft_concluido(estado: Dictionary)
+## Uma partida foi simulada. partida = linha do tempo completa (ver docs/CONTRATO.md, seção 2.7).
+signal partida_simulada(partida: Dictionary)
 signal falencia(resumo: Dictionary)

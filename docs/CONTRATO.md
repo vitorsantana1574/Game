@@ -3,7 +3,7 @@
 Este documento é a **ponte entre a lógica (Claude) e a interface (GPT)**.
 A interface só pode usar o que está escrito aqui. Se precisar de algo que não existe, peça por mensagem em [comunicacao/](comunicacao/README.md).
 
-> **Status: v6.** Etapas 1 (tela inicial), 2 (mercado, elenco, contratos, técnico), economia/calendário, catálogo de campeões e itens os acréscimos pedidos pela sede (seção 2.5) e domínio de campeões, patch e draft (seção 2.6) **[PRONTOS]**. Os nomes abaixo são a proposta inicial. A cada etapa de construção, o Claude atualiza este documento **antes** de o GPT começar a tela correspondente. Itens marcados **[PLANEJADO]** ainda não existem no código.
+> **Status: v7.** Etapas 1 (tela inicial), 2 (mercado, elenco, contratos, técnico), economia/calendário, catálogo de campeões e itens os acréscimos pedidos pela sede (seção 2.5) domínio de campeões, patch e draft (seção 2.6) e partida simulada (seção 2.7) **[PRONTOS]**. Os nomes abaixo são a proposta inicial. A cada etapa de construção, o Claude atualiza este documento **antes** de o GPT começar a tela correspondente. Itens marcados **[PLANEJADO]** ainda não existem no código.
 
 Regras do contrato: [ARQUITETURA.md](ARQUITETURA.md), seção 2.
 
@@ -531,6 +531,109 @@ Todas as ações devolvem `{"ok": true, "estado": {...}}` ou `{"ok": false, "err
 
 Ordem (GDD 8.1): 3 bans de cada lado, alternando; picks A B B A A B; 2 bans de cada lado, com o vermelho começando; picks B A A B.
 
+## 2.7 Partida simulada — **[PRONTO]** (25/11)
+
+A partida é **simulada inteira de uma vez** (regras + semente, sem IA de linguagem) e devolvida como **linha do tempo**. A tela da partida (`ui/partida/`) só **reproduz** essa linha: não decide nada. O técnico não intervém durante a partida; ajustes só entre os jogos de uma série.
+
+| Função | O que faz |
+|---|---|
+| `Jogo.simular_partida_do_draft(opcoes = {})` | Simula a partida do draft concluído. `opcoes`: `"semente"` (repete uma partida). Devolve `{"ok": true, "partida": {...}}` ou erro em `"draft"` (sem draft / draft em andamento) |
+| `Jogo.ultima_partida` | A última partida simulada (só na memória) |
+| `Jogo.mapa_partida()` | Geometria do mapa (abaixo) |
+
+**Sinal:** `Eventos.partida_simulada(partida)`.
+
+Partida de **treino** (contra o time de treino) não conta no histórico de campeões dos jogadores.
+
+### Partida
+
+```gdscript
+{
+    "vencedor": 0,              # 0 = azul, 1 = vermelho (em toda a partida, time 0 é o azul)
+    "lado_jogador": "azul",     # de que lado está o seu time
+    "venceu": true,
+    "treino": true,
+    "semente": 123456,
+    "duracao": 1932,            # segundos
+    "times": [{"nome": "Vale Rift", "lado": "azul"}, {"nome": "Time de Treino", "lado": "vermelho"}],
+    "placar": {"abates": [21, 9], "torres": [8, 2], "hydra": [2, 1], "cerbero": [3, 0], "ouro": [61200, 50400]},
+    "jogadores": [   # estatística final, 10 entradas (5 de cada time, na ordem topo, selva, meio, atirador, suporte)
+        {"jogador": "j000012", "apelido": "Kyxis", "time": 0, "posicao": "topo",
+         "campeao": "eirafim", "campeao_nome": "Eirafim", "abates": 3, "mortes": 1, "assistencias": 6,
+         "cs": 238, "ouro": 12087, "nivel": 15, "itens": [ids na ordem de compra], "dominio": "conhece_bem"},
+    ],
+    "eventos": [ ... ],   # lances, em ordem de tempo (abaixo)
+    "quadros": [ ... ],   # posição de todos, a cada 5 s (abaixo)
+}
+```
+
+### Lances (`eventos`)
+
+Campos de todo lance:
+
+```gdscript
+{
+    "indice": 14,            # posição na lista (outros lances apontam para ele)
+    "t": 845,                # segundos desde o início
+    "minuto": "14:05",       # relógio pronto para a tela
+    "tipo": "abate",
+    "time": 0,               # time que fez o lance (-1 no início)
+    "destaque": true,        # entra no modo "melhores momentos"
+    "narracao": [            # 0, 1 ou 2 falas, na ordem: primeiro o narrador, depois o comentarista
+        {"voz": "narrador", "nome": "Narrador", "texto": "Solo kill no topo! Eirafim passa por cima de Marulva."},
+        {"voz": "comentarista", "nome": "Comentarista", "texto": "Duelo assim é Micro."},
+    ],
+    "x": 0.12, "y": 0.40,    # onde aconteceu (quando faz sentido), no mesmo sistema do mapa
+}
+```
+
+| `tipo` | Campos extras |
+|---|---|
+| `inicio` | — |
+| `abate` | `jogador`, `campeao`, `alvo`, `alvo_campeao`, `assistencias` (ids), `contexto` (`"solo"`, `"gank"`, `"dive"`, `"luta"`). Abates de luta vêm **sem narração**: quem narra é o lance `luta` |
+| `gank_falhou` | `jogador` (o caçador), `alvo` |
+| `luta` | `objetivo` (`""`, `"hydra"`, `"cerbero"`), `abates` ([azul, vermelho] na luta), `lances` (índices dos abates dessa luta, que vêm logo depois, no mesmo segundo) |
+| `torre` | `rota` (`"topo"`, `"meio"`, `"baixo"`), `torre` (0 = externa, 1 = interna, 2 = da base), `jogador` (pode ser vazio) |
+| `cerbero` / `hydra` | `roubado` (bool), `jogador` (quem roubou, quando roubado) |
+| `guardiao` | `time` = quem derrubou o Guardião do outro |
+| `guardiao_renasce` | `time` = dono do Guardião |
+| `item` | `jogador`, `campeao`, `item` (id). Sem narração; serve para o painel de itens |
+| `analise` | `assunto` (`"ouro"` ou `"farm"`), `jogador` (no farm). Só fala do comentarista |
+| `vitoria` | `x`, `y` = Cristal destruído |
+
+**Modos de assistir** (GDD 7.4): partida inteira em 1x, 2x ou 4x; **melhores momentos** (padrão) = mostrar os lances com `destaque: true` e acelerar entre eles; **ver resultado** = pular para a estatística final.
+
+### Quadros (`quadros`)
+
+Um a cada 5 segundos de partida. A tela anima cada campeão entre um quadro e o próximo.
+
+```gdscript
+{
+    "t": 845,
+    "campeoes": [{"jogador": "j000012", "x": 0.121, "y": 0.402, "vivo": true, "nivel": 9}, ...],   # os 10
+    "ouro": [24100, 22800], "abates": [6, 4], "torres": [2, 1],   # placar até ali, [azul, vermelho]
+}
+```
+
+Campeão morto fica na fonte do próprio time até renascer (`vivo: false`).
+
+### Mapa (`Jogo.mapa_partida()`)
+
+Coordenadas normalizadas de 0 a 1 (x para a direita, y para baixo). **Azul embaixo à esquerda, vermelho em cima à direita.** A rota do meio segue a diagonal entre as bases; o rio cruza na outra diagonal, onde ficam Hydra e Cérbero.
+
+```gdscript
+{
+    "bases": {"azul": {"fonte": [x, y], "cristal": [x, y], "guardiao": [x, y]}, "vermelho": {...}},
+    "rotas": {"topo": [[x, y], ...], "meio": [...], "baixo": [...]},   # da base azul até a vermelha
+    "torres": {"posicoes": [0.36, 0.24, 0.12]},   # posição na rota a partir da base do dono (vermelho = 1 - valor)
+    "monstros_epicos": {"hydra": [x, y], "cerbero": [x, y]},
+    "acampamentos": {"passaros": [x, y], ...},    # selva azul; na vermelha, (1 - x, 1 - y)
+    "nomes_rotas": {"topo": {"nome", "na", "da"}, ...},
+}
+```
+
+Se a arte precisar de outra geometria, peça: os pontos mudam em `data/config/mapa.json` e a simulação acompanha.
+
 ## 3. Dados que a interface pode ler **[PLANEJADO]**
 
 Resumo dos modelos. Os campos exatos serão listados aqui quando cada modelo for implementado.
@@ -557,7 +660,7 @@ Lista inicial; será detalhada com parâmetros e retornos em cada etapa.
 | Elenco | `definir_titulares(...)`, `conversar(jogador, tipo)`, `definir_capitao(jogador)` |
 | Agenda e treino | `definir_atividade(jogador, dia, atividade)` |
 | Draft | `banir(campeao)`, `escolher(campeao, jogador)` |
-| Partida | `simular_partida(...)` → devolve a **linha do tempo** (seção 6) |
+| Partida | **Pronta:** `simular_partida_do_draft()` (seção 2.7) |
 
 ## 5. Sinais **[PLANEJADO]**
 
@@ -570,25 +673,9 @@ Lista inicial; será detalhada com parâmetros e retornos em cada etapa.
 | `contrato_vencendo(jogador, dias)` | Avisos de 3 meses e 1 semana |
 | `satisfacao_mudou(jogador)` | Ego, banco, salário, promessas |
 | `candidatos_chegaram(anuncio)` | Técnicos responderam ao anúncio |
-| `partida_simulada(linha_do_tempo)` | A partida está pronta para ser exibida |
+| `partida_simulada(partida)` | **[PRONTO]** A partida está pronta para ser exibida (seção 2.7) |
 | `temporada_terminou(resumo)` | Fim de temporada, acesso e rebaixamento |
 
-## 6. Linha do tempo da partida **[PLANEJADO]**
+## 6. Linha do tempo da partida — **[PRONTO]**
 
-A simulação devolve a partida inteira de uma vez, como uma lista de eventos em ordem de tempo. A cena visual (`ui/partida/`) **reproduz** essa lista; ela não decide nada.
-
-Formato proposto de cada evento:
-
-```gdscript
-{
-    "tempo": 312.5,                 # segundos desde o início da partida
-    "tipo": "abate",                # tipo do evento (lista abaixo)
-    "dados": { ... },               # informações do evento, conforme o tipo
-    "narracao": "Fulano abate Sicrano na rota do meio!"   # texto para o painel (pode ser vazio)
-}
-```
-
-Tipos previstos: `posicao` (posições lógicas dos 10 campeões), `ataque`, `habilidade`, `abate`, `minion_abatido`, `torre_destruida`, `monstro_abatido`, `bonus_ganho`, `bonus_perdido`, `roubo`, `torre_visao_colocada`, `guardiao_derrotado`, `guardiao_renasceu`, `cristal_destruido`, `fim_de_partida`.
-
-- **Posições** são coordenadas lógicas do mapa (em unidades do mapa, não em pixels). A interface converte para a tela e anima o deslocamento entre um ponto e outro.
-- Detalhes do mapa lógico (tamanho, rotas, posição das torres e acampamentos) serão publicados aqui na etapa 5.
+Substituída pela seção 2.7.

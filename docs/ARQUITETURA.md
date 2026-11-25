@@ -44,7 +44,7 @@ Por quê:
 
 A partida é onde as duas metades mais se encostam, então a divisão precisa ser exata:
 
-- **A simulação (Claude) decide o que acontece e onde:** posições lógicas dos campeões no mapa, quem ataca quem, abates, torres, objetivos, visão, ouro, experiência, texto da narração. O resultado é uma **linha do tempo de eventos** (ver [CONTRATO.md](CONTRATO.md)).
+- **A simulação (Claude) decide o que acontece e onde:** posições lógicas dos campeões no mapa, abates, torres, objetivos, ouro, experiência, texto da narração. O resultado é uma **linha do tempo de eventos** (ver [CONTRATO.md](CONTRATO.md)).
 - **O visual (GPT) decide como isso aparece:** sprites, interpolação do movimento entre posições, animações de ataque e habilidade, efeitos, câmera, sons e o painel de narração.
 
 A partida é **simulada primeiro e exibida depois**. O visual "reproduz" a linha do tempo, como um vídeo. Assim, o resultado nunca depende da velocidade do computador ou da animação.
@@ -72,16 +72,15 @@ A partida é **simulada primeiro e exibida depois**. O visual "reproduz" a linha
 ├── core/                  ── LÓGICA (Claude) ──
 │   ├── autoload/          Singletons globais (estado do jogo, barramento de sinais)
 │   ├── models/            Classes de dados: jogador, campeão, time, técnico, contrato
-│   ├── systems/           Sistemas: liga, contratos, treino, ego, economia, reputação
-│   └── simulation/        Simulação da partida e do draft
+│   └── systems/           Sistemas: contratos, economia, draft, narração...; partida/ = simulação da partida
 ├── data/                  ── DADOS (Claude) ──
 │   ├── campeoes/          Catálogo dos campeões (campeoes.json, gerado a partir da proposta do GPT)
 │   ├── itens/             Itens e botas (data/itens/itens.json)
 │   ├── config/            Dificuldades, balanceamento, constantes
 │   ├── nomes/             Listas para gerar nomes de jogadores, times e regiões
-│   └── narracao/          Modelos de frase da narração
+│   └── narracao/          Frases da narração (narrador e comentarista)
 ├── tests/                 ── TESTES (Claude) ── testes automáticos da lógica
-├── tools/                 ── FERRAMENTAS (Claude) ── protótipos e laboratórios de balanceamento (prototipos/), relatórios (relatorios/), conversão de propostas em dados (conversao/), validadores (validacao/) e geradores de documentação (documentacao/)
+├── tools/                 ── FERRAMENTAS (Claude) ── protótipos e laboratórios de balanceamento (prototipos/), relatórios (relatorios/), conversão de propostas em dados (conversao/), validadores (validacao/), calibração da partida (calibracao/) e geradores de documentação (documentacao/)
 │
 ├── ui/                    ── INTERFACE (GPT) ──
 │   ├── telas/             Telas: menu, elenco, contratação, agenda, draft, tabela da liga...
@@ -161,7 +160,7 @@ As cenas da Godot dão conflito quando duas pessoas editam o mesmo arquivo. Por 
 | 2 ✅ | Contratos, contratação, técnico, calendário | Telas de mercado, contratação e elenco |
 | 3 | Agenda, treino, energia, ego | Tela de agenda semanal e perfil do jogador |
 | 4 | Campeões ✅ (catálogo, laboratório de equilíbrio), domínio de campeões ✅, patch ✅ e draft ✅ | Fichas e arte dos campeões; tela de draft |
-| 5 | Simulação da partida (linha do tempo) | Cena visual da partida e painel de narração |
+| 5 ✅ | Simulação da partida (linha do tempo) e narração | Cena visual da partida e painel de narração |
 | 6 | Liga, calendário, playoffs | Tabela, calendário, chaveamento |
 | 7 | Save/load | Menus de salvar e carregar |
 | 8 | Simulador de balanceamento | Ajustes visuais finais |

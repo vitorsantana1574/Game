@@ -352,6 +352,51 @@ func encerrar_draft() -> void:
 	draft_atual = null
 
 
+# --- Etapa 5: partida simulada ------------------------------------------------
+# A partida é simulada inteira de uma vez e devolvida como linha do tempo (docs/CONTRATO.md, seção 2.7).
+# Fica só na memória. Partida de treino não conta no histórico de campeões dos jogadores.
+
+var ultima_partida: Dictionary = {}
+
+
+## Simula a partida do draft concluído. Retorno: {"ok": true, "partida": {...}} ou erro em "draft".
+## opcoes: {"semente": int} para repetir uma partida (opcional).
+func simular_partida_do_draft(opcoes: Dictionary = {}) -> Dictionary:
+	if draft_atual == null:
+		return _erro("draft", "sem_draft", "Não há draft para jogar.")
+	if not draft_atual.concluido():
+		return _erro("draft", "draft_em_andamento", "Termine o draft antes da partida.")
+	var times: Array[Dictionary] = []
+	for lado: String in Draft.LADOS:
+		var time: Dictionary = draft_atual.times[lado]
+		var jogadores: Array[Dictionary] = []
+		for posicao: String in Draft.POSICOES:
+			jogadores.append({"posicao": posicao, "jogador": time["jogadores"][posicao],
+				"campeao": draft_atual.posicoes[lado][posicao]})
+		times.append({"nome": time["nome"], "macro_tecnico": _macro_tecnico_de(time), "jogadores": jogadores})
+	var semente: int = int(opcoes.get("semente", hash("%d:partida:%d:%d" % [carreira.semente, carreira.dia, randi()])))
+	var partida: Dictionary = SimuladorPartida.simular({"times": times, "forcas_patch": carreira.forcas_patch, "semente": semente})
+	partida["lado_jogador"] = _lado_jogador
+	partida["venceu"] = Draft.LADOS[int(partida["vencedor"])] == _lado_jogador
+	partida["treino"] = draft_atual.times[Draft.outro(_lado_jogador)].get("id", "") == "treino"
+	ultima_partida = partida
+	Eventos.partida_simulada.emit(partida)
+	return {"ok": true, "partida": partida}
+
+
+## Geometria do mapa para desenhar a partida (coordenadas de 0 a 1). Ver docs/CONTRATO.md, seção 2.7.
+func mapa_partida() -> Dictionary:
+	return Dados.mapa().duplicate(true)
+
+
+## Macro do técnico (0 a 100) que entra na leitura de jogo do time; -1 quando não há técnico.
+func _macro_tecnico_de(time: Dictionary) -> int:
+	if time.get("id", "") == "treino":
+		return roundi(float(Dados.draft()["treino"]["qualidade_tecnico"]) * 100.0)
+	var tecnico: Tecnico = carreira.organizacao.tecnico
+	return int(tecnico.atributos.get("macro", 50)) if tecnico != null else -1
+
+
 func _acao_draft(campeao_id: String, acao: String) -> Dictionary:
 	if draft_atual == null:
 		return _erro("draft", "sem_draft", "Não há draft em andamento.")

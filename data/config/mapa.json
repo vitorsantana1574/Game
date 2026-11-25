@@ -1,0 +1,35 @@
+{
+	"_comentario": "Mapa de Crystal Legends em coordenadas normalizadas (0 a 1; x para a direita, y para baixo). Time azul embaixo à esquerda, vermelho em cima à direita. A lógica usa estes pontos para posicionar campeões e lances na linha do tempo; a arte do GPT deve seguir a mesma geometria (ou pedir ajuste aqui).",
+	"bases": {
+		"azul": {"fonte": [0.04, 0.96], "cristal": [0.08, 0.92], "guardiao": [0.12, 0.88]},
+		"vermelho": {"fonte": [0.96, 0.04], "cristal": [0.92, 0.08], "guardiao": [0.88, 0.12]}
+	},
+	"rotas": {
+		"_comentario": "Cada rota vai da base azul até a base vermelha. A posição numa rota é um número de 0 (base azul) a 1 (base vermelha).",
+		"topo": [[0.13, 0.82], [0.10, 0.45], [0.12, 0.13], [0.45, 0.10], [0.82, 0.13]],
+		"meio": [[0.17, 0.83], [0.50, 0.50], [0.83, 0.17]],
+		"baixo": [[0.18, 0.87], [0.55, 0.90], [0.87, 0.88], [0.90, 0.55], [0.87, 0.18]]
+	},
+	"torres": {
+		"_comentario": "Posição de cada torre na rota, a partir da base do próprio time: 1ª (externa), 2ª e 3ª (interna). As do time vermelho ficam em 1 menos esse valor.",
+		"posicoes": [0.36, 0.24, 0.12]
+	},
+	"monstros_epicos": {
+		"hydra": [0.31, 0.33],
+		"cerbero": [0.69, 0.67]
+	},
+	"acampamentos": {
+		"_comentario": "Posições na selva azul. Na selva vermelha, o mesmo acampamento fica em (1 - x, 1 - y).",
+		"passaros": [0.24, 0.52],
+		"sapo": [0.30, 0.62],
+		"rato": [0.22, 0.66],
+		"aranhas": [0.47, 0.70],
+		"polvo": [0.56, 0.79],
+		"golem": [0.42, 0.80]
+	},
+	"nomes_rotas": {
+		"topo": {"nome": "topo", "na": "no topo", "da": "do topo"},
+		"meio": {"nome": "meio", "na": "no meio", "da": "do meio"},
+		"baixo": {"nome": "rota de baixo", "na": "na rota de baixo", "da": "da rota de baixo"}
+	}
+}

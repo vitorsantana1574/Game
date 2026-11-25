@@ -1,0 +1,160 @@
+{
+	"_comentario": "Gerado por tools/prototipos/laboratorio_campeoes.py. Taxa de vitória de cada campeão na luta 5x5 por momento (nível 6, 10 e 16). Força escondida: não vai para a interface.",
+	"campeoes": {
+		"alvenora": {
+			"fim": 0.5466,
+			"inicio": 0.4326,
+			"meio": 0.4636
+		},
+		"brumeria": {
+			"fim": 0.5141,
+			"inicio": 0.4852,
+			"meio": 0.4562
+		},
+		"calzugo": {
+			"fim": 0.5043,
+			"inicio": 0.5042,
+			"meio": 0.4844
+		},
+		"cintarro": {
+			"fim": 0.4866,
+			"inicio": 0.5644,
+			"meio": 0.5286
+		},
+		"clavento": {
+			"fim": 0.4973,
+			"inicio": 0.5659,
+			"meio": 0.5298
+		},
+		"dorsalio": {
+			"fim": 0.4777,
+			"inicio": 0.4902,
+			"meio": 0.4684
+		},
+		"eirafim": {
+			"fim": 0.5534,
+			"inicio": 0.4703,
+			"meio": 0.4912
+		},
+		"fulcrim": {
+			"fim": 0.4654,
+			"inicio": 0.6338,
+			"meio": 0.4632
+		},
+		"fulgaveu": {
+			"fim": 0.451,
+			"inicio": 0.4815,
+			"meio": 0.5593
+		},
+		"iscavro": {
+			"fim": 0.5607,
+			"inicio": 0.4099,
+			"meio": 0.5827
+		},
+		"kordume": {
+			"fim": 0.4911,
+			"inicio": 0.545,
+			"meio": 0.4948
+		},
+		"luminela": {
+			"fim": 0.4553,
+			"inicio": 0.4323,
+			"meio": 0.5175
+		},
+		"marulva": {
+			"fim": 0.5092,
+			"inicio": 0.4298,
+			"meio": 0.5571
+		},
+		"mirfuso": {
+			"fim": 0.4886,
+			"inicio": 0.5006,
+			"meio": 0.4709
+		},
+		"nalcora": {
+			"fim": 0.4428,
+			"inicio": 0.6008,
+			"meio": 0.5132
+		},
+		"ocravia": {
+			"fim": 0.495,
+			"inicio": 0.4565,
+			"meio": 0.5018
+		},
+		"orvante": {
+			"fim": 0.4705,
+			"inicio": 0.5188,
+			"meio": 0.5258
+		},
+		"perlivia": {
+			"fim": 0.4965,
+			"inicio": 0.5274,
+			"meio": 0.5349
+		},
+		"prismora": {
+			"fim": 0.5454,
+			"inicio": 0.4006,
+			"meio": 0.5617
+		},
+		"ravineo": {
+			"fim": 0.4801,
+			"inicio": 0.5754,
+			"meio": 0.465
+		},
+		"riscavela": {
+			"fim": 0.5153,
+			"inicio": 0.489,
+			"meio": 0.4888
+		},
+		"suteria": {
+			"fim": 0.5303,
+			"inicio": 0.5874,
+			"meio": 0.4473
+		},
+		"terralume": {
+			"fim": 0.542,
+			"inicio": 0.4166,
+			"meio": 0.5428
+		},
+		"tessari": {
+			"fim": 0.5134,
+			"inicio": 0.4395,
+			"meio": 0.4621
+		},
+		"trevalio": {
+			"fim": 0.5039,
+			"inicio": 0.5159,
+			"meio": 0.4512
+		},
+		"trisquilo": {
+			"fim": 0.4988,
+			"inicio": 0.5335,
+			"meio": 0.5083
+		},
+		"vardilha": {
+			"fim": 0.4203,
+			"inicio": 0.5349,
+			"meio": 0.4933
+		},
+		"vedrassa": {
+			"fim": 0.48,
+			"inicio": 0.5219,
+			"meio": 0.5365
+		},
+		"veluria": {
+			"fim": 0.5453,
+			"inicio": 0.4448,
+			"meio": 0.4745
+		},
+		"zarcavil": {
+			"fim": 0.4976,
+			"inicio": 0.5169,
+			"meio": 0.4137
+		}
+	},
+	"niveis": {
+		"fim": 16,
+		"inicio": 6,
+		"meio": 10
+	}
+}

@@ -86,7 +86,7 @@ A Resistência funciona em duas partes:
 ### 6.2 Como os atributos interagem na partida
 
 - **Farm vs. Micro:** o farm de cada jogador na fase de rotas = seu atributo Farm, **ajustado pela diferença de Micro** contra o oponente direto. Um jogador com Farm ótimo e Micro fraco perde farm para um rival agressivo.
-- **Lutas em equipe:** não há atributo próprio de Teamfight. O desempenho nas lutas é calculado a partir de **Micro + Macro** (e do nível e itens de cada personagem). Fórmula exata: **[A DEFINIR]**
+- **Lutas em equipe:** não há atributo próprio de Teamfight. O desempenho nas lutas é calculado a partir de **Micro + Macro** (e do nível e itens de cada personagem). Fórmula implementada: ver 7.4.
 - **Mental:** quando o time está atrás no placar/ouro, o desempenho de cada jogador cai — e quanto maior o Mental, menor essa queda.
 
 ### 6.3 Domínio de campeões
@@ -117,7 +117,8 @@ Isso dá peso ao **pick & ban** e ao **meta** de cada patch.
 - Especialistas conhecem cerca de 4 campeões, com o favorito perto de 94. Versáteis conhecem cerca de 11, com o melhor perto de 82.
 - Os campeões conhecidos combinam com as posições do jogador.
 - Um campeão fora das posições dele rende 65%; numa posição secundária, 90%.
-- Os valores finais serão calibrados com a simulação de partidas.
+- **Na partida (decidido em 25/11):** o domínio pesa **forte no Micro** (os percentuais acima), **pela metade no Farm** (102,5% / 100% / 96% / 90%) e **nada no Macro**. Assim, alguém de habilidade alta num campeão que não conhece ainda leva uma **leve vantagem** sobre alguém fraco no campeão favorito, e o Macro do time pode engolir qualquer vantagem individual.
+- Calibrado com a simulação de partidas (7.4).
 
 ### 6.4 Traços ocultos
 
@@ -207,9 +208,11 @@ Baseado em League of Legends, mas não idêntico:
 **Exibição da partida:** visão **2D de cima**, com os campeões se movendo e lutando sozinhos pelo mapa, e um **painel de narração ao lado** descrevendo o que está acontecendo (abates, ganks, objetivos, torres, roubos etc.).
 
 **O jogador não é obrigado a assistir tudo.** Opções:
-- velocidades **1x, 2x, 4x e 8x**;
-- **"Só os melhores momentos"**: acelera e para nas lutas, objetivos e torres;
+- **"Melhores momentos"** (padrão): acelera e para nas lutas, objetivos e torres;
+- **partida inteira** em **1x, 2x ou 4x**;
 - **"Ver resultado"**: pula direto para o fim, com as estatísticas.
+
+Detalhes da simulação, do mapa e da narração: 7.4.
 
 ## 7.0 Ritmo da partida (proposto e testado)
 
@@ -228,7 +231,7 @@ Valores calibrados com 2.000 partidas simuladas no protótipo de ritmo. Relatór
 | **Ouro passivo** | 2,4 por segundo a partir de 1:30 |
 | **Renascimento** | 6 s + 2,6 s por nível (nível 1: 9 s; nível 16: 48 s). Depois dos 25 min, +2% por minuto, até +50% |
 | **Itens (atirador típico)** | Bota aos ~5 min, 2º item aos ~13, 3º aos ~21, 4º aos ~29, 5º aos ~37 (partidas longas). Bota custa 1.000 de ouro; itens, ~2.700 |
-| **Item de suporte** | O suporte começa com um item que gera ouro: 35% do ouro dos minions que o atirador abate por perto + 60 por participação em abate. **Não depende do Farm do suporte** — o suporte ajuda o atirador a farmar, não farma. Resultado: suporte com ~73% do ouro do atirador |
+| **Item de suporte** | O suporte começa com um item que gera ouro: 25% do ouro dos minions que o atirador abate por perto + 35 por participação em abate (era 35% + 60 no protótipo; baixado quando a simulação passou a distribuir assistências de verdade). **Não depende do Farm do suporte** — o suporte ajuda o atirador a farmar, não farma. Resultado: suporte com ~73% do ouro do atirador |
 | **Ordem dos itens** | Segue a recomendação de cada campeão. **Macro alto adapta a ordem à partida** (ex.: atrasar a bota para fechar antes um item decisivo, item contra cura). **Micro alto faz compras arriscadas renderem mais** (itens só de dano) |
 | **Reaparecimento dos monstros épicos** | **6 minutos** (Cérbero e Hydra). Bônus continua durando 2 minutos. Resultado: ~3,5 de cada por partida |
 | **Cérbero** | Aparece aos **4:22** (nível 5 teórico); na prática o 1º é abatido por volta dos 6 min |
@@ -480,7 +483,52 @@ O dono do projeto aprovou os **30 campeões** propostos pelo GPT (`docs/proposta
 
   Resultado: médias por classe entre 47% e 54% em todos os momentos, e curvas na direção certa (fortes no início 56% → 49%; fortes no fim 45% → 53%).
 - **Proposta de kits nº 1 (aprovada em 25/11):** Clavento (exposto após o avanço; atordoamento maior no combo; Égide de Aço vira alternativa), Prismora (tripé armado, dano por distância, +12% por item), Vedrassa (divide 20% do dano do aliado; escudo cresce com a vida bônus) e Nalcora (dano vai para a resistência mais baixa, atravessa escudos mágicos, +30% em alvo lento, abate reabre a passiva). Depois de recalibrados, os quatro ficam entre 50% e 53% de vitória. Os textos são provisórios até o GPT reescrever as fichas.
-- **Valor de nível:** com os atributos dos campeões, 1 nível a mais vale cerca de +6 a 8% de força, como no protótipo de ritmo. **A simulação da partida não soma um bônus genérico por nível** quando usar os atributos dos campeões, para não contar o nível duas vezes.
+- **Valor de nível:** com os atributos dos campeões, 1 nível a mais vale cerca de +6 a 8% de força, como no protótipo de ritmo (7,5% por nível). **O nível não é contado duas vezes:** a simulação da partida usa os 7,5% por nível e, dos campeões, só a **curva relativa** do laboratório (quanto cada um é mais forte ou mais fraco que a média em cada momento), em `data/campeoes/curvas_de_forca.json`.
+
+## 7.4 Simulação e exibição da partida (decidido em 25/11)
+
+**Decisões do dono:**
+- A partida é simulada por **regras + semente**: mesma semente, mesma partida. **Sem IA de linguagem** (nem para simular, nem para narrar). Os números são calibrados em laboratório.
+- **Sem intervenção do técnico durante a partida.** Ajustes só entre os jogos de uma série.
+- Formas de assistir: **melhores momentos** (padrão), partida inteira em 1x/2x/4x, ou pular para o resultado.
+- **Mapa 2D visto de cima**, com os campeões como **fichas redondas** (retrato do campeão). O estilo é detalhado pelo GPT com o dono.
+- **Narração em dupla:** um **narrador** (conta o lance, com energia) e um **comentarista** (explica o porquê). **Frases pré-escritas pelo Claude**, naturais, no jeito de transmissão de LoL (first blood, gank, dive, teamfight, ace, shutdown, farm/CS, wave, peel, engage…), sem cara de texto gerado.
+
+**Como a simulação funciona** (`core/systems/partida/simulador_partida.gd`, constantes em `data/config/partida.json` → `simulacao`):
+- Passos de **5 segundos**. Waves dão XP e ouro conforme o **Farm**, ajustado pela diferença de **Micro** contra o rival direto; o caçador limpa a selva.
+- **Força de cada campeão** = habilidade do jogador (50% Micro, 30% Macro, 20% Farm) × nível (+7,5% por nível) × itens × **curva do campeão** × **força escondida do patch** × **adequação à posição**.
+  - Curva do campeão: o laboratório mede a taxa de vitória de cada campeão no início (nível 6), meio (10) e fim (16); 1 ponto percentual acima de 50% vale +0,9% de força. Assim, um campeão forte no fim cresce de verdade ao longo da partida.
+  - **Forma do dia:** cada jogador tem uma pequena variação por partida; **Mental alto** deixa o jogador mais constante.
+  - **Energia** baixa reduz Micro e Macro (até −15%).
+- **Fase de rotas** (até 14 min): trocas na rota (Micro e força), **ganks** (o caçador com Macro alto acha mais oportunidades; a visão do suporte rival atrapalha), **dive** quando um lado está bem à frente.
+- **Lutas em equipe** depois disso e nos objetivos: chance de vencer pela razão de força dos dois times, com bônus do **Macro do time** (média dos jogadores, com 20% do Macro do técnico), queda de quem está atrás compensada pelo **Mental**, e bônus de defesa perto da base.
+- Quem vence a luta converte a vantagem: objetivo disponível (Hydra/Cérbero), depois torres, Guardião e Cristal, enquanto o outro time renasce.
+- **Roubo de objetivo:** o caçador de quem perdeu a luta pode roubar. Chegar a tempo é Macro do time; acertar é a diferença de Micro entre os caçadores.
+
+**Duas pessoas experientes na mesma rota, uma com campeão forte no início e outra com campeão forte no fim:** a primeira tende a ganhar as trocas e o farm nos primeiros 10 a 14 minutos; a segunda segura (Mental, Macro) e passa a vencer as lutas do meio para o fim, quando a curva do campeão vira. Quem decide é o resto do mapa: se a vantagem do começo virou torre e objetivo, o campeão de fim pode nem chegar a crescer.
+
+**Resultado da calibração** (`tools/calibracao/calibrar_partida.gd`, 600 partidas entre times iguais + 900 com diferença de qualidade, jogadores reais gerados e domínio de campeões):
+
+| Meta | Simulação |
+|---|---|
+| Duração mediana ≈ 32 min | **32 min** (80% entre 25 e 39 min) |
+| ≈ 33 abates | **32,6** |
+| Time 2.500+ atrás aos 15 min vence ≈ 33% | **28 a 32%** (varia com a amostra) |
+| Suporte com ≈ 73% do ouro do atirador | **74%** |
+| Hydra e Cérbero ≈ 3,5 a 3,9 de cada | **3,5 e 3,9** |
+| Lado azul ≈ 50% | **50 a 52%** |
+| Time mais forte vence (5 / 10 / 20 pontos) ≈ 63 / 73 / 90% | **≈ 64 / 74 / 91%** (média de três amostras) |
+
+Cada partida leva menos de 0,1 s para simular.
+
+**Narração** (`data/narracao/narracao.json`, `core/systems/narracao.gd`):
+- Mais de 230 frases, divididas por tipo de lance. O narrador sempre fala; o comentarista entra numa parte dos lances (sempre no início, no fim e em roubos).
+- O comentarista **só afirma o que a partida sustenta**: frases como "atropelo, esteve na frente do começo ao fim" ou "que virada" só aparecem quando aconteceu; comentários de conforto/desconforto só aparecem quando o domínio do jogador naquele campeão é mesmo Favorito / Não conhece.
+- A mesma frase não se repete enquanto houver outra opção para aquele tipo de lance.
+
+**Mapa** (`data/config/mapa.json`): coordenadas de 0 a 1, azul embaixo à esquerda, vermelho em cima à direita, rota do meio numa diagonal e rio na outra (Hydra do lado azul do rio, Cérbero do lado vermelho). A arte segue essa geometria ou pede ajuste.
+
+**Ainda não decidido:** se uma partida oficial gasta energia dos jogadores e quanto; se partida oficial conta no histórico de campeões (treino não conta).
 
 ## 8. Draft (pick & ban)
 
@@ -781,7 +829,7 @@ Detalhes: **[A DEFINIR]**
 - [ ] Sistema de energia, descanso e treino
 - [x] Campeões fictícios (30, catálogo e laboratório de equilíbrio)
 - [x] Draft (sistema, IA e patch escondido; tela com o GPT)
-- [ ] Simulação de partida
+- [x] Simulação de partida (lógica e narração; tela com o GPT)
 - [ ] Liga e calendário
 - [ ] Salvar e carregar
 - [ ] Versão de navegador publicada no itch.io
@@ -793,8 +841,7 @@ Detalhes: **[A DEFINIR]**
 
 - Valores de dinheiro inicial e de cada nível de dificuldade
 - Penalidade por jogar fora da posição principal
-- Fórmula das lutas em equipe (Micro + Macro)
-- Balanceamento de torres, Guardião, monstros épicos e acampamentos
+- Energia gasta por partida oficial
 - Detalhes dos acampamentos da selva (posição, reaparição, bônus)
 - Técnico: custos e tempos dos anúncios, efeitos do cansaço e duração das férias
 - Reputação: outros efeitos e exibição

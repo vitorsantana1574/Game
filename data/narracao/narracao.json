@@ -1,0 +1,473 @@
+{
+	"_comentario": "Frases da narração da partida (dupla narrador + comentarista). Escritas pelo Claude a pedido do dono (25/11): português do Brasil, jeito de transmissão de LoL, sem cara de texto gerado. Regras de escrita: nada de artigo antes de nome de jogador, campeão ou time (use 'de {time}', 'para {time}'); nada de adjetivo com gênero sobre pessoas; o comentarista só afirma o que a partida sustenta (listas 'comentarista_<contexto>' e 'narrador_<contexto>' são escolhidas pelo simulador quando o contexto é verdadeiro). Marcadores: {jogador} {campeao} {alvo} {alvo_campeao} {time} {rival} {rota} {na_rota} {da_rota} {local} {minuto} {ouro} {quantidade} {abates_texto} {cacador} {objetivo} {pelo_objetivo}. {objetivo} já vem com artigo ('a Hydra', 'o Cérbero'); a primeira letra de cada frase vira maiúscula automaticamente.",
+	"vozes": {
+		"narrador": {"nome": "Narrador", "papel": "Narra o lance, com energia."},
+		"comentarista": {"nome": "Comentarista", "papel": "Explica por que o lance aconteceu e o que ele muda."}
+	},
+	"chance_comentario": {
+		"_comentario": "Chance de o comentarista falar depois do narrador, por tipo de lance.",
+		"padrao": 0.35,
+		"inicio": 1.0,
+		"primeiro_sangue": 0.8,
+		"gank_falhou": 0.6,
+		"gank_virado": 0.8,
+		"roubo_objetivo": 1.0,
+		"ace": 0.9,
+		"multiabate": 0.7,
+		"shutdown": 0.8,
+		"reacao": 1.0,
+		"guardiao": 0.7,
+		"escaramuca": 0.25,
+		"vitoria": 1.0
+	},
+	"eventos": {
+		"inicio": {
+			"narrador": [
+				"Minions na rota, {time} contra {rival}. Valendo!",
+				"É agora! Os campeões saem da base e a partida começa.",
+				"Rola a bola em Crystal Legends: {time} de um lado, {rival} do outro.",
+				"Todo mundo posicionado... e começa! {time} contra {rival}.",
+				"Primeira wave chegando, cada um na sua rota. Vamos nessa!"
+			],
+			"comentarista": [
+				"Olho na selva. Quem ganhar os primeiros minutos do caçador costuma ditar o mapa.",
+				"Draft equilibrado. Vai pesar quem tomar as melhores decisões de mapa.",
+				"Começo é farm e paciência. Quem errar a troca agora paga até o meio do jogo."
+			],
+			"comentarista_comp_cedo": [
+				"Pelo draft, {time} quer jogo cedo. Se deixar a partida esfriar, a composição do outro lado cresce.",
+				"{time} montou time pra brigar cedo. Precisa abrir vantagem antes dos 20 minutos.",
+				"Composição de {rival} é de fim de jogo. O plano deles é simples: sobreviver à fase de rotas."
+			]
+		},
+		"primeiro_sangue": {
+			"narrador": [
+				"FIRST BLOOD! {jogador} abre o placar em cima de {alvo}!",
+				"Saiu o primeiro abate da partida! {jogador} de {campeao} derruba {alvo}!",
+				"É de {jogador} o first blood! Não teve conversa {na_rota}.",
+				"PRIMEIRO SANGUE! {campeao} pega {alvo_campeao} e {time} sai na frente!",
+				"Lá vem, lá vem... FIRST BLOOD para {time}! {jogador} faz a festa.",
+				"Abriu a contagem! {alvo} não segura e {jogador} leva o first blood."
+			],
+			"comentarista": [
+				"Esse ouro do first blood adianta o primeiro item. Faz diferença na próxima troca.",
+				"{alvo} avançou demais sem visão. Com a wave do seu lado, o cuidado tem que ser dobrado.",
+				"First blood com {minuto} minutos. Agora é ver se {time} sabe aproveitar.",
+				"Não é só o abate: {alvo} perde a wave inteira voltando pra base.",
+				"{rival} vai precisar responder rápido, senão essa rota vira problema."
+			]
+		},
+		"abate_solo": {
+			"narrador": [
+				"{jogador} sai no mano a mano e derruba {alvo}!",
+				"Solo kill {na_rota}! {campeao} passa por cima de {alvo_campeao}.",
+				"Que troca! {jogador} vence o duelo e pega {alvo}.",
+				"No um contra um, deu {jogador}! {alvo} cai.",
+				"Ninguém ajudou ninguém e {jogador} resolveu sozinho!",
+				"{alvo} aceitou a briga... e pagou caro. Abate de {jogador}.",
+				"Foi pra cima e foi certeiro: {campeao} derruba {alvo_campeao} {na_rota}.",
+				"Derrubou! {jogador} ganha o duelo {na_rota}."
+			],
+			"comentarista": [
+				"{jogador} contou direitinho a vida. Sabia que vencia aquela troca.",
+				"Mecânica pura. {jogador} acertou tudo que tinha pra acertar.",
+				"{alvo} forçou a troca na hora errada, com a habilidade principal ainda recarregando.",
+				"Isso desmonta a rota. Agora {jogador} tem pressão pra rodar pelo mapa.",
+				"Duelo assim é Micro. Não tem estratégia que salve quando o outro executa melhor."
+			]
+		},
+		"abate_gank": {
+			"narrador": [
+				"Olha o gank! {cacador} chega pela selva e {alvo} não tem pra onde correr!",
+				"GANK PERFEITO! {cacador} entra e {jogador} finaliza {alvo}!",
+				"Chegou a ajuda da selva! Dois contra um e {alvo} cai.",
+				"{cacador} aparece do nada e pegou! Abate para {time} {na_rota}!",
+				"Que entrada de {cacador}! {alvo} tentou fugir, mas não deu.",
+				"Gank {na_rota}! {alvo_campeao} cai e {time} comemora."
+			],
+			"comentarista": [
+				"{cacador} leu o mapa. Viu que {alvo} estava sem visão e foi na hora certa.",
+				"Não tinha uma ward no rio. Caçador agradece.",
+				"Esse gank é Macro: perceber a rota avançada e chegar antes da wave voltar.",
+				"{rival} precisa colocar visão nessa entrada.",
+				"Timing perfeito do caçador. Chegou junto com o controle do aliado.",
+				"Quando o caçador ganha a rota assim, ela vira moeda pros próximos objetivos."
+			]
+		},
+		"gank_falhou": {
+			"narrador": [
+				"Tentaram o gank, mas {alvo} escapa! Sai com um fio de vida!",
+				"{cacador} chega... e {alvo} foge por pouco! Não foi dessa vez.",
+				"Que fuga! {alvo} sai do dois contra um e volta pra torre.",
+				"O gank veio, mas {alvo} jogou demais! Escapou!",
+				"Quase! {alvo} sobrevive com pouquíssima vida."
+			],
+			"comentarista": [
+				"Gank que não sai abate também custa. {cacador} perdeu o tempo dos acampamentos.",
+				"{alvo} viu o caçador na ward e recuou um passo antes. Esse passo salvou.",
+				"Mesmo sem abate, a rota ficou presa embaixo da torre. Não foi tudo perdido.",
+				"Faltou dano pra fechar. A entrada foi boa, a execução nem tanto."
+			]
+		},
+		"gank_virado": {
+			"narrador": [
+				"VIROU! O gank deu errado e {jogador} pune {alvo}!",
+				"Que reação! {jogador} vira o dois contra um e derruba {alvo}!",
+				"Tentaram pegar {jogador}, mas quem caiu foi {alvo}!",
+				"Olha isso! {jogador} se defende e ainda leva o abate!"
+			],
+			"comentarista": [
+				"Caçador entrou sem saber que {jogador} tinha a fuga pronta. Pagou caro.",
+				"Isso é Micro de outro nível. Transformou um gank em presente.",
+				"Péssima hora pra gankar. A wave estava do lado de quem defendia, a torre ajudou.",
+				"Esse lance mexe com a cabeça. {alvo} vai pensar duas vezes antes de voltar nessa rota."
+			]
+		},
+		"abate_dive": {
+			"narrador": [
+				"DIVE! Foram embaixo da torre e pegaram {alvo}!",
+				"Mergulhou na torre e deu certo! {jogador} finaliza {alvo}.",
+				"Nem a torre salvou! {alvo} cai debaixo da própria torre.",
+				"Tower dive de {time}! {alvo_campeao} não aguenta.",
+				"Entrou com tudo embaixo da torre e saiu com o abate!"
+			],
+			"comentarista": [
+				"Arriscado, mas a conta fechou. {alvo} estava sem vida pra aguentar.",
+				"Quando a vantagem é grande assim, nem a torre protege.",
+				"Isso só acontece com muita confiança no dano. E {jogador} tem.",
+				"Dive no tempo certo: entrou, pegou e saiu antes da torre virar."
+			]
+		},
+		"abate": {
+			"narrador": [
+				"{jogador} pega {alvo}!",
+				"Abate para {time}! {campeao} derruba {alvo_campeao}.",
+				"Caiu {alvo}! Ponto para {time}.",
+				"{alvo} vai pra base mais cedo. Abate de {jogador}.",
+				"Pegou! {jogador} finaliza {alvo}.",
+				"Sobrou pra {alvo}! {campeao} não perdoa."
+			],
+			"comentarista": [
+				"Posicionamento ruim de {alvo}, que se expôs sem necessidade.",
+				"Mais ouro para {time}. A diferença já passa de {ouro}.",
+				"Esses abates pequenos vão somando. Daqui a pouco é item de diferença."
+			]
+		},
+		"multiabate": {
+			"narrador_2": [
+				"DOUBLE KILL! {jogador} pega dois!",
+				"Dois de uma vez! Double kill de {campeao}!",
+				"{jogador} limpa a dupla! DOUBLE KILL!"
+			],
+			"narrador_3": [
+				"TRIPLE KILL! {jogador} tá impossível!",
+				"Três! Triple kill de {jogador} de {campeao}!",
+				"É TRIPLE! {campeao} varre a luta!"
+			],
+			"narrador_4": [
+				"QUADRA KILL! {jogador}, que absurdo!",
+				"Quatro abates! QUADRA de {jogador}! Falta um!",
+				"QUADRAAA! {campeao} desmonta o time inteiro!"
+			],
+			"narrador_5": [
+				"PEEENTAKILL! {jogador} PEGA OS CINCO! INACREDITÁVEL!",
+				"PENTAKILL! {jogador} fez sozinho! Os cinco no chão!",
+				"É PENTA! É PENTA! {jogador} de {campeao}, que momento!"
+			],
+			"comentarista": [
+				"O time abriu espaço e {jogador} fez o que sabe. Isso é carregar.",
+				"Repara no posicionamento: sempre na borda da luta, batendo em quem chegava.",
+				"Esse lance vai pro destaque da rodada, pode anotar.",
+				"{jogador} esperou a hora certa de entrar. Quando entrou, ninguém segurou."
+			]
+		},
+		"shutdown": {
+			"narrador": [
+				"SHUTDOWN! Acabou a festa de {alvo}!",
+				"Pararam {alvo}! {jogador} leva a recompensa gorda!",
+				"Fim da sequência! {alvo} cai e {jogador} embolsa o ouro do shutdown.",
+				"Quem para {alvo}? {jogador} para! SHUTDOWN!"
+			],
+			"comentarista": [
+				"Esse shutdown vale muito ouro. {jogador} volta pra base com item novo.",
+				"{alvo} estava em sequência e ficou confiante demais.",
+				"Era a cabeça mais valiosa do mapa. Que alívio para {time}.",
+				"A recompensa existe pra isso: punir quem estica demais a corda."
+			]
+		},
+		"sequencia": {
+			"narrador": [
+				"{jogador} chega a {quantidade} abates seguidos! Tá em chamas!",
+				"Mais um pra conta! {jogador} não para: {quantidade} sem morrer.",
+				"{quantidade} seguidos! Alguém segura {jogador}?"
+			],
+			"comentarista": [
+				"Com essa sequência, a cabeça de {jogador} já vale um bom ouro para {rival}.",
+				"Momento de confiança total. Quando entra nessa, joga sem medo.",
+				"{rival} precisa focar {jogador} na próxima luta. Não dá pra deixar livre."
+			]
+		},
+		"torre": {
+			"narrador": [
+				"Cai a torre {da_rota}! Ouro para {time}.",
+				"Torre no chão! {time} avança {na_rota}.",
+				"Derrubaram mais uma! {time} abrindo caminho {na_rota}.",
+				"Lá se vai a torre! {rival} perde terreno {na_rota}.",
+				"Estrutura destruída {na_rota}. Ponto para {time}."
+			],
+			"comentarista": [
+				"Cada torre abre mais mapa. Agora {time} coloca visão na selva inimiga com segurança.",
+				"Torre é ouro pro time inteiro. Ninguém fica pra trás nos itens.",
+				"{rival} não conseguiu rotacionar pra defender. Faltou leitura de mapa.",
+				"Wave empurrada, torre no chão. É assim que se joga com vantagem."
+			]
+		},
+		"primeira_torre": {
+			"narrador": [
+				"PRIMEIRA TORRE DA PARTIDA! {time} derruba {na_rota}!",
+				"Saiu a primeira torre! Caminho livre {na_rota} para {time}.",
+				"First tower para {time}! Ouro extra e mapa liberado."
+			],
+			"comentarista": [
+				"A primeira torre dá ouro e, mais importante, liberdade pra rodar pelo mapa.",
+				"Com a torre {da_rota} no chão, {time} pode puxar o jogo pro lado dos objetivos.",
+				"Isso premia quem ganhou a rota. Vantagem de rota virando vantagem de mapa."
+			]
+		},
+		"torre_cerbero": {
+			"narrador": [
+				"Com o bônus do Cérbero, a torre derrete! Caiu em segundos!",
+				"O Cérbero faz efeito: torre {da_rota} no chão num piscar de olhos!",
+				"Que estrago! Bônus do Cérbero e lá se vai mais uma torre."
+			],
+			"comentarista": [
+				"É pra isso que se pega o Cérbero. Dano dobrado em torre muda o ritmo do jogo.",
+				"Dois minutos de bônus e {time} está usando cada segundo.",
+				"Bem usado. Não adianta pegar o Cérbero e ficar parado."
+			]
+		},
+		"base_aberta": {
+			"narrador": [
+				"Caiu a última torre {da_rota}! A base de {rival} está exposta!",
+				"Acabaram as torres {na_rota}! Os minions fortalecidos vão chegar.",
+				"Sem torre nenhuma {na_rota}! {rival} sente a pressão."
+			],
+			"comentarista": [
+				"Agora vêm os minions fortalecidos. Eles dão mais ouro a quem defende, então ainda tem jogo.",
+				"Base aberta é pressão constante. {rival} vai ter que dividir o time pra segurar.",
+				"O Guardião é a última barreira. E ele bate forte, não dá pra entrar de qualquer jeito."
+			]
+		},
+		"cerbero": {
+			"narrador": [
+				"O Cérbero é de {time}! Bônus garantido pra pressionar torres.",
+				"Caiu o Cérbero! {time} sai com o bônus.",
+				"Cérbero no papo! {time} vai pra cima das estruturas."
+			],
+			"narrador_sem_luta": [
+				"{time} faz o Cérbero sem ninguém incomodar.",
+				"Cérbero tranquilo para {time}. Ninguém apareceu pra contestar.",
+				"{time} fecha o Cérbero sem disputa! Hora de derrubar torre."
+			],
+			"comentarista": [
+				"Agora é jogar rápido. O bônus dura só dois minutos.",
+				"Esse é o objetivo de torre. Com ele, {time} quer abrir o mapa."
+			],
+			"comentarista_sem_luta": [
+				"Pegaram o Cérbero sem ninguém aparecer. {rival} não tinha visão do rio.",
+				"{rival} estava do outro lado do mapa. Objetivo de graça."
+			],
+			"comentarista_pos_luta": [
+				"Ganhou a luta, pegou o objetivo. Não tem segredo.",
+				"Com o outro time renascendo, o Cérbero sai sem resistência."
+			]
+		},
+		"hydra": {
+			"narrador": [
+				"A Hydra é de {time}! As três cabeças caíram!",
+				"Hydra garantida! {time} fica com o bônus de luta!",
+				"Caiu a Hydra! E agora {time} chega muito mais forte nas lutas."
+			],
+			"narrador_sem_luta": [
+				"{time} faz a Hydra sem disputa!",
+				"Hydra limpa para {time}. Ninguém veio contestar.",
+				"{time} esconde o jogo e fecha a Hydra quietinho."
+			],
+			"comentarista": [
+				"Bônus da Hydra é mais dano e mais vida. Nos próximos dois minutos, {time} é favorito em qualquer luta.",
+				"Hydra é o maior objetivo do mapa. {rival} vai ter que jogar recuado agora.",
+				"Com esse bônus, a hora de forçar estrutura é agora."
+			],
+			"comentarista_sem_luta": [
+				"Repara que {time} limpou a visão antes de começar. Isso garantiu a Hydra.",
+				"{rival} demorou a perceber. Quando chegou, já não tinha mais Hydra."
+			],
+			"comentarista_pos_luta": [
+				"Luta ganha, Hydra garantida. Aproveitou cada segundo com o outro time morto.",
+				"É isso que a teamfight compra: objetivo de graça."
+			]
+		},
+		"roubo_objetivo": {
+			"narrador": [
+				"ROUBOU! {cacador} ROUBA {objetivo}! INACREDITÁVEL!",
+				"NÃÃÃO! {cacador} pega o último golpe e rouba {objetivo}!",
+				"QUE ROUBO! {cacador} entra na hora certa e leva {objetivo}!",
+				"Ninguém acredita! {objetivo} vai para {time} no último golpe de {cacador}!"
+			],
+			"comentarista": [
+				"Isso é Macro pra estar lá e Micro pra acertar o último golpe. Lance de campeão.",
+				"{rival} ganhou a luta e saiu sem o objetivo. Dói demais.",
+				"Faltou alguém pra impedir a entrada de {cacador}. Um detalhe que custou caro.",
+				"Roubo assim muda o humor das duas equipes. Vai pesar na cabeça."
+			]
+		},
+		"escaramuca": {
+			"narrador": [
+				"Briga {local}! {time} leva a melhor.",
+				"Esbarraram {local} e {time} ganha a troca.",
+				"Pegou fogo {local}! Melhor para {time}.",
+				"Encontro {local}! {time} sai na frente nessa."
+			],
+			"comentarista": [
+				"Briga pequena, mas libera o mapa pra {time} por um minuto.",
+				"Quem estava mais perto ganhou. Posicionamento é tudo nessas horas."
+			]
+		},
+		"teamfight": {
+			"narrador": [
+				"TEAMFIGHT! Os dois times se encontram... e {time} leva a melhor!",
+				"Luta grande! E quem sai por cima é {time}!",
+				"Começou a briga! Habilidade pra todo lado... vitória de {time}!",
+				"Teamfight! {time} vence e conta {abates_texto}.",
+				"Que luta! {time} ganha a troca e fica com o mapa."
+			],
+			"narrador_objetivo": [
+				"Teamfight {pelo_objetivo}! E quem leva é {time}!",
+				"Todo mundo no rio, briga {pelo_objetivo}... e dá {time}!",
+				"Briga feia {pelo_objetivo}! {time} vence e conta {abates_texto}."
+			],
+			"comentarista": [
+				"O engage foi perfeito. Pegou os carregadores fora de posição.",
+				"Ganharam a luta no foco. Todo mundo batendo no mesmo alvo.",
+				"O suporte de {time} fez um peel impecável. O atirador bateu a luta inteira.",
+				"Luta decidida antes de começar: {time} escolheu o terreno.",
+				"{rival} entrou picado, um de cada vez. Assim não dá."
+			]
+		},
+		"teamfight_equilibrada": {
+			"narrador": [
+				"Troca de abates! Ninguém sai muito na frente nessa luta.",
+				"Briga pesada e... empate técnico! Os dois times perdem gente.",
+				"Que luta equilibrada! Abate pra lá, abate pra cá."
+			],
+			"comentarista": [
+				"Luta sem vencedor claro. Quem voltar primeiro pro mapa leva o próximo objetivo.",
+				"Os dois times têm motivos pra reclamar. Faltou acabar a luta.",
+				"Troca igual, mas repara no tempo de renascimento. Isso pode decidir o próximo minuto."
+			]
+		},
+		"ace": {
+			"narrador": [
+				"ACE! {time} derruba os cinco!",
+				"É ACE! Não sobrou ninguém de {rival}!",
+				"Time inteiro no chão! ACE para {time}!",
+				"ACE! O mapa todo é de {time} agora!"
+			],
+			"comentarista": [
+				"Com os cinco renascendo, {time} tem caminho livre pro que quiser.",
+				"Que execução. Ninguém de {rival} conseguiu sequer fugir.",
+				"Agora é não ter pressa. Pega o que dá e sai antes de eles voltarem."
+			]
+		},
+		"guardiao": {
+			"narrador": [
+				"CAIU O GUARDIÃO! O Cristal de {rival} está desprotegido!",
+				"O Guardião vai ao chão! {time} encara o Cristal!",
+				"Derrubaram o gigante! Guardião de {rival} destruído!"
+			],
+			"comentarista": [
+				"Ele renasce em cinco minutos. {rival} precisa aguentar até lá.",
+				"Sem o Guardião, qualquer luta perdida pode ser a última.",
+				"{time} soube recuar das batidas do escudo. Posicionamento perfeito."
+			]
+		},
+		"guardiao_renasce": {
+			"narrador": [
+				"O Guardião de {time} está de volta! Respiro pra defesa!",
+				"Renasceu o Guardião! {time} ganha uma nova chance.",
+				"Ele voltou! O Guardião se levanta na frente do Cristal de {time}."
+			],
+			"comentarista": [
+				"{time} sobreviveu ao pior momento. Agora a partida tem outra cara.",
+				"Renascer o Guardião é como ganhar uma vida extra. Vamos ver se aproveitam.",
+				"Quem atacava perdeu a janela. Vai ter que montar tudo de novo."
+			]
+		},
+		"reacao": {
+			"narrador": [
+				"REAÇÃO! {time} estava atrás e ganha uma luta enorme!",
+				"Não acabou! {time} responde e limpa a luta!",
+				"Que resposta de {time}! Estava {ouro} atrás e não se entregou!"
+			],
+			"comentarista": [
+				"{time} estava {ouro} atrás e ainda assim foi pra luta. Mental fortíssimo.",
+				"Ainda tem diferença no ouro, mas essa luta devolve {time} pro jogo.",
+				"{rival} relaxou com a vantagem e pagou. Em Crystal Legends uma luta muda muita coisa."
+			]
+		},
+		"vantagem_ouro": {
+			"comentarista": [
+				"{time} já tem {ouro} de vantagem no ouro.",
+				"Diferença de {ouro} em ouro. {rival} precisa de uma luta boa pra voltar.",
+				"{time} administra bem a vantagem: {ouro} na frente sem forçar nada.",
+				"Repara no ouro: {ouro} para {time}. Quem controla os objetivos controla a economia.",
+				"{ouro} de vantagem para {time}. Agora é transformar isso em torre."
+			]
+		},
+		"farm": {
+			"comentarista": [
+				"{jogador} está com {quantidade} de farm a mais que {alvo}. Isso não aparece no placar, mas aparece no item.",
+				"Farm impecável de {jogador}: {quantidade} de CS na frente do rival direto.",
+				"{alvo} está perdendo muito farm na rota. {quantidade} de CS de diferença já pesa.",
+				"Olha o CS de {jogador}. {quantidade} a mais, sem precisar de abate."
+			]
+		},
+		"desconforto": {
+			"comentarista": [
+				"{jogador} visivelmente desconfortável de {campeao}. Não é campeão da lista.",
+				"Escolha arriscada no draft. {jogador} quase nunca joga de {campeao} e está sofrendo.",
+				"Dá pra ver que {campeao} não é campeão de conforto de {jogador}. As trocas estão saindo erradas."
+			]
+		},
+		"conforto": {
+			"comentarista": [
+				"Esse é o campeão de {jogador}. Joga de olhos fechados de {campeao}.",
+				"{campeao} na mão de {jogador} é outra coisa. Campeão favorito faz diferença.",
+				"Draft deu o campeão favorito pra {jogador}, e olha o resultado."
+			]
+		},
+		"vitoria": {
+			"narrador": [
+				"CAI O CRISTAL! Vitória de {time}!",
+				"É FIM DE JOGO! {time} destrói o Cristal e vence!",
+				"ACABOU! O Cristal de {rival} explode e {time} comemora!",
+				"Vitória de {time}! Cristal no chão aos {minuto} minutos!"
+			],
+			"comentarista": [
+				"Partida decidida nos objetivos. Quem pega Hydra e Cérbero na hora certa, ganha.",
+				"Jogo duro, mas a equipe que errou menos levou. Parabéns, {time}.",
+				"Vitória construída nas decisões de mapa. {time} sabia o que fazer em cada momento."
+			],
+			"comentarista_dominio": [
+				"Atropelo. {time} esteve na frente do começo ao fim.",
+				"{rival} até tentou, mas {time} não deu uma brecha. Vitória sem sustos.",
+				"Grande atuação de {time}. Draft bem pensado e execução limpa."
+			],
+			"comentarista_virada": [
+				"Que virada! {time} chegou a estar {ouro} atrás e mesmo assim levou.",
+				"{rival} teve o jogo na mão e deixou escapar. {time} nunca desistiu.",
+				"É por isso que ninguém desiste em Crystal Legends. {time} virou uma partida que parecia perdida."
+			]
+		}
+	}
+}

@@ -17,6 +17,7 @@ const ARQUIVOS_DE_TESTE: Array[String] = [
 	"res://tests/teste_campeoes.gd",
 	"res://tests/teste_integracao_interface.gd",
 	"res://tests/teste_draft.gd",
+	"res://tests/teste_partida.gd",
 ]
 
 var _falhas: int = 0

@@ -117,3 +117,30 @@ Quando a proposta tiver os textos novos, eu tiro os provisórios do conversor.
 A tela de draft já pode ser feita (etapa 4 da sua coluna), sempre perguntando ao Matheus o visual. Uma ideia de fluxo: um botão "Draft de treino" na sede enquanto a liga não existe.
 
 Testes: 321 verificações, 0 falhas.
+
+---
+
+**25/11/2026 · Claude**
+
+A **partida simulada está pronta** (etapa 5 da minha coluna). O Matheus decidiu como ela funciona; está tudo no GDD 7.4 e no `CONTRATO.md` 2.7. O que muda para você:
+
+**1. Decisões do Matheus que a tela precisa seguir**
+- A partida é simulada inteira antes de aparecer. A tela só reproduz; não existe botão de intervir durante o jogo.
+- Formas de assistir: **melhores momentos** é o padrão; dá para ver a partida inteira em **1x, 2x ou 4x**, ou pular direto para o resultado.
+- Mapa **2D visto de cima**, campeões como **fichas redondas** com o retrato. O estilo do mapa e das fichas é com você e o Matheus.
+- Narração em **dupla**: narrador e comentarista, num painel ao lado do mapa. As frases são minhas (o Matheus pediu que eu escrevesse). Se quiser dar nome e rosto às duas vozes, pergunte a ele; hoje elas se chamam só "Narrador" e "Comentarista" (campo `nome` de cada fala).
+
+**2. O que a lógica entrega**
+- `Jogo.simular_partida_do_draft()` depois do draft concluído, e o sinal `partida_simulada(partida)`.
+- `eventos`: cada lance com relógio pronto (`"14:05"`), onde aconteceu (`x`, `y`), as falas (`narracao`, narrador primeiro) e `destaque` (o que entra nos melhores momentos).
+- `quadros`: a posição dos 10 campeões a cada 5 s, se estão vivos, o nível e o placar até ali. É só interpolar entre um quadro e o próximo.
+- `jogadores`: a estatística final (KDA, CS, ouro, nível, itens comprados, domínio do campeão).
+- `Jogo.mapa_partida()`: bases, rotas, torres, Hydra, Cérbero e acampamentos em coordenadas de 0 a 1. Azul embaixo à esquerda, vermelho em cima à direita. A rota do meio vai de uma base à outra; o rio cruza na outra diagonal. Se a arte pedir outra geometria, me avise que eu mudo os pontos e a simulação acompanha.
+
+**3. Para ler uma partida narrada sem tela**
+`godot --headless --path . -s res://tools/calibracao/ver_partida.gd -- 21` imprime a narração completa de uma partida de exemplo (o número é a semente). Ajuda a sentir o ritmo do painel: são uns 60 a 90 lances com fala por partida.
+
+**4. Ideia de fluxo (decida com o Matheus)**
+Fim do draft → botão "Jogar partida" → tela da partida em melhores momentos → tela de resultado com a estatística. Enquanto a liga não existe, é tudo contra o time de treino (`partida["treino"] = true`).
+
+Testes: 352 verificações, 0 falhas.

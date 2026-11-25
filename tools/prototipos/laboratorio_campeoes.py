@@ -1290,6 +1290,23 @@ def valor_de_nivel(campeoes, semente):
     return resultado
 
 
+CAMINHO_CURVAS = os.path.join(RAIZ, "data", "campeoes", "curvas_de_forca.json")
+
+
+def exportar_curvas(campeoes, tab):
+    """Grava a taxa de vitória de cada campeão por momento. A simulação da partida usa isso como força relativa
+    do campeão (escondida da interface). Momentos: início = nível 6, meio = nível 10, fim = nível 16."""
+    curvas = {c["id"]: {m: round(taxa(tab, c["id"], m), 4) for m in MOMENTOS} for c in campeoes}
+    dados = {
+        "_comentario": "Gerado por tools/prototipos/laboratorio_campeoes.py. Taxa de vitória de cada campeão na luta 5x5 por momento (nível 6, 10 e 16). Força escondida: não vai para a interface.",
+        "niveis": {m: MOMENTOS[m]["nivel"] for m in MOMENTOS},
+        "campeoes": curvas,
+    }
+    with open(CAMINHO_CURVAS, "w", encoding="utf-8") as arquivo:
+        json.dump(dados, arquivo, ensure_ascii=False, indent="\t", sort_keys=True)
+        arquivo.write("\n")
+
+
 def relatorio(lutas, semente):
     campeoes = carregar_campeoes()
     tab = medir(campeoes, lutas, semente)
@@ -1322,6 +1339,7 @@ def relatorio(lutas, semente):
             print("  %-10s dano %5.0f  proteção %4.0f  controle %4.1f  passiva %4.1f  morre %3.0f%%" % (
                 c["nome"], statistics.mean(x[1] for x in lst), statistics.mean(x[2] for x in lst),
                 statistics.mean(x[3] for x in lst), statistics.mean(x[4] for x in lst), statistics.mean(x[5] for x in lst) * 100))
+    exportar_curvas(campeoes, tab)
     vn = valor_de_nivel(campeoes, semente)
     print("\n== Valor de nível (duelo do mesmo campeão no meio da partida)")
     print("  1 nível a mais: %+.1f%% de força; 2 níveis a mais: %+.1f%%" % ((vn[1] - 1) * 100, (vn[2] - 1) * 100))

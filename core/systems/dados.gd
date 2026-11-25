@@ -13,6 +13,10 @@ const CAMPEOES: String = "res://data/campeoes/campeoes.json"
 const ITENS: String = "res://data/itens/itens.json"
 const COMBATE: String = "res://data/config/combate.json"
 const DRAFT: String = "res://data/config/draft.json"
+const PARTIDA: String = "res://data/config/partida.json"
+const MAPA: String = "res://data/config/mapa.json"
+const CURVAS: String = "res://data/campeoes/curvas_de_forca.json"
+const NARRACAO: String = "res://data/narracao/narracao.json"
 
 static var _cache: Dictionary = {}
 
@@ -67,6 +71,22 @@ static func combate() -> Dictionary:
 
 static func draft() -> Dictionary:
 	return carregar(DRAFT)
+
+
+static func partida() -> Dictionary:
+	return carregar(PARTIDA)
+
+
+static func mapa() -> Dictionary:
+	return carregar(MAPA)
+
+
+static func curvas_de_forca() -> Dictionary:
+	return carregar(CURVAS)
+
+
+static func narracao() -> Dictionary:
+	return carregar(NARRACAO)
 
 
 static func dias_por_mes() -> int:
