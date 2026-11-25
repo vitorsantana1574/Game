@@ -1227,7 +1227,9 @@ def amostras(tab, cid, momento):
 LIMITES = (0.5, 2.0)
 
 
-def calibrar(rodadas, lutas, semente):
+def calibrar(rodadas, lutas, semente, somente=None, limites=None):
+    """somente: lista de ids a recalibrar (os outros ficam como estão). limites: (mínimo, máximo) dos botões."""
+    limites = limites or LIMITES
     ajustes = json.load(open(CAMINHO_AJUSTES, encoding="utf-8")) if os.path.exists(CAMINHO_AJUSTES) else {}
     for rodada in range(rodadas):
         os.system("python3 %s > /dev/null" % os.path.join(RAIZ, "tools", "conversao", "converter_campeoes.py"))
@@ -1235,6 +1237,8 @@ def calibrar(rodadas, lutas, semente):
         tab = medir(campeoes, lutas, semente + rodada)
         erro_total = 0
         for c in campeoes:
+            if somente and c["id"] not in somente:
+                continue
             alvo = ALVO_CURVA[c["curva_de_forca"]]
             e_ini = alvo["inicio"] - taxa(tab, c["id"], "inicio")
             e_mei = alvo["meio"] - taxa(tab, c["id"], "meio")
@@ -1245,10 +1249,11 @@ def calibrar(rodadas, lutas, semente):
             sens = 0.3
             passo_ini = max(-0.15, min(0.15, (e_ini + 0.3 * e_mei) / sens * 0.4))
             passo_fim = max(-0.15, min(0.15, (e_fim + 0.3 * e_mei) / sens * 0.4))
-            a["inicio"] = round(max(LIMITES[0], min(LIMITES[1], a["inicio"] * (1 + passo_ini))), 3)
-            a["fim"] = round(max(LIMITES[0], min(LIMITES[1], a["fim"] * (1 + passo_fim))), 3)
+            a["inicio"] = round(max(limites[0], min(limites[1], a["inicio"] * (1 + passo_ini))), 3)
+            a["fim"] = round(max(limites[0], min(limites[1], a["fim"] * (1 + passo_fim))), 3)
             a["motivo"] = "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
-        print("Rodada %d: erro médio %.1f pontos" % (rodada + 1, erro_total / (3 * len(campeoes)) * 100))
+        n = len(somente) if somente else len(campeoes)
+        print("Rodada %d: erro médio %.1f pontos" % (rodada + 1, erro_total / (3 * n) * 100))
         with open(CAMINHO_AJUSTES, "w", encoding="utf-8") as arquivo:
             json.dump(ajustes, arquivo, ensure_ascii=False, indent="\t", sort_keys=True)
             arquivo.write("\n")
@@ -1328,7 +1333,11 @@ if __name__ == "__main__":
     ap.add_argument("--lutas", type=int, default=900)
     ap.add_argument("--semente", type=int, default=1)
     ap.add_argument("--calibrar", type=int, default=0)
+    ap.add_argument("--somente", default="", help="ids separados por vírgula: recalibra só esses campeões")
+    ap.add_argument("--limites", default="", help="mínimo,máximo dos botões (padrão 0.5,2.0)")
     args = ap.parse_args()
     if args.calibrar:
-        calibrar(args.calibrar, args.lutas, args.semente)
+        somente = [x for x in args.somente.split(",") if x] or None
+        limites = tuple(float(x) for x in args.limites.split(",")) if args.limites else None
+        calibrar(args.calibrar, args.lutas, args.semente, somente, limites)
     relatorio(args.lutas, args.semente)

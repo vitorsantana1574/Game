@@ -28,6 +28,10 @@ var avisos_enviados: Array[String] = []
 ## Carreira encerrada (ex.: falência). Nenhuma ação é aceita depois disso.
 var encerrada: bool = false
 var motivo_encerramento: String = ""
+## Patch de Crystal Legends em vigor e a força escondida de cada campeão (nunca vai para a interface).
+var patch_numero: int = 1
+var forcas_patch: Dictionary = {}
+
 ## Livro de lançamentos (entradas e saídas de dinheiro), do mais antigo para o mais novo.
 ## Cada item: {"dia", "descricao", "valor", "categoria"}. Guarda só os últimos MAXIMO_LANCAMENTOS.
 var lancamentos: Array[Dictionary] = []
@@ -79,6 +83,8 @@ func para_dicionario() -> Dictionary:
 		"encerrada": encerrada,
 		"motivo_encerramento": motivo_encerramento,
 		"lancamentos": lancamentos,
+		"patch_numero": patch_numero,
+		"forcas_patch": forcas_patch,
 	}
 
 
@@ -116,6 +122,11 @@ static func de_dicionario(dados: Dictionary) -> Carreira:
 		carreira.avisos_enviados.append(str(aviso))
 	carreira.encerrada = bool(dados.get("encerrada", false))
 	carreira.motivo_encerramento = str(dados.get("motivo_encerramento", ""))
+	carreira.patch_numero = int(dados.get("patch_numero", Patch.numero_no_dia(carreira.dia)))
+	for id_campeao: String in dados.get("forcas_patch", {}):
+		carreira.forcas_patch[id_campeao] = float(dados["forcas_patch"][id_campeao])
+	if carreira.forcas_patch.is_empty():
+		carreira.forcas_patch = Patch.gerar_forcas(carreira.semente, carreira.patch_numero)
 	for item: Dictionary in dados.get("lancamentos", []):
 		carreira.lancamentos.append({"dia": int(item["dia"]), "descricao": str(item["descricao"]),
 			"valor": int(item["valor"]), "categoria": str(item["categoria"])})

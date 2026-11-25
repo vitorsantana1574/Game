@@ -3,7 +3,7 @@
 Este documento é a **ponte entre a lógica (Claude) e a interface (GPT)**.
 A interface só pode usar o que está escrito aqui. Se precisar de algo que não existe, peça por mensagem em [comunicacao/](comunicacao/README.md).
 
-> **Status: v5.** Etapas 1 (tela inicial), 2 (mercado, elenco, contratos, técnico), economia/calendário, catálogo de campeões e itens e os acréscimos pedidos pela sede (seção 2.5) **[PRONTOS]**. Os nomes abaixo são a proposta inicial. A cada etapa de construção, o Claude atualiza este documento **antes** de o GPT começar a tela correspondente. Itens marcados **[PLANEJADO]** ainda não existem no código.
+> **Status: v6.** Etapas 1 (tela inicial), 2 (mercado, elenco, contratos, técnico), economia/calendário, catálogo de campeões e itens os acréscimos pedidos pela sede (seção 2.5) e domínio de campeões, patch e draft (seção 2.6) **[PRONTOS]**. Os nomes abaixo são a proposta inicial. A cada etapa de construção, o Claude atualiza este documento **antes** de o GPT começar a tela correspondente. Itens marcados **[PLANEJADO]** ainda não existem no código.
 
 Regras do contrato: [ARQUITETURA.md](ARQUITETURA.md), seção 2.
 
@@ -466,6 +466,70 @@ Os sinais de cada dia são emitidos normalmente, então os avisos da sede contin
 ### Aparência (para os personagens animados, se forem aprovados)
 
 `detalhe_jogador`, `listar_elenco`, `listar_mercado` e as fichas de técnico trazem `"aparencia"`: um inteiro de 0 a 19, estável por pessoa e guardado no save. A quantidade fica em `data/config/balanceamento.json` (`"aparencias": 20`). A lógica só guarda o índice; qual arte corresponde a cada índice é decisão da apresentação. As **atividades** na sede (computadores, reunião, intervalo) dependem da agenda de treino, que entra na etapa 3. Este contrato será atualizado antes.
+
+## 2.6 Domínio de campeões, patch e draft — **[PRONTO]** (25/11)
+
+### Domínio de campeões (GDD 6.3)
+
+`detalhe_jogador`, `listar_elenco` e `listar_mercado` trazem:
+
+```gdscript
+"dominio_campeoes": [   # só os que o jogador conhece, do mais para o menos dominado
+    {"id": "veluria", "nivel": "favorito", "nivel_nome": "Favorito"},
+    {"id": "prismora", "nivel": "conhece_bem", "nivel_nome": "Conhece bem"},
+    {"id": "cintarro", "nivel": "ja_jogou", "nivel_nome": "Já jogou"},
+]
+# nivel: "favorito" | "conhece_bem" | "ja_jogou". Campeão fora da lista = "Não conhece".
+```
+
+A maestria numérica não sai. Especialistas têm lista curta e favoritos fortes; versáteis, lista longa sem pico. Bom lugar para mostrar: a aba **Campeões** da ficha, ao lado do histórico.
+
+### Patch
+
+- `Jogo.patch_atual()` devolve `{"numero": 1, "dias_ate_proximo": 180}`.
+- A cada 180 dias sai um patch novo, com o sinal `Eventos.patch_novo(numero)`.
+- A força dos campeões no patch **nunca** chega à interface.
+
+### Draft (GDD seção 8)
+
+O draft fica só na memória (não entra no save). Enquanto a liga não existe, o adversário é um **time de treino** gerado em torno do nível dos seus titulares. Quando a liga chegar, as partidas oficiais usam as mesmas funções.
+
+| Função | O que faz |
+|---|---|
+| `Jogo.iniciar_draft(opcoes = {})` | Começa. `opcoes`: `"primeira_escolha"` (padrão `true`: você é o azul) e `"indisponiveis"` (`{"azul": [ids], "vermelho": [ids]}`, para o fearless de séries). Exige os 5 titulares; senão, erro em `"titulares"` |
+| `Jogo.estado_draft()` | Estado completo (abaixo). `{}` sem draft |
+| `Jogo.banir_no_draft(id)` / `Jogo.escolher_no_draft(id)` | Sua vez. Depois, o rival joga sozinho até a sua próxima vez |
+| `Jogo.delegar_vez_ao_tecnico()` | O técnico faz a sua vez atual. Técnico melhor (Macro + Conhecimento) escolhe melhor; sem técnico, escolhe mal |
+| `Jogo.definir_posicoes_draft({posicao: id})` | Depois do fim, troca quem joga com qual campeão (os 5 escolhidos, um por posição). A lógica já entrega a melhor distribuição |
+| `Jogo.encerrar_draft()` | Descarta |
+
+Todas as ações devolvem `{"ok": true, "estado": {...}}` ou `{"ok": false, "erros": {campo: mensagem}}`. Campos de erro: `"draft"` (não é sua vez, ação errada, já terminou), `"campeao"` (indisponível, desconhecido) e `"posicoes"`.
+
+**Sinais:** `Eventos.draft_mudou(estado)` a cada mudança e `Eventos.draft_concluido(estado)` no fim.
+
+**Estado:**
+
+```gdscript
+{
+    "lado_jogador": "azul",
+    "concluido": false,
+    "vez": {"acao": "ban", "time": "azul", "do_jogador": true, "numero": 1, "total": 20},   # {} no fim
+    "passos": [{"acao": "ban", "time": "azul", "campeao": ""}, ...],   # os 20 passos, na ordem; "" = ainda não feito
+    "times": {
+        "azul": {"nome": "...", "bans": [ids], "picks": [ids], "posicoes": {"topo": id, ...},   # posicoes só no fim
+                 "jogadores": {"topo": {"id", "apelido"}, ...}},
+        "vermelho": {...},
+    },
+    "campeoes": [
+        {"id": "veluria", "estado": "livre", "por": "",      # estado: "livre" | "banido" | "escolhido" | "indisponivel"
+         "dominio": {"meio": {"jogador_id", "apelido", "nivel", "nivel_nome"}},   # seus jogadores que conhecem o campeão
+         "favorito_do_rival": ["meio"]},                     # só com favoritos_do_rival_revelados = true
+    ],
+    "favoritos_do_rival_revelados": false,   # true com olheiro do técnico a partir de 60 (GDD 8.7)
+}
+```
+
+Ordem (GDD 8.1): 3 bans de cada lado, alternando; picks A B B A A B; 2 bans de cada lado, com o vermelho começando; picks B A A B.
 
 ## 3. Dados que a interface pode ler **[PLANEJADO]**
 

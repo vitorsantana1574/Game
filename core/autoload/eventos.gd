@@ -55,4 +55,10 @@ signal parcela_atrasada(divida_atrasada: int, parcelas_atrasadas: int)
 ## O empréstimo terminou (última parcela paga ou quitado antes).
 signal emprestimo_quitado()
 ## A organização faliu e a carreira terminou. `resumo` = Jogo.resumo_carreira().
+## Saiu um patch novo de Crystal Legends (a cada 180 dias). A força dos campeões não é informada.
+signal patch_novo(numero: int)
+## O draft mudou (ação do jogador ou da IA). estado = Jogo.estado_draft().
+signal draft_mudou(estado: Dictionary)
+## O draft terminou: estado final com as posições de cada campeão.
+signal draft_concluido(estado: Dictionary)
 signal falencia(resumo: Dictionary)

@@ -111,7 +111,8 @@ MANUAL_HABILIDADES = {
     ("calzugo", 2): {"escudo": {"alvo": "si", "pct_vida": 0.03, "duracao": 2}, "furia_cheia": {"escudo_pct_vida": 0.04}},
     ("calzugo", 3): {"furia_cheia": {"atordoamento": 0.85}},
     ("orvante", 3): {},
-    ("vedrassa", 2): {"escudo": {"alvo": "aliado", "pct_vida": 0.03, "duracao": 2.5}},
+    ("vedrassa", 2): {"escudo": {"alvo": "aliado", "pct_vida": 0.03, "duracao": 2.5},
+                      "redireciona": {"pct": 0.2, "duracao": 2.5}},  # proposta de kits nº 1
     ("vedrassa", 3): {"alvo_centro": "aliado"},
     ("tessari", 1): {"marca": {"duracao": 4}, "primeiro_alvo": True, "alvos": "um"},
     ("tessari", 3): {"vida_perdida_exige_marca": True},
@@ -137,7 +138,13 @@ MANUAL_HABILIDADES = {
     ("alvenora", 3): {"escudo": {"alvo": "aliado", "pct_vida": 0.07, "pm": 0.16, "teto_pct": 0.09, "duracao": 2.5}},
     ("luminela", 2): {"escudo": {"alvo": "aliado", "pct_vida": 0.035, "pm": 0.13, "teto_pct": 0.06, "duracao": 2}},
     ("luminela", 3): {"cura": {"alvo": "aliado", "pct_vida": 0.045, "pm": 0.12, "teto_pct": 0.06}, "preparacao": 0.7},
-    ("clavento", 3): {"raio": 92},
+    ("clavento", 2): {"exposto_apos_uso": {"pct": 0.2, "duracao": 2}},  # proposta de kits nº 1
+    ("clavento", 3): {"raio": 92, "atordoamento": 0.45, "atordoamento_extra_se_lento": 0.3},  # proposta de kits nº 1
+    ("nalcora", 1): {"divisao_adaptativa": True, "ignora_escudo_magico": True},  # proposta de kits nº 1
+    ("nalcora", 2): {"divisao_adaptativa": True, "ignora_escudo_magico": True},
+    ("nalcora", 3): {"divisao_adaptativa": True, "ignora_escudo_magico": True, "bonus_se_lento": 0.3},
+    ("prismora", 1): {"imobiliza_ao_lancar": 0.35, "dano_por_distancia": {"distancia": 600, "perto": 0.7}, "bonus_por_item": 0.12},
+    ("prismora", 3): {"imobiliza_ao_lancar": 0.35},
     ("ocravia", 2): {"escudo": {"alvo": "aliado", "pct_vida": 0.04, "pm": 0.17, "teto_pct": 0.07, "duracao": 2.4}},
     ("ocravia", 3): {"alvos": "nenhum", "zona": {"duracao": 3}, "visao": {"raio": 225, "duracao": 3}},
     ("terralume", 2): {"reduz_lentidao": {"pct": 0.2, "duracao": 2}},
@@ -169,13 +176,14 @@ MANUAL_PASSIVAS = {
     "dorsalio": {"tipo": "cura_propria", "gatilho": "duas_habilidades_mesmo_alvo", "janela": 10, "pct_vida": 0.05, "duracao": 3, "recarga": 16},
     "calzugo": {"tipo": "furia", "ganho_ataque": 12, "ganho_recebido": 8, "perda_fora_combate": 10, "fora_combate": 4,
                 "barra_cheia": {"reducao_dano": 0.09, "duracao": 1.6, "recarga": 16, "exige_acerto": True}},
-    "vedrassa": {"tipo": "escudo_aliado", "gatilho": "aliado_vida_baixa", "limite": 0.4, "raio": 360, "pct_vida": 0.06, "duracao": 2, "recarga": 20},
+    "vedrassa": {"tipo": "escudo_aliado", "gatilho": "aliado_vida_baixa", "limite": 0.4, "raio": 360, "pct_vida": 0.06, "duracao": 2, "recarga": 20,
+                 "pct_vida_bonus_propria": 0.05},
     "ravineo": {"tipo": "dano_extra", "gatilho": "isolado", "habilidade": 1, "distancia": 425, "recarga": 12,
                 "dano": {"tipo": "fisico", "base": [25.09, 1.18], "dano_fisico_bonus": 0.20244}},
     "tessari": {"tipo": "dano_extra", "gatilho": "combo", "sequencia": [1, 2], "janela": 4, "recarga": 12,
                 "dano": {"tipo": "fisico", "base": [7.05, 3.27], "dano_fisico_bonus": 0.13677}},
     "nalcora": {"tipo": "dano_extra", "gatilho": "abertura", "habilidade": 1, "fora_combate": 3, "recarga": 13,
-                "dano": {"tipo": "magico", "base": [20.93, 1.91], "dano_fisico_bonus": 0.20286}},
+                "dano": {"tipo": "magico", "base": [20.93, 1.91], "dano_fisico_bonus": 0.20286}, "reinicia_ao_abater": True},
     "iscavro": {"tipo": "furia", "ganho_ataque": 13, "ganho_recebido": 7, "perda_fora_combate": 10, "fora_combate": 4,
                 "barra_cheia": {"cura_pct_vida": 0.04, "duracao": 2, "recarga": 17}},
     "mirfuso": {"tipo": "dano_extra", "gatilho": "isolado_marca_ataque", "habilidade": 1, "distancia": 440, "janela": 3, "recarga": 13,
@@ -221,6 +229,9 @@ MANUAL_PASSIVAS = {
 # ---------------------------------------------------------------------------
 
 AJUSTES = {
+    "prismora": [
+        ("habilidades.1.dano.base", [23.0, 8.655], "Proposta de kits nº 1: a Projeção de Prova cresce metade por nível (17,31 → 8,655) e ganha +12% por item."),
+    ],
     "cintarro": [
         ("habilidades.1.dano.base", [92.0, 3.6], "Forte no início: no nível 3 estava abaixo dos magos constantes porque a Porta refratária não causa dano."),
     ],
@@ -380,6 +391,52 @@ def corrigir_classe(c):
                          "motivo": "Equilíbrio entre classes medido no laboratório de campeões (ver tools/relatorios/laboratorio_campeoes.md)."})
 
 
+# ---------------------------------------------------------------------------
+# Proposta de kits nº 1 (aprovada pelo dono em 25/11): builds e textos provisórios
+# ---------------------------------------------------------------------------
+# Os textos abaixo valem até o GPT reescrever as fichas em docs/propostas/campeoes.md no estilo dele.
+# Quando a proposta trouxer o texto novo, a entrada correspondente sai daqui.
+BUILDS = {
+    "clavento": ["Grevas de Ferro", "Medalhão dos Eternos", "Manto dos Ventos Gélidos", "Escudo do Guardião", "Armadura Viva de Cristal"],
+    "nalcora": ["Botas do Caçador", "Lâmina do Eclipse", "Manto da Noite Eterna", "Presa da Serpente", "Escudo do Guardião"],
+}
+ALTERNATIVOS_EXTRA = {
+    "clavento": [{"item": "Égide de Aço", "substitui": "Armadura Viva de Cristal", "quando": "contra atiradores de ataques básicos"}],
+}
+TEXTOS_PROVISORIOS = {
+    ("vedrassa", 2): {"acrescentar": ["Por 2,5 s, 20% do dano que o aliado receberia vai para Vedrassa, que o recebe com as próprias resistências"]},
+    ("vedrassa", "passiva"): {"trocar": ("escudo de 6% da vida máxima dele por 2 s", "escudo de 6% da vida máxima dele + 5% da vida bônus de Vedrassa por 2 s")},
+    ("clavento", 2): {"acrescentar": ["Depois do avanço, Clavento fica exposto por 2 s: −20% de armadura e de resistência mágica"]},
+    ("clavento", 3): {"substituir": {"Atordoamento em área de 0,65 s": "Atordoamento em área de 0,45 s; 0,75 s em quem estiver sob a lentidão do Dente de Fechadura"}},
+    ("nalcora", 1): {"acrescentar": ["A parte maior do dano vai para a resistência mais baixa do alvo", "A parte mágica atravessa escudos que só absorvem dano mágico"]},
+    ("nalcora", 2): {"acrescentar": ["A parte maior do dano vai para a resistência mais baixa do alvo", "A parte mágica atravessa escudos que só absorvem dano mágico"]},
+    ("nalcora", 3): {"acrescentar": ["+30% de dano em quem estiver sob a lentidão do Fio de Retorno", "A parte maior do dano vai para a resistência mais baixa do alvo", "A parte mágica atravessa escudos que só absorvem dano mágico"]},
+    ("nalcora", "passiva"): {"anexar": " Participar de um abate reabre a passiva na hora."},
+    ("prismora", 1): {"acrescentar": ["Tripé armado: fica parada 0,35 s ao lançar", "Dano total a partir de 600 de distância; mais perto, 70%", "+12% de dano por item completo (a bota não conta)"]},
+    ("prismora", 3): {"acrescentar": ["Tripé armado: fica parada 0,35 s ao lançar"]},
+}
+
+
+def aplicar_textos_provisorios(c):
+    for (cid, alvo), regra in TEXTOS_PROVISORIOS.items():
+        if cid != c["id"]:
+            continue
+        if alvo == "passiva":
+            if "trocar" in regra:
+                antigo, novo = regra["trocar"]
+                if antigo in c["passiva"]["efeito"]:
+                    c["passiva"]["efeito"] = c["passiva"]["efeito"].replace(antigo, novo)
+            if "anexar" in regra and regra["anexar"].strip() not in c["passiva"]["efeito"]:
+                c["passiva"]["efeito"] += regra["anexar"]
+            continue
+        h = next(x for x in c["habilidades"] if x["posicao"] == alvo)
+        for antigo, novo in regra.get("substituir", {}).items():
+            h["efeitos"] = [novo if e == antigo else e for e in h["efeitos"]]
+        for linha in regra.get("acrescentar", []):
+            if linha not in h["efeitos"]:
+                h["efeitos"].append(linha)
+
+
 def definir(ficha, caminho, valor):
     partes = caminho.split(".")
     alvo = ficha
@@ -482,6 +539,12 @@ def converter():
         if c["id"] not in MANUAL_PASSIVAS:
             sys.exit("Passiva sem mecânica: %s" % c["id"])
         c["passiva"]["mecanica"] = copy.deepcopy(MANUAL_PASSIVAS[c["id"]])
+        if c["id"] in BUILDS:
+            c["build_recomendada"] = list(BUILDS[c["id"]])
+        for alt in ALTERNATIVOS_EXTRA.get(c["id"], []):
+            if not any(a["item"] == alt["item"] for a in c["itens_alternativos"]):
+                c["itens_alternativos"].append(dict(alt))
+        aplicar_textos_provisorios(c)
         c["build_ids"] = [ID_ITEM[n] for n in c["build_recomendada"]]
         for alt in c["itens_alternativos"]:
             alt["item_id"] = ID_ITEM[alt["item"]]

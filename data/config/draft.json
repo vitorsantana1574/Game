@@ -1,0 +1,65 @@
+{
+	"_comentario": "Draft (GDD seção 8) e domínio de campeões (GDD 6.3). Números provisórios, a calibrar com a simulação de partidas.",
+	"ordem": [
+		{"acao": "ban", "time": "azul"}, {"acao": "ban", "time": "vermelho"},
+		{"acao": "ban", "time": "azul"}, {"acao": "ban", "time": "vermelho"},
+		{"acao": "ban", "time": "azul"}, {"acao": "ban", "time": "vermelho"},
+		{"acao": "pick", "time": "azul"}, {"acao": "pick", "time": "vermelho"},
+		{"acao": "pick", "time": "vermelho"}, {"acao": "pick", "time": "azul"},
+		{"acao": "pick", "time": "azul"}, {"acao": "pick", "time": "vermelho"},
+		{"acao": "ban", "time": "vermelho"}, {"acao": "ban", "time": "azul"},
+		{"acao": "ban", "time": "vermelho"}, {"acao": "ban", "time": "azul"},
+		{"acao": "pick", "time": "vermelho"}, {"acao": "pick", "time": "azul"},
+		{"acao": "pick", "time": "azul"}, {"acao": "pick", "time": "vermelho"}
+	],
+	"dominio": {
+		"_comentario": "Maestria de 0 a 100 por campeão. Os níveis saem dos limites abaixo. 'rendimento' multiplica o desempenho do jogador com o campeão na partida.",
+		"niveis": [
+			{"id": "favorito", "nome": "Favorito", "minimo": 80, "rendimento": 1.05},
+			{"id": "conhece_bem", "nome": "Conhece bem", "minimo": 55, "rendimento": 1.0},
+			{"id": "ja_jogou", "nome": "Já jogou", "minimo": 25, "rendimento": 0.92},
+			{"id": "nao_conhece", "nome": "Não conhece", "minimo": 0, "rendimento": 0.8}
+		],
+		"campeoes_conhecidos_especialista": 4,
+		"campeoes_conhecidos_versatil": 11,
+		"maestria_topo_especialista": 94,
+		"maestria_topo_versatil": 82,
+		"queda_por_campeao_especialista": 11,
+		"queda_por_campeao_versatil": 4.5,
+		"ruido": 5,
+		"maestria_desconhecido_maxima": 18,
+		"peso_posicao_principal_do_campeao": 1.0,
+		"peso_posicao_secundaria_do_campeao": 0.6,
+		"peso_fora_da_posicao": 0.08
+	},
+	"adequacao_posicao": {
+		"_comentario": "Rendimento de um campeão numa posição: principal do campeão, secundária do campeão, fora das posições dele.",
+		"principal": 1.0,
+		"secundaria": 0.9,
+		"fora": 0.65
+	},
+	"patch": {
+		"_comentario": "A cada 180 dias sai um patch. Cada campeão ganha uma força escondida (multiplicador). A interface nunca recebe estes valores.",
+		"dias_por_patch": 180,
+		"forca_minima": 0.9,
+		"forca_maxima": 1.1,
+		"desvio": 0.045
+	},
+	"ia": {
+		"_comentario": "Decisões automáticas (rival ou técnico delegado). Qualidade 0 a 1 vem do técnico: (macro + conhecimento) / 200. Sem técnico, 0.35.",
+		"qualidade_sem_tecnico": 0.35,
+		"ruido_qualidade_baixa": 0.25,
+		"ruido_qualidade_alta": 0.04,
+		"peso_meta_qualidade_baixa": 0.2,
+		"peso_meta_qualidade_alta": 1.0,
+		"peso_negar_rival": 0.6
+	},
+	"olheiro_revela_favoritos": 60,
+	"_comentario_olheiro": "Com olheiro do técnico a partir deste valor, o draft mostra os campeões favoritos dos jogadores rivais (GDD 8.7).",
+	"treino": {
+		"_comentario": "Adversário de treino (enquanto a liga não existe): 5 jogadores gerados em torno do nível dos seus titulares.",
+		"nome": "Time de treino",
+		"variacao_qualidade": 6,
+		"qualidade_tecnico": 0.5
+	}
+}

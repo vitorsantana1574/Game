@@ -27,8 +27,8 @@
 			},
 			"atributos": {
 				"vida": [
-					817.9,
-					68.02
+					845.7,
+					55.26
 				],
 				"armadura": [
 					41,
@@ -72,8 +72,8 @@
 					"alvo": "cone",
 					"dano": {
 						"base": [
-							49.13,
-							7.314
+							52.54,
+							7.821
 						],
 						"proporcoes": {
 							"dano_fisico_bonus": 0.0,
@@ -151,8 +151,8 @@
 					"alvo": "area",
 					"dano": {
 						"base": [
-							21.67,
-							3.338
+							23.18,
+							3.569
 						],
 						"proporcoes": {
 							"dano_fisico_bonus": 0.0,
@@ -237,8 +237,8 @@
 				},
 				{
 					"campo": "força (botões inicio e fim, ver aplicar_fator em tools/conversao/converter_campeoes.py)",
-					"inicio": 1.342,
-					"fim": 0.5,
+					"inicio": 1.435,
+					"fim": 0.33,
 					"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
 				}
 			],
@@ -276,8 +276,8 @@
 			},
 			"atributos": {
 				"vida": [
-					446.5,
-					176.13
+					413.5,
+					206.08
 				],
 				"armadura": [
 					36,
@@ -329,8 +329,8 @@
 					"alvo": "area",
 					"dano": {
 						"base": [
-							7.56,
-							5.044
+							6.48,
+							4.326
 						],
 						"proporcoes": {
 							"dano_fisico_bonus": 0.0,
@@ -412,8 +412,8 @@
 					"alvo": "area",
 					"dano": {
 						"base": [
-							3.06,
-							2.205
+							2.62,
+							1.891
 						],
 						"proporcoes": {
 							"dano_fisico_bonus": 0.0,
@@ -495,8 +495,8 @@
 				},
 				{
 					"campo": "força (botões inicio e fim, ver aplicar_fator em tools/conversao/converter_campeoes.py)",
-					"inicio": 0.541,
-					"fim": 2.0,
+					"inicio": 0.464,
+					"fim": 2.738,
 					"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
 				}
 			],
@@ -1044,8 +1044,8 @@
 			},
 			"atributos": {
 				"vida": [
-					503.6,
-					155.18
+					365.3,
+					190.06
 				],
 				"armadura": [
 					40,
@@ -1069,7 +1069,7 @@
 			"passiva": {
 				"nome": "Batente de emergência",
 				"descricao": "Vedrassa protege quem está perto quando uma investida pega um aliado de surpresa.",
-				"efeito": "Quando um acerto inimigo reduzir um aliado a menos de 40% de vida a até 360 de Vedrassa, protege esse aliado com escudo de 6% da vida máxima dele por 2 s, se sobreviver. Recarga de 20 s, partilhada entre aliados. Contra a mesma ameaça, mantém apenas o maior valor restante entre este escudo e Batente Emprestado.",
+				"efeito": "Quando um acerto inimigo reduzir um aliado a menos de 40% de vida a até 360 de Vedrassa, protege esse aliado com escudo de 6% da vida máxima dele + 5% da vida bônus de Vedrassa por 2 s, se sobreviver. Recarga de 20 s, partilhada entre aliados. Contra a mesma ameaça, mantém apenas o maior valor restante entre este escudo e Batente Emprestado.",
 				"mecanica": {
 					"tipo": "escudo_aliado",
 					"gatilho": "aliado_vida_baixa",
@@ -1077,7 +1077,8 @@
 					"raio": 360,
 					"pct_vida": 0.06,
 					"duracao": 2,
-					"recarga": 20
+					"recarga": 20,
+					"pct_vida_bonus_propria": 0.05
 				}
 			},
 			"habilidades": [
@@ -1090,8 +1091,8 @@
 					"alvo": "cone",
 					"dano": {
 						"base": [
-							14.09,
-							3.956
+							7.42,
+							2.082
 						],
 						"proporcoes": {
 							"dano_fisico_bonus": 0.0,
@@ -1145,7 +1146,8 @@
 					"recarga": 8,
 					"efeitos": [
 						"Alcance 500",
-						"Escudo de 3% da vida máxima do aliado por 2,5 s"
+						"Escudo de 3% da vida máxima do aliado por 2,5 s",
+						"Por 2,5 s, 20% do dano que o aliado receberia vai para Vedrassa, que o recebe com as próprias resistências"
 					],
 					"tags": [
 						"escudo",
@@ -1158,6 +1160,10 @@
 						"escudo": {
 							"alvo": "aliado",
 							"pct_vida": 0.03,
+							"duracao": 2.5
+						},
+						"redireciona": {
+							"pct": 0.2,
 							"duracao": 2.5
 						}
 					}
@@ -1172,8 +1178,8 @@
 					"alvo": "area",
 					"dano": {
 						"base": [
-							6.38,
-							1.724
+							3.36,
+							0.907
 						],
 						"proporcoes": {
 							"dano_fisico_bonus": 0.0,
@@ -1259,8 +1265,8 @@
 				},
 				{
 					"campo": "força (botões inicio e fim, ver aplicar_fator em tools/conversao/converter_campeoes.py)",
-					"inicio": 0.57,
-					"fim": 2.0,
+					"inicio": 0.3,
+					"fim": 3.0,
 					"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
 				}
 			],
@@ -1581,10 +1587,10 @@
 					"dano": {
 						"tipo": "fisico",
 						"base": [
-							25.86,
-							7.139
+							28.33,
+							7.822
 						],
-						"dano_fisico_bonus": 0.71428
+						"dano_fisico_bonus": 0.91749
 					}
 				}
 			},
@@ -1598,11 +1604,11 @@
 					"alvo": "linha",
 					"dano": {
 						"base": [
-							84.36,
-							22.049
+							92.43,
+							24.159
 						],
 						"proporcoes": {
-							"dano_fisico_bonus": 2.20912,
+							"dano_fisico_bonus": 2.83761,
 							"poder_magico": 0.0,
 							"vida_maxima_alvo_pct": 0,
 							"vida_perdida_alvo_pct": 0,
@@ -1639,11 +1645,11 @@
 					"alvo": "cone",
 					"dano": {
 						"base": [
-							29.16,
-							8.034
+							31.95,
+							8.803
 						],
 						"proporcoes": {
-							"dano_fisico_bonus": 0.80548,
+							"dano_fisico_bonus": 1.03464,
 							"poder_magico": 0.0,
 							"vida_maxima_alvo_pct": 0,
 							"vida_perdida_alvo_pct": 0,
@@ -1680,11 +1686,11 @@
 					"alvo": "unico",
 					"dano": {
 						"base": [
-							57.93,
-							15.173
+							63.48,
+							16.625
 						],
 						"proporcoes": {
-							"dano_fisico_bonus": 1.52,
+							"dano_fisico_bonus": 1.95244,
 							"poder_magico": 0.0,
 							"vida_maxima_alvo_pct": 0,
 							"vida_perdida_alvo_pct": 0.068,
@@ -1763,8 +1769,8 @@
 				},
 				{
 					"campo": "força (botões inicio e fim, ver aplicar_fator em tools/conversao/converter_campeoes.py)",
-					"inicio": 0.836,
-					"fim": 2.0,
+					"inicio": 0.916,
+					"fim": 2.569,
 					"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
 				}
 			],
@@ -1826,7 +1832,7 @@
 			"passiva": {
 				"nome": "Solda de entrada",
 				"descricao": "Depois de preparar o flanco, o primeiro golpe deixa uma descarga de calor no alvo.",
-				"efeito": "Após 3 s sem causar ou receber dano de campeão, Estilete de Solda aplica uma descarga mágica no primeiro campeão atingido, uma vez a cada 13 s. A descarga não acelera o lançamento. O efeito causa 20,93 + 1,91 por nível além do primeiro + 20,286% do DF bônus de dano mágico. Não ativa efeitos de item e não causa dano a minions, monstros ou estruturas.",
+				"efeito": "Após 3 s sem causar ou receber dano de campeão, Estilete de Solda aplica uma descarga mágica no primeiro campeão atingido, uma vez a cada 13 s. A descarga não acelera o lançamento. O efeito causa 20,93 + 1,91 por nível além do primeiro + 20,286% do DF bônus de dano mágico. Não ativa efeitos de item e não causa dano a minions, monstros ou estruturas. Participar de um abate reabre a passiva na hora.",
 				"mecanica": {
 					"tipo": "dano_extra",
 					"gatilho": "abertura",
@@ -1836,11 +1842,12 @@
 					"dano": {
 						"tipo": "magico",
 						"base": [
-							50.53,
-							2.745
+							49.61,
+							2.695
 						],
-						"dano_fisico_bonus": 0.33323
-					}
+						"dano_fisico_bonus": 0.42724
+					},
+					"reinicia_ao_abater": true
 				}
 			},
 			"habilidades": [
@@ -1853,11 +1860,11 @@
 					"alvo": "linha",
 					"dano": {
 						"base": [
-							169.16,
-							9.212
+							166.08,
+							9.044
 						],
 						"proporcoes": {
-							"dano_fisico_bonus": 1.11557,
+							"dano_fisico_bonus": 1.43033,
 							"poder_magico": 0.0,
 							"vida_maxima_alvo_pct": 0,
 							"vida_perdida_alvo_pct": 0,
@@ -1870,7 +1877,9 @@
 						"Alcance 380, largura 70",
 						"Preparação fixa de 0,35 s",
 						"Para no primeiro campeão",
-						"Divisão do dano final bruto: 69% físico e 31% mágico, com mitigação separada."
+						"Divisão do dano final bruto: 69% físico e 31% mágico, com mitigação separada.",
+						"A parte maior do dano vai para a resistência mais baixa do alvo",
+						"A parte mágica atravessa escudos que só absorvem dano mágico"
 					],
 					"tags": [
 						"dano_misto",
@@ -1886,7 +1895,9 @@
 						},
 						"primeiro_alvo": true,
 						"alvos": "um",
-						"esquivavel": true
+						"esquivavel": true,
+						"divisao_adaptativa": true,
+						"ignora_escudo_magico": true
 					}
 				},
 				{
@@ -1898,11 +1909,11 @@
 					"alvo": "cone",
 					"dano": {
 						"base": [
-							101.4,
-							5.605
+							99.56,
+							5.503
 						],
 						"proporcoes": {
-							"dano_fisico_bonus": 0.68005,
+							"dano_fisico_bonus": 0.87193,
 							"poder_magico": 0.0,
 							"vida_maxima_alvo_pct": 0,
 							"vida_perdida_alvo_pct": 0,
@@ -1914,7 +1925,9 @@
 					"efeitos": [
 						"Alcance 290 e abertura 65°",
 						"Lentidão de 30% por 1,4 s",
-						"Divisão do dano final bruto: 57% físico e 43% mágico, com mitigação separada."
+						"Divisão do dano final bruto: 57% físico e 43% mágico, com mitigação separada.",
+						"A parte maior do dano vai para a resistência mais baixa do alvo",
+						"A parte mágica atravessa escudos que só absorvem dano mágico"
 					],
 					"tags": [
 						"dano_misto",
@@ -1932,7 +1945,9 @@
 							"magico": 0.43
 						},
 						"alvos": "area",
-						"esquivavel": false
+						"esquivavel": false,
+						"divisao_adaptativa": true,
+						"ignora_escudo_magico": true
 					}
 				},
 				{
@@ -1945,11 +1960,11 @@
 					"alvo": "unico",
 					"dano": {
 						"base": [
-							83.97,
-							4.566
+							82.23,
+							4.471
 						],
 						"proporcoes": {
-							"dano_fisico_bonus": 0.55377,
+							"dano_fisico_bonus": 0.70812,
 							"poder_magico": 0.0,
 							"vida_maxima_alvo_pct": 0,
 							"vida_perdida_alvo_pct": 0,
@@ -1962,7 +1977,10 @@
 						"Alcance 285",
 						"Preparação de 0,4 s e um único acerto",
 						"Divisão do dano final bruto: 60% físico e 40% mágico, com mitigação separada.",
-						"Disponível a partir do nível 6."
+						"Disponível a partir do nível 6.",
+						"+30% de dano em quem estiver sob a lentidão do Fio de Retorno",
+						"A parte maior do dano vai para a resistência mais baixa do alvo",
+						"A parte mágica atravessa escudos que só absorvem dano mágico"
 					],
 					"tags": [
 						"dano_misto",
@@ -1977,15 +1995,18 @@
 						},
 						"alvos": "um",
 						"esquivavel": false,
-						"nivel_minimo": 6
+						"nivel_minimo": 6,
+						"divisao_adaptativa": true,
+						"ignora_escudo_magico": true,
+						"bonus_se_lento": 0.3
 					}
 				}
 			],
 			"build_recomendada": [
 				"Botas do Caçador",
 				"Lâmina do Eclipse",
-				"Presa da Serpente",
 				"Manto da Noite Eterna",
+				"Presa da Serpente",
 				"Escudo do Guardião"
 			],
 			"itens_alternativos": [
@@ -2019,7 +2040,7 @@
 			"ajustes": [
 				{
 					"campo": "habilidades 1 e 2 e dano da passiva",
-					"fator": 1.495,
+					"fator": 1.499,
 					"motivo": "Correção de orçamento: dano contínuo das básicas = 88% do combo da classe a cada 7 s."
 				},
 				{
@@ -2032,16 +2053,16 @@
 				},
 				{
 					"campo": "força (botões inicio e fim, ver aplicar_fator em tools/conversao/converter_campeoes.py)",
-					"inicio": 0.769,
-					"fim": 0.879,
+					"inicio": 0.753,
+					"fim": 1.124,
 					"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
 				}
 			],
 			"build_ids": [
 				"botas_do_cacador",
 				"lamina_do_eclipse",
-				"presa_da_serpente",
 				"manto_da_noite_eterna",
+				"presa_da_serpente",
 				"escudo_do_guardiao"
 			]
 		},
@@ -2828,8 +2849,8 @@
 			},
 			"atributos": {
 				"vida": [
-					549.1,
-					168.12
+					528.5,
+					173.26
 				],
 				"armadura": [
 					33,
@@ -2874,11 +2895,11 @@
 					"alvo": "linha",
 					"dano": {
 						"base": [
-							20.18,
-							8.899
+							18.69,
+							8.243
 						],
 						"proporcoes": {
-							"dano_fisico_bonus": 0.81154,
+							"dano_fisico_bonus": 0.86186,
 							"poder_magico": 0.0,
 							"vida_maxima_alvo_pct": 0,
 							"vida_perdida_alvo_pct": 0,
@@ -2912,11 +2933,11 @@
 					"alvo": "si_mesmo",
 					"dano": {
 						"base": [
-							11.42,
-							5.176
+							10.58,
+							4.795
 						],
 						"proporcoes": {
-							"dano_fisico_bonus": 0.47298,
+							"dano_fisico_bonus": 0.5023,
 							"poder_magico": 0.0,
 							"vida_maxima_alvo_pct": 0,
 							"vida_perdida_alvo_pct": 0,
@@ -2954,11 +2975,11 @@
 					"alvo": "cone",
 					"dano": {
 						"base": [
-							12.17,
-							5.788
+							11.27,
+							5.361
 						],
 						"proporcoes": {
-							"dano_fisico_bonus": 0.5274,
+							"dano_fisico_bonus": 0.5601,
 							"poder_magico": 0.0,
 							"vida_maxima_alvo_pct": 0,
 							"vida_perdida_alvo_pct": 0,
@@ -3043,8 +3064,8 @@
 				},
 				{
 					"campo": "força (botões inicio e fim, ver aplicar_fator em tools/conversao/converter_campeoes.py)",
-					"inicio": 0.869,
-					"fim": 2.0,
+					"inicio": 0.805,
+					"fim": 2.124,
 					"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
 				}
 			],
@@ -4652,10 +4673,10 @@
 					"dano": {
 						"tipo": "magico",
 						"base": [
-							1.94,
-							8.056
+							3.09,
+							12.845
 						],
-						"poder_magico": 0.68914
+						"poder_magico": 0.64765
 					}
 				}
 			},
@@ -4669,12 +4690,12 @@
 					"alvo": "linha",
 					"dano": {
 						"base": [
-							9.29,
-							39.387
+							14.81,
+							31.408
 						],
 						"proporcoes": {
 							"dano_fisico_bonus": 0.0,
-							"poder_magico": 3.36433,
+							"poder_magico": 3.162,
 							"vida_maxima_alvo_pct": 0,
 							"vida_perdida_alvo_pct": 0,
 							"vida_maxima_propria_pct": 0.0
@@ -4684,7 +4705,10 @@
 					"recarga": 7,
 					"efeitos": [
 						"Alcance fixo 850 e largura 57",
-						"Atinge só o primeiro campeão. Minions recebem dano e não interrompem"
+						"Atinge só o primeiro campeão. Minions recebem dano e não interrompem",
+						"Tripé armado: fica parada 0,35 s ao lançar",
+						"Dano total a partir de 600 de distância; mais perto, 70%",
+						"+12% de dano por item completo (a bota não conta)"
 					],
 					"tags": [
 						"longo_alcance",
@@ -4696,7 +4720,13 @@
 						"largura": 57,
 						"primeiro_alvo": true,
 						"alvos": "um",
-						"esquivavel": true
+						"esquivavel": true,
+						"imobiliza_ao_lancar": 0.35,
+						"dano_por_distancia": {
+							"distancia": 600,
+							"perto": 0.7
+						},
+						"bonus_por_item": 0.12
 					}
 				},
 				{
@@ -4708,12 +4738,12 @@
 					"alvo": "area",
 					"dano": {
 						"base": [
-							2.9,
-							12.082
+							4.64,
+							19.269
 						],
 						"proporcoes": {
 							"dano_fisico_bonus": 0.0,
-							"poder_magico": 1.03363,
+							"poder_magico": 0.97149,
 							"vida_maxima_alvo_pct": 0,
 							"vida_perdida_alvo_pct": 0,
 							"vida_maxima_propria_pct": 0.0
@@ -4751,12 +4781,12 @@
 					"alvo": "linha",
 					"dano": {
 						"base": [
-							4.67,
-							19.081
+							5.7,
+							23.278
 						],
 						"proporcoes": {
 							"dano_fisico_bonus": 0.0,
-							"poder_magico": 1.62821,
+							"poder_magico": 1.17064,
 							"vida_maxima_alvo_pct": 0,
 							"vida_perdida_alvo_pct": 0,
 							"vida_maxima_propria_pct": 0.0
@@ -4767,7 +4797,8 @@
 					"efeitos": [
 						"Alcance 1080, largura 78 e aviso de 0,75 s",
 						"Primeiro campeão recebe 100% do dano. Os demais recebem 60%",
-						"Disponível a partir do nível 6."
+						"Disponível a partir do nível 6.",
+						"Tripé armado: fica parada 0,35 s ao lançar"
 					],
 					"tags": [
 						"longo_alcance",
@@ -4780,7 +4811,8 @@
 						"dano_secundario": 0.6,
 						"alvos": "area",
 						"esquivavel": true,
-						"nivel_minimo": 6
+						"nivel_minimo": 6,
+						"imobiliza_ao_lancar": 0.35
 					}
 				}
 			],
@@ -4821,8 +4853,20 @@
 			"fraco_contra": "Engajes rápidos, zonas que obrigam a andar o tempo todo e dano físico que chega pela lateral.",
 			"ajustes": [
 				{
+					"campo": "habilidades.1.dano.base",
+					"antes": [
+						23,
+						17.31
+					],
+					"depois": [
+						23.0,
+						8.655
+					],
+					"motivo": "Proposta de kits nº 1: a Projeção de Prova cresce metade por nível (17,31 → 8,655) e ganha +12% por item."
+				},
+				{
 					"campo": "habilidades 1 e 2 e dano da passiva",
-					"fator": 1.468,
+					"fator": 1.919,
 					"motivo": "Correção de orçamento: dano contínuo das básicas = 88% do combo da classe a cada 7 s."
 				},
 				{
@@ -4835,8 +4879,8 @@
 				},
 				{
 					"campo": "força (botões inicio e fim, ver aplicar_fator em tools/conversao/converter_campeoes.py)",
-					"inicio": 0.5,
-					"fim": 1.982,
+					"inicio": 0.61,
+					"fim": 1.425,
 					"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
 				}
 			],
@@ -5965,12 +6009,12 @@
 					"alvo": "cone",
 					"dano": {
 						"base": [
-							76.65,
-							5.45
+							120.63,
+							8.578
 						],
 						"proporcoes": {
 							"dano_fisico_bonus": 0.0,
-							"poder_magico": 0.10438,
+							"poder_magico": 0.06263,
 							"vida_maxima_alvo_pct": 0,
 							"vida_perdida_alvo_pct": 0,
 							"vida_maxima_propria_pct": 0.0
@@ -6019,7 +6063,8 @@
 					"custo": 34,
 					"recarga": 9,
 					"efeitos": [
-						"Avanço de até 260 unidades. Não cruza terreno e não é intocável"
+						"Avanço de até 260 unidades. Não cruza terreno e não é intocável",
+						"Depois do avanço, Clavento fica exposto por 2 s: −20% de armadura e de resistência mágica"
 					],
 					"tags": [
 						"mobilidade",
@@ -6028,7 +6073,11 @@
 					"mecanica": {
 						"avanco": 260,
 						"alvos": "nenhum",
-						"esquivavel": false
+						"esquivavel": false,
+						"exposto_apos_uso": {
+							"pct": 0.2,
+							"duracao": 2
+						}
 					}
 				},
 				{
@@ -6041,12 +6090,12 @@
 					"alvo": "area",
 					"dano": {
 						"base": [
-							33.03,
-							2.332
+							51.98,
+							3.67
 						],
 						"proporcoes": {
 							"dano_fisico_bonus": 0.0,
-							"poder_magico": 0.04493,
+							"poder_magico": 0.02696,
 							"vida_maxima_alvo_pct": 0,
 							"vida_perdida_alvo_pct": 0,
 							"vida_maxima_propria_pct": 0.0
@@ -6056,7 +6105,7 @@
 					"recarga": 68,
 					"efeitos": [
 						"Alcance 420, arco com largura 185, aviso de 0,65 s",
-						"Atordoamento em área de 0,65 s",
+						"Atordoamento em área de 0,45 s; 0,75 s em quem estiver sob a lentidão do Dente de Fechadura",
 						"Disponível a partir do nível 6."
 					],
 					"tags": [
@@ -6067,21 +6116,22 @@
 					"mecanica": {
 						"alcance": 420,
 						"largura": 185,
-						"atordoamento": 0.65,
+						"atordoamento": 0.45,
 						"aviso": 0.65,
 						"alvos": "area",
 						"esquivavel": true,
 						"nivel_minimo": 6,
-						"raio": 92
+						"raio": 92,
+						"atordoamento_extra_se_lento": 0.3
 					}
 				}
 			],
 			"build_recomendada": [
 				"Grevas de Ferro",
 				"Medalhão dos Eternos",
-				"Égide de Aço",
 				"Manto dos Ventos Gélidos",
-				"Escudo do Guardião"
+				"Escudo do Guardião",
+				"Armadura Viva de Cristal"
 			],
 			"itens_alternativos": [
 				{
@@ -6107,6 +6157,14 @@
 					"item_id": "tocha_do_tormento",
 					"substitui_id": "manto_dos_ventos_gelidos",
 					"condicao": "cura"
+				},
+				{
+					"item": "Égide de Aço",
+					"substitui": "Armadura Viva de Cristal",
+					"quando": "contra atiradores de ataques básicos",
+					"item_id": "egide_de_aco",
+					"substitui_id": "armadura_viva_de_cristal",
+					"condicao": "situacional"
 				}
 			],
 			"forte_contra": "Adversários corpo a corpo que passam juntos por entradas estreitas.",
@@ -6128,17 +6186,17 @@
 				},
 				{
 					"campo": "força (botões inicio e fim, ver aplicar_fator em tools/conversao/converter_campeoes.py)",
-					"inicio": 0.948,
-					"fim": 0.5,
+					"inicio": 1.492,
+					"fim": 0.3,
 					"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
 				}
 			],
 			"build_ids": [
 				"grevas_de_ferro",
 				"medalhao_dos_eternos",
-				"egide_de_aco",
 				"manto_dos_ventos_gelidos",
-				"escudo_do_guardiao"
+				"escudo_do_guardiao",
+				"armadura_viva_de_cristal"
 			]
 		},
 		{

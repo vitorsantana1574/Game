@@ -160,7 +160,7 @@ As cenas da Godot dão conflito quando duas pessoas editam o mesmo arquivo. Por 
 | 1 ✅ | Modelos de dados, gerador de jogadores, estado do jogo, saves | Tema visual, tela inicial, tela de configuração da carreira |
 | 2 ✅ | Contratos, contratação, técnico, calendário | Telas de mercado, contratação e elenco |
 | 3 | Agenda, treino, energia, ego | Tela de agenda semanal e perfil do jogador |
-| 4 (em andamento) | Campeões ✅ (catálogo, laboratório de equilíbrio) e draft | Fichas e arte dos campeões; tela de draft |
+| 4 | Campeões ✅ (catálogo, laboratório de equilíbrio), domínio de campeões ✅, patch ✅ e draft ✅ | Fichas e arte dos campeões; tela de draft |
 | 5 | Simulação da partida (linha do tempo) | Cena visual da partida e painel de narração |
 | 6 | Liga, calendário, playoffs | Tabela, calendário, chaveamento |
 | 7 | Save/load | Menus de salvar e carregar |

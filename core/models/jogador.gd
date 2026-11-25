@@ -35,7 +35,7 @@ var tracos_revelados: Array[String] = []
 ## Salário mensal que ele pede, em reais.
 var salario_pedido: int = 0
 
-## Domínio de campeões (id do campeão -> nível). Preenchido na etapa dos campeões.
+## Domínio de campeões: id do campeão -> maestria de 0 a 100 (ver DominioCampeoes). A interface vê só o nível.
 var dominio_campeoes: Dictionary = {}
 
 ## Partidas oficiais por campeão (id do campeão -> partidas). Preenchido pela simulação de partidas.
@@ -107,6 +107,7 @@ func resumo_publico(dia_atual: int = 1) -> Dictionary:
 		"fama": snappedf(fama(), 0.01),
 		"contrato": contrato.resumo(dia_atual) if contrato else {},
 		"aparencia": aparencia,
+		"dominio_campeoes": DominioCampeoes.lista_publica(self),
 		"historico_campeoes": {
 			# false até a simulação de partidas existir; depois, true mesmo sem partidas.
 			"disponivel": bool(Dados.balanceamento().get("historico_de_partidas_ativo", false)),
@@ -166,7 +167,11 @@ static func de_dicionario(dados: Dictionary) -> Jogador:
 	for traco: Variant in dados["tracos_revelados"]:
 		jogador.tracos_revelados.append(str(traco))
 	jogador.salario_pedido = int(dados["salario_pedido"])
-	jogador.dominio_campeoes = dados.get("dominio_campeoes", {}).duplicate()
+	for id_campeao: String in dados.get("dominio_campeoes", {}):
+		jogador.dominio_campeoes[id_campeao] = int(dados["dominio_campeoes"][id_campeao])
+	if jogador.dominio_campeoes.is_empty():
+		# Saves anteriores ao domínio: gera de forma estável a partir do id.
+		jogador.dominio_campeoes = DominioCampeoes.gerar(jogador, hash(jogador.id))
 	for id_campeao: String in dados.get("partidas_por_campeao", {}):
 		jogador.partidas_por_campeao[id_campeao] = int(dados["partidas_por_campeao"][id_campeao])
 	jogador.aparencia = int(dados["aparencia"]) if dados.has("aparencia") else aparencia_do_id(jogador.id)

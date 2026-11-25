@@ -182,3 +182,59 @@ O erro médio parou em ~4 pontos por momento (o ruído da medição é de ~2). A
 Para esses quatro, a correção precisa mexer no kit: duração de controle, alcance ou tamanho de escudo. Isso muda o texto das fichas, então depende do dono do projeto e do GPT.
 
 Campeões com botão no limite (0,5 ou 2,0) são candidatos a revisão de kit no primeiro patch.
+
+## 7. Atualização de 25/11: proposta de kits nº 1 aprovada
+
+O dono aprovou a proposta (`docs/balanceamento/proposta_kits_1.md`). As mecânicas novas entraram no conversor e o laboratório recalibrou:
+- os quatro campeões da proposta (5 rodadas, botões entre 0,3 e 3,0);
+- Téssari, Bruméria, Marulva e Orvante, que tinham ficado mais longe do alvo (4 rodadas).
+
+Resultado com 1.500 lutas 5x5 por momento:
+
+```
+Campeão    Classe    Curva     Início   Meio    Fim  Geral  Fora do alvo
+Ravíneo    assassino inicio     54.8%  46.9%  46.8%  49.2%  meio
+Nalcora    assassino inicio     56.6%  46.5%  45.1%  49.1%  meio
+Fulcrim    atirador  inicio     60.2%  48.1%  47.2%  51.5%  inicio
+Kordume    lutador   inicio     49.3%  51.4%  47.1%  49.5%  inicio
+Vardilha   lutador   inicio     52.8%  50.1%  42.9%  48.8%  
+Cintarro   mago      inicio     58.6%  52.6%  43.1%  51.6%  
+Sutéria    suporte   inicio     56.0%  46.0%  48.9%  49.9%  meio
+Clavento   suporte   inicio     55.1%  53.8%  51.5%  53.5%  fim
+Orvante    tanque    inicio     51.8%  46.9%  48.9%  49.0%  meio
+Calzugo    tanque    inicio     53.8%  48.8%  48.7%  50.3%  
+Mirfuso    assassino constante  51.2%  44.6%  45.5%  46.9%  meio, fim
+Zarcavil   atirador  constante  48.0%  41.7%  50.8%  46.3%  meio
+Treválio   atirador  constante  51.1%  45.7%  48.4%  48.1%  meio
+Trisquilo  lutador   constante  48.2%  51.0%  52.1%  50.5%  
+Perlívia   mago      constante  54.3%  49.5%  49.4%  50.9%  inicio
+Fulgavéu   mago      constante  46.6%  58.4%  44.0%  50.6%  meio, fim
+Luminela   suporte   constante  47.1%  52.0%  44.2%  48.2%  fim
+Ocravia    suporte   constante  47.0%  51.6%  51.5%  50.2%  
+Dorsálio   tanque    constante  54.7%  46.8%  47.0%  49.3%  inicio
+Vedrassa   tanque    constante  49.2%  51.8%  47.0%  49.6%  
+Téssari    assassino fim        45.8%  48.1%  54.5%  49.3%  
+Iscavro    assassino fim        41.3%  54.5%  54.1%  50.4%  meio
+Terralume  atirador  fim        46.0%  53.1%  58.9%  52.7%  meio
+Riscavela  atirador  fim        52.8%  47.1%  55.3%  51.3%  inicio
+Marulva    lutador   fim        46.9%  58.3%  52.1%  53.0%  meio
+Eirafim    lutador   fim        45.1%  51.0%  55.0%  50.4%  
+Velúria    mago      fim        43.1%  51.3%  52.9%  49.3%  
+Prismora   mago      fim        41.3%  56.0%  52.4%  50.5%  meio
+Alvenora   suporte   fim        45.7%  45.3%  57.0%  48.9%  
+Bruméria   tanque    fim        50.9%  48.9%  54.1%  51.0%  inicio
+
+Momentos fora do alvo (±4 pontos): 22 de 90
+
+== Média por classe
+  tanque    início  52.1%  meio  48.6%  fim  49.1%
+  assassino início  49.9%  meio  48.1%  fim  49.2%
+  lutador   início  48.4%  meio  52.4%  fim  49.9%
+  mago      início  48.8%  meio  53.6%  fim  48.4%
+  suporte   início  50.2%  meio  49.7%  fim  50.6%
+  atirador  início  51.6%  meio  47.1%  fim  52.1%
+```
+
+- **Fora do alvo:** 22 de 90 momentos (antes eram 26 a 34).
+- **No geral:** todos os campeões entre 46% e 54% de vitória.
+- **Botões no limite (0,3 ou 3,0):** o botão de dano da Vedrassa (força agora vem da divisão de dano) e o botão "fim" do Clavento (o dano dele quase não pesa). São candidatos a revisão de kit no próximo patch, se a partida real confirmar.

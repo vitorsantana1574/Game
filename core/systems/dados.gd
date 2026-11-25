@@ -12,6 +12,7 @@ const TECNICOS: String = "res://data/config/tecnicos.json"
 const CAMPEOES: String = "res://data/campeoes/campeoes.json"
 const ITENS: String = "res://data/itens/itens.json"
 const COMBATE: String = "res://data/config/combate.json"
+const DRAFT: String = "res://data/config/draft.json"
 
 static var _cache: Dictionary = {}
 
@@ -62,6 +63,10 @@ static func itens() -> Dictionary:
 
 static func combate() -> Dictionary:
 	return carregar(COMBATE)
+
+
+static func draft() -> Dictionary:
+	return carregar(DRAFT)
 
 
 static func dias_por_mes() -> int:

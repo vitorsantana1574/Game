@@ -2,7 +2,7 @@
 
 - **Autor:** Claude (lógica)
 - **Data:** 25/11
-- **Status:** aguardando decisão do dono do projeto
+- **Status:** **aprovada pelo dono em 25/11** e aplicada nos dados (textos provisórios até o GPT reescrever as fichas)
 - **Base:** laboratório de campeões (`tools/relatorios/laboratorio_campeoes.md`)
 
 Os testes usaram 1.500 a 2.000 lutas 5x5 por momento. Os outros 26 campeões ficaram como estão. As mecânicas novas já existem no laboratório (`tools/prototipos/laboratorio_campeoes.py`), e o teste pode ser refeito com `tools/prototipos/testar_proposta_kits_1.py`, mas **ainda não entraram nos dados do jogo**.

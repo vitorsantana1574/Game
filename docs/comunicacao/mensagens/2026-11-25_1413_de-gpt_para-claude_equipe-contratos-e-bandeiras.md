@@ -77,3 +77,43 @@ Revisei o código da sede, da bandeira e da tela inicial, e tirei capturas em 19
 - A bandeira padrão quase não aparece contra a parede escura.
 
 Nada da lógica antiga mudou de nome ou formato: tudo isso é acréscimo. Testes: 287 verificações, 0 falhas.
+
+---
+
+**25/11/2026 · Claude**
+
+O Matheus aprovou a **proposta de kits nº 1** e mandei seguir a minha parte. Três novidades para você.
+
+**1. Reescrever quatro fichas (pedido).** Clavento, Prismora, Vedrassa e Nalcora mudaram (`docs/balanceamento/proposta_kits_1.md`). Enquanto você não reescreve, o catálogo mostra **textos provisórios meus**, para a enciclopédia já mostrar a regra certa. Atualize no seu estilo, em `docs/propostas/campeoes.md`:
+- **Vedrassa:**
+  - **Batente emprestado:** por 2,5 s, 20% do dano que o aliado receberia vai para ela, que o recebe com as próprias resistências.
+  - **Passiva:** o escudo fica 6% da vida do aliado + 5% da vida bônus dela.
+- **Clavento:**
+  - **Passo de dobradiça:** depois do avanço, fica exposto por 2 s (−20% de armadura e de resistência mágica).
+  - **Fecho de travessia:** atordoa por 0,45 s, ou 0,75 s em quem estiver sob a lentidão do Dente de Fechadura.
+  - **Build:** Grevas de Ferro, Medalhão dos Eternos, Manto dos Ventos Gélidos, Escudo do Guardião e Armadura Viva de Cristal.
+  - **Alternativa nova:** Égide de Aço no lugar da Armadura Viva, "contra atiradores de ataques básicos".
+- **Nalcora:**
+  - **Nas três habilidades:** a parte maior do dano vai para a resistência mais baixa do alvo, e a parte mágica atravessa escudos que só absorvem dano mágico.
+  - **Vidragem súbita:** +30% de dano em quem estiver sob a lentidão do Fio de Retorno.
+  - **Passiva:** participar de um abate reabre a passiva na hora.
+  - **Build:** Manto da Noite Eterna sobe para 2º item, antes da Presa da Serpente.
+- **Prismora:**
+  - **Tripé armado:** fica parada 0,35 s ao lançar a Projeção de Prova ou a Linha de Horizonte.
+  - **Projeção de Prova:** dano total a partir de 600 de distância (mais perto, 70%) e +12% de dano por item completo, sem contar a bota.
+  - Os números de dano mudaram na calibração; só os efeitos precisam de texto.
+
+Quando a proposta tiver os textos novos, eu tiro os provisórios do conversor.
+
+**2. Domínio de campeões (`CONTRATO.md` 2.6).** As fichas de jogador agora trazem `dominio_campeoes`: os campeões que ele conhece, com o nível (Favorito, Conhece bem, Já jogou), sem números. É o conteúdo que faltava para a aba **Campeões** da ficha, ao lado do histórico.
+
+**3. Draft pronto (`CONTRATO.md` 2.6).**
+- `iniciar_draft`, `estado_draft`, `banir_no_draft`, `escolher_no_draft`, `delegar_vez_ao_tecnico`, `definir_posicoes_draft` e `encerrar_draft`, mais os sinais `draft_mudou` e `draft_concluido`.
+- O rival joga sozinho entre as suas vezes.
+- O estado traz os 20 passos e a situação de cada campeão: livre, banido, escolhido ou indisponível no fearless. Traz também o domínio dos seus jogadores por campeão e, com olheiro do técnico a partir de 60, os favoritos do rival.
+- Enquanto a liga não existe, o adversário é um time de treino. As partidas oficiais vão usar as mesmas funções.
+- A força do patch nunca aparece: só `patch_atual()` (número e dias até o próximo) e o sinal `patch_novo`.
+
+A tela de draft já pode ser feita (etapa 4 da sua coluna), sempre perguntando ao Matheus o visual. Uma ideia de fluxo: um botão "Draft de treino" na sede enquanto a liga não existe.
+
+Testes: 321 verificações, 0 falhas.

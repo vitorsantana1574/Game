@@ -106,7 +106,18 @@ Cada jogador tem um nível de domínio para cada campeão:
 - **Lista vasta:** razoável com quase tudo, mas não é especialista em nenhum.
 - O mesmo vale para as **posições**: um jogador especialista na posição principal rende mais nela, enquanto um jogador flexível rende de forma mais equilibrada entre a principal e as secundárias.
 
-Isso dá peso ao **pick & ban** e ao **meta** de cada patch. Tamanho exato das penalidades e bônus: **[A DEFINIR]**
+Isso dá peso ao **pick & ban** e ao **meta** de cada patch.
+
+**Implementado (25/11, valores provisórios em `data/config/draft.json`):**
+- A lógica guarda uma maestria de 0 a 100 por campeão. O jogador vê só o nível:
+  - **Favorito:** a partir de 80, rende 105%;
+  - **Conhece bem:** a partir de 55, rende 100%;
+  - **Já jogou:** a partir de 25, rende 92%;
+  - **Não conhece:** rende 80%.
+- Especialistas conhecem cerca de 4 campeões, com o favorito perto de 94. Versáteis conhecem cerca de 11, com o melhor perto de 82.
+- Os campeões conhecidos combinam com as posições do jogador.
+- Um campeão fora das posições dele rende 65%; numa posição secundária, 90%.
+- Os valores finais serão calibrados com a simulação de partidas.
 
 ### 6.4 Traços ocultos
 
@@ -468,7 +479,7 @@ O dono do projeto aprovou os **30 campeões** propostos pelo GPT (`docs/proposta
   3. dois botões por campeão (sem itens / com itens).
 
   Resultado: médias por classe entre 47% e 54% em todos os momentos, e curvas na direção certa (fortes no início 56% → 49%; fortes no fim 45% → 53%).
-- **Fora do alvo:** Clavento e Prismora (fortes), Vedrassa e Nalcora (fracas). O dono pediu uma proposta criativa, que compense as fraquezas de outras formas em vez de só mexer em dano. Ela está em `docs/balanceamento/proposta_kits_1.md`, aguardando decisão.
+- **Proposta de kits nº 1 (aprovada em 25/11):** Clavento (exposto após o avanço; atordoamento maior no combo; Égide de Aço vira alternativa), Prismora (tripé armado, dano por distância, +12% por item), Vedrassa (divide 20% do dano do aliado; escudo cresce com a vida bônus) e Nalcora (dano vai para a resistência mais baixa, atravessa escudos mágicos, +30% em alvo lento, abate reabre a passiva). Depois de recalibrados, os quatro ficam entre 50% e 53% de vitória. Os textos são provisórios até o GPT reescrever as fichas.
 - **Valor de nível:** com os atributos dos campeões, 1 nível a mais vale cerca de +6 a 8% de força, como no protótipo de ritmo. **A simulação da partida não soma um bônus genérico por nível** quando usar os atributos dos campeões, para não contar o nível duas vezes.
 
 ## 8. Draft (pick & ban)
@@ -514,6 +525,17 @@ Fase de banimentos e escolhas antes de cada partida.
   - com **treinos**, numa fase de treinamento; e/ou
   - pelo **técnico, que precisa estudar e treinar o meta**. Um técnico atualizado com o meta orienta melhor o draft.
 - Detalhes de como o conhecimento do meta é exibido e evolui: **[A DEFINIR]**
+
+### 8.7.1 Implementação do draft (25/11)
+
+- **Patch:** a cada 180 dias, cada campeão recebe uma força escondida entre 0,9 e 1,1. A interface só fica sabendo que saiu um patch novo.
+- **Decisões automáticas** (rival, ou técnico quando o jogador delega a vez):
+  - consideram o domínio dos jogadores, a adequação do campeão às posições ainda abertas e o meta percebido;
+  - escolher também conta negar um campeão bom para o rival;
+  - a qualidade vem de (Macro + Conhecimento) do técnico: técnico fraco erra mais e enxerga menos o meta.
+- **Olheiro do técnico a partir de 60:** o draft mostra os campeões favoritos dos jogadores rivais.
+- **Distribuição final:** a lógica distribui os 5 campeões pelas posições da melhor forma; o jogador pode trocar.
+- **Adversário provisório:** enquanto a liga não existe, o draft é contra um time de treino. As partidas oficiais vão usar o mesmo sistema.
 
 ## 8.8 Técnico
 
@@ -758,7 +780,7 @@ Detalhes: **[A DEFINIR]**
 - [ ] Contratação do elenco (5 titulares + 5 reservas)
 - [ ] Sistema de energia, descanso e treino
 - [x] Campeões fictícios (30, catálogo e laboratório de equilíbrio)
-- [ ] Draft
+- [x] Draft (sistema, IA e patch escondido; tela com o GPT)
 - [ ] Simulação de partida
 - [ ] Liga e calendário
 - [ ] Salvar e carregar
@@ -777,7 +799,6 @@ Detalhes: **[A DEFINIR]**
 - Técnico: custos e tempos dos anúncios, efeitos do cansaço e duração das férias
 - Reputação: outros efeitos e exibição
 - Como o conhecimento do meta é exibido e evolui
-- Kits de Clavento, Prismora, Vedrassa e Nalcora (fora do alvo no laboratório de campeões)
 - Mundial: vagas por região, séries do play-in e da fase suíça, premiação
 - Contratos: ganho de experiência, regras de rescisão
 - Ego e lealdade: valores e velocidade de mudança (balanceamento)

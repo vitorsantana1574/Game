@@ -117,6 +117,7 @@ func nova_carreira(escolhas: Dictionary) -> Dictionary:
 	nova.organizacao.nome = config["nome"]
 	nova.organizacao.dinheiro = int(config["capital_valor"])
 	nova.organizacao.bandeira_png = bandeira
+	nova.forcas_patch = Patch.gerar_forcas(nova.semente, 1)
 	nova.registrar_lancamento("Capital inicial", nova.organizacao.dinheiro, "capital")
 	SistemaMercado.gerar_inicial(nova)
 
@@ -213,6 +214,187 @@ func listar_itens(filtros: Dictionary = {}) -> Array[Dictionary]:
 ## Ficha de um item pelo ID (ex.: "orbe_da_tempestade"). {} se não existir.
 func detalhe_item(id: String) -> Dictionary:
 	return CatalogoCampeoes.detalhe_item(id)
+
+
+# --- Draft (GDD seção 8) --------------------------------------------------------
+# O draft fica só na memória: não vai para o save. Enquanto a liga não existe, o adversário é um time de treino.
+
+var draft_atual: Draft = null
+var _lado_jogador: String = "azul"
+
+
+## Patch em vigor: {"numero", "dias_ate_proximo"}. A força dos campeões nunca é informada.
+func patch_atual() -> Dictionary:
+	if carreira == null:
+		return {}
+	return {"numero": carreira.patch_numero, "dias_ate_proximo": Patch.proximo_dia(carreira.dia) - carreira.dia}
+
+
+## Começa um draft. opcoes (todas opcionais):
+##   "primeira_escolha": true (padrão) = seu time é o azul e escolhe primeiro;
+##   "indisponiveis": {"azul": [ids], "vermelho": [ids]} para o "fearless" de séries.
+## Exige os 5 titulares definidos. Retorno: {"ok": true, "estado": {...}} ou erro em "titulares".
+func iniciar_draft(opcoes: Dictionary = {}) -> Dictionary:
+	var bloqueio: Dictionary = _verificar_ativa()
+	if not bloqueio.is_empty():
+		return bloqueio
+	var meus: Dictionary = {}
+	for posicao: String in Draft.POSICOES:
+		var jogador: Jogador = carreira.organizacao.jogador_por_id(str(carreira.organizacao.titulares.get(posicao, "")))
+		if jogador == null:
+			return _erro("titulares", "titulares_incompletos", "Defina os 5 titulares antes do draft.")
+		meus[posicao] = jogador
+	var regra: Dictionary = Dados.draft()
+	var meu_time: Dictionary = {"id": "jogador", "nome": carreira.organizacao.nome, "jogadores": meus,
+		"qualidade": _qualidade_draft(carreira.organizacao.tecnico), "controlado": true}
+	var rival: Dictionary = _time_de_treino(meus)
+	_lado_jogador = "azul" if bool(opcoes.get("primeira_escolha", true)) else "vermelho"
+	var azul: Dictionary = meu_time if _lado_jogador == "azul" else rival
+	var vermelho: Dictionary = rival if _lado_jogador == "azul" else meu_time
+	draft_atual = Draft.criar(azul, vermelho, carreira.forcas_patch,
+		hash("%d:draft:%d:%d" % [carreira.semente, carreira.dia, randi()]), opcoes.get("indisponiveis", {}))
+	draft_atual.avancar_ia()
+	var estado: Dictionary = estado_draft()
+	Eventos.draft_mudou.emit(estado)
+	return {"ok": true, "estado": estado}
+
+
+## Estado do draft para a tela (ver docs/CONTRATO.md). {} se não houver draft.
+func estado_draft() -> Dictionary:
+	if draft_atual == null:
+		return {}
+	var d: Draft = draft_atual
+	var meu: String = _lado_jogador
+	var rival: String = Draft.outro(meu)
+	var atual: Dictionary = d.vez()
+	var passos: Array[Dictionary] = []
+	var feitos: Dictionary = {"azul": {"ban": 0, "pick": 0}, "vermelho": {"ban": 0, "pick": 0}}
+	for indice: int in range(d.ordem.size()):
+		var item: Dictionary = d.ordem[indice]
+		var lista: Array = d.bans[item["time"]] if item["acao"] == "ban" else d.picks[item["time"]]
+		var n: int = feitos[item["time"]][item["acao"]]
+		feitos[item["time"]][item["acao"]] = n + 1
+		passos.append({"acao": item["acao"], "time": item["time"], "campeao": lista[n] if n < lista.size() else ""})
+	var tecnico: Tecnico = carreira.organizacao.tecnico
+	var revela: bool = tecnico != null and int(tecnico.atributos.get("olheiro", 0)) >= int(Dados.draft()["olheiro_revela_favoritos"])
+	var campeoes: Array[Dictionary] = []
+	for id: String in Draft.ids_campeoes():
+		var uso: Dictionary = d.usado_por(id)
+		var estado_campeao: String = uso.get("estado", "livre")
+		if estado_campeao == "livre" and d.indisponiveis[meu].has(id):
+			estado_campeao = "indisponivel"
+		var dominio: Dictionary = {}
+		for posicao: String in Draft.POSICOES:
+			var jogador: Jogador = d.times[meu]["jogadores"][posicao]
+			var nivel: Dictionary = DominioCampeoes.nivel(int(jogador.dominio_campeoes.get(id, 0)))
+			if nivel["id"] != "nao_conhece":
+				dominio[posicao] = {"jogador_id": jogador.id, "apelido": jogador.apelido, "nivel": nivel["id"], "nivel_nome": nivel["nome"]}
+		var item_campeao: Dictionary = {"id": id, "estado": estado_campeao, "por": uso.get("por", ""), "dominio": dominio}
+		if revela:
+			var favoritos: Array[String] = []
+			for posicao: String in Draft.POSICOES:
+				var adversario: Jogador = d.times[rival]["jogadores"][posicao]
+				if DominioCampeoes.nivel(int(adversario.dominio_campeoes.get(id, 0)))["id"] == "favorito":
+					favoritos.append(posicao)
+			item_campeao["favorito_do_rival"] = favoritos
+		campeoes.append(item_campeao)
+	var times_publico: Dictionary = {}
+	for lado: String in Draft.LADOS:
+		var jogadores: Dictionary = {}
+		for posicao: String in Draft.POSICOES:
+			var j: Jogador = d.times[lado]["jogadores"][posicao]
+			jogadores[posicao] = {"id": j.id, "apelido": j.apelido}
+		times_publico[lado] = {"nome": d.times[lado]["nome"], "bans": d.bans[lado].duplicate(),
+			"picks": d.picks[lado].duplicate(), "posicoes": d.posicoes[lado].duplicate(), "jogadores": jogadores}
+	return {
+		"lado_jogador": meu,
+		"concluido": d.concluido(),
+		"vez": {} if atual.is_empty() else {"acao": atual["acao"], "time": atual["time"],
+			"do_jogador": atual["time"] == meu, "numero": d.passo + 1, "total": d.ordem.size()},
+		"passos": passos,
+		"times": times_publico,
+		"campeoes": campeoes,
+		"favoritos_do_rival_revelados": revela,
+	}
+
+
+## Bane um campeão na sua vez. Depois, a IA do rival joga até a sua próxima vez.
+func banir_no_draft(campeao_id: String) -> Dictionary:
+	return _acao_draft(campeao_id, "ban")
+
+
+## Escolhe um campeão na sua vez. Depois, a IA do rival joga até a sua próxima vez.
+func escolher_no_draft(campeao_id: String) -> Dictionary:
+	return _acao_draft(campeao_id, "pick")
+
+
+## O técnico faz a sua vez atual (com a qualidade dele; sem técnico, a escolha é fraca).
+func delegar_vez_ao_tecnico() -> Dictionary:
+	if draft_atual == null or draft_atual.concluido():
+		return _erro("draft", Draft.ERRO_CONCLUIDO, "Não há vez para jogar.")
+	return _acao_draft(draft_atual.decidir_ia(), str(draft_atual.vez()["acao"]))
+
+
+## Troca a posição final dos seus campeões depois do draft. mapa: {posicao: id do campeão} com os 5 escolhidos.
+func definir_posicoes_draft(mapa: Dictionary) -> Dictionary:
+	if draft_atual == null:
+		return _erro("draft", "sem_draft", "Não há draft em andamento.")
+	var codigo: String = draft_atual.definir_posicoes(_lado_jogador, mapa)
+	if not codigo.is_empty():
+		return _erro("posicoes", codigo, "Distribua os seus 5 campeões, um por posição.")
+	var estado: Dictionary = estado_draft()
+	Eventos.draft_mudou.emit(estado)
+	return {"ok": true, "estado": estado}
+
+
+## Descarta o draft atual.
+func encerrar_draft() -> void:
+	draft_atual = null
+
+
+func _acao_draft(campeao_id: String, acao: String) -> Dictionary:
+	if draft_atual == null:
+		return _erro("draft", "sem_draft", "Não há draft em andamento.")
+	var d: Draft = draft_atual
+	if d.concluido():
+		return _erro("draft", Draft.ERRO_CONCLUIDO, "O draft já terminou.")
+	var atual: Dictionary = d.vez()
+	if atual["time"] != _lado_jogador:
+		return _erro("draft", Draft.ERRO_NAO_E_SUA_VEZ, "Aguarde a vez do seu time.")
+	if atual["acao"] != acao:
+		return _erro("draft", Draft.ERRO_ACAO_ERRADA, "Agora é hora de %s." % ("banir" if atual["acao"] == "ban" else "escolher"))
+	var codigo: String = d.aplicar(campeao_id)
+	if not codigo.is_empty():
+		var mensagens: Dictionary = {Draft.ERRO_INDISPONIVEL: "Este campeão não está disponível.",
+			Draft.ERRO_CAMPEAO: "Campeão desconhecido."}
+		return _erro("campeao", codigo, str(mensagens.get(codigo, "Ação inválida.")))
+	d.avancar_ia()
+	var estado: Dictionary = estado_draft()
+	Eventos.draft_mudou.emit(estado)
+	if d.concluido():
+		Eventos.draft_concluido.emit(estado)
+	return {"ok": true, "estado": estado}
+
+
+func _qualidade_draft(tecnico: Tecnico) -> float:
+	if tecnico == null:
+		return float(Dados.draft()["ia"]["qualidade_sem_tecnico"])
+	return clampf((float(tecnico.atributos.get("macro", 50)) + float(tecnico.atributos.get("conhecimento", 50))) / 200.0, 0.0, 1.0)
+
+
+func _time_de_treino(meus: Dictionary) -> Dictionary:
+	var regra: Dictionary = Dados.draft()["treino"]
+	var media: float = 0.0
+	for jogador: Jogador in meus.values():
+		media += jogador.nivel_geral()
+	media /= meus.size()
+	var gerador: GeradorJogadores = GeradorJogadores.new(hash("%d:treino:%d" % [carreira.semente, carreira.dia]), 900000)
+	var jogadores: Dictionary = {}
+	for posicao: String in Draft.POSICOES:
+		var qualidade: float = media + gerador.sortear_float(-float(regra["variacao_qualidade"]), float(regra["variacao_qualidade"]))
+		jogadores[posicao] = gerador.gerar({"posicao": posicao, "qualidade": qualidade})
+	return {"id": "treino", "nome": str(regra["nome"]), "jogadores": jogadores,
+		"qualidade": float(regra["qualidade_tecnico"]), "controlado": false}
 
 
 # --- Etapa 2: leitura de elenco, mercado e técnico ---------------------------
@@ -656,6 +838,11 @@ func _limpar_avisos(id: String) -> void:
 
 
 func _processar_dia() -> void:
+	var patch: int = Patch.numero_no_dia(carreira.dia)
+	if patch != carreira.patch_numero:
+		carreira.patch_numero = patch
+		carreira.forcas_patch = Patch.gerar_forcas(carreira.semente, patch)
+		Eventos.patch_novo.emit(patch)
 	_processar_anuncio()
 	_processar_contratos()
 	if (carreira.dia - 1) % Dados.dias_por_mes() == 0:

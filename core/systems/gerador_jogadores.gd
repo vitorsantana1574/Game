@@ -4,10 +4,12 @@ extends RefCounted
 
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _contador: int = 0
+var _semente: int = 0
 
 
 func _init(semente: int = 0, contador_inicial: int = 0) -> void:
 	_rng.seed = semente
+	_semente = semente
 	_contador = contador_inicial
 
 
@@ -47,7 +49,14 @@ func gerar(opcoes: Dictionary = {}) -> Jogador:
 	jogador.satisfacao = float(geracao["satisfacao_inicial"])
 	jogador.lealdade = float(geracao["lealdade_inicial"])
 	jogador.salario_pedido = calcular_salario_pedido(jogador)
+	# Semente própria: gerar o domínio não muda a sequência dos outros sorteios.
+	jogador.dominio_campeoes = DominioCampeoes.gerar(jogador, hash("%s:%d" % [jogador.id, _semente]))
 	return jogador
+
+
+## Número aleatório no intervalo, com o mesmo gerador (sequência determinística).
+func sortear_float(minimo: float, maximo: float) -> float:
+	return _rng.randf_range(minimo, maximo)
 
 
 ## Gera vários jogadores de uma vez, com qualidade variando em torno da média.
