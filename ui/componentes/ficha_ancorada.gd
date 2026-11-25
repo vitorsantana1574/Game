@@ -81,8 +81,8 @@ func atualizar(categoria_nova: String, titulo_novo: String, detalhe: bool) -> VB
 func abrir(origem: Control, animar: bool) -> void:
 	_origem = origem
 	show()
-	reposicionar()
 	_parar_animacao()
+	reposicionar()
 	seta.grab_focus()
 	if not animar:
 		return
@@ -146,6 +146,8 @@ func _parar_animacao() -> void:
 	painel.modulate.a = 1.0
 
 
-func esconder() -> void:
+func esconder(voltar_ao_origem: bool = false) -> void:
 	_parar_animacao()
 	hide()
+	if voltar_ao_origem and is_instance_valid(_origem):
+		_origem.grab_focus()

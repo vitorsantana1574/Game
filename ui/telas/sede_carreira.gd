@@ -37,7 +37,6 @@ const FUNDO: Color = Color("#101a17")
 var _espaco: Control
 var _arte: TextureRect
 var _bandeira: BandeiraNaSede
-var _imagem_bandeira: Image
 var _rotulo_equipe: Button
 var _topo: PanelContainer
 var _rodape: PanelContainer
@@ -46,6 +45,8 @@ var _data: Label
 var _data_compacta: Label
 var _janela: Label
 var _dinheiro: Button
+var _botao_salvar: Button
+var _botao_menu: Button
 var _botoes: Dictionary = {}
 var _legendas: Dictionary = {}
 var _ficha: Ficha
@@ -53,7 +54,6 @@ var _aviso: Label
 var _tempo_aviso: Timer
 var _resumo: Dictionary
 var _titulares: Dictionary
-var _historico: Array[Dictionary] = []
 var _avisos_dia: PackedStringArray = []
 var _alvo: String
 var _detalhe: String
@@ -61,9 +61,11 @@ var _id_pessoa: String
 var _posicao_edicao: String
 var _retorno_cancelamento: String
 var _volta_perfil: String
-var _erro_bandeira: bool
 var _animar: bool = true
 var _fim: bool = false
+var _avancando: bool
+var _saindo: bool
+var _confirmacao: ConfirmationDialog
 
 
 func _ready() -> void:
@@ -75,14 +77,31 @@ func _ready() -> void:
 	_montar_cena()
 	_ligar_sinais()
 	_atualizar_sede()
-	var slot: int = int(_resumo.get("slot", -1))
-	if slot >= 0:
-		_imagem_bandeira = Bandeiras.carregar(slot, Jogo.listar_saves()[slot])
-		_bandeira.aplicar(_imagem_bandeira)
+	_carregar_bandeira()
 	resized.connect(_posicionar)
+	_topo.resized.connect(_posicionar_area.call_deferred)
+	_rodape.resized.connect(_posicionar_area.call_deferred)
 	_posicionar()
 	if bool(_resumo.get("encerrada", false)):
 		_encerrar(_resumo)
+
+
+func _carregar_bandeira() -> void:
+	var png: String = str(_resumo.get("bandeira_png", ""))
+	if not png.is_empty():
+		_bandeira.aplicar(Bandeiras.decodificar(png))
+		return
+	var slot: int = int(_resumo.get("slot", -1))
+	var saves: Array[Dictionary] = Jogo.listar_saves()
+	if slot < 0 or slot >= saves.size():
+		return
+	png = Bandeiras.ler_legado(slot, saves[slot])
+	var imagem: Image = Bandeiras.decodificar(png)
+	if imagem == null:
+		return
+	_bandeira.aplicar(imagem)
+	if not bool(_resumo.get("encerrada", false)) and Jogo.definir_bandeira(png)["ok"]:
+		Jogo.salvar()
 
 
 func _montar_cena() -> void:
@@ -133,7 +152,10 @@ func _montar_cena() -> void:
 	_nome = _texto(identidade, "", 26)
 	_nome.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_data_compacta = _texto(identidade, "", 15, Tema.SUAVE)
+	_data_compacta.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_data = _texto(cabecalho, "", 17, Tema.SUAVE)
+	_data.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_data.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_dinheiro = _botao(cabecalho, "", _abrir.bind("dinheiro"))
 	_dinheiro.add_theme_color_override("font_color", Tema.VERDE)
 
@@ -143,13 +165,15 @@ func _montar_cena() -> void:
 	_rodape.add_child(rodape)
 	_janela = _texto(rodape, "", 17, Tema.SUAVE)
 	_janela.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_botao(rodape, "Salvar", _salvar)
-	_botao(rodape, "Menu principal", _pedir_saida)
+	_janela.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_botao_salvar = _botao(rodape, "Salvar", _salvar)
+	_botao_menu = _botao(rodape, "Menu principal", _pedir_saida)
 
 	_ficha = Ficha.new()
 	_espaco.add_child(_ficha)
 	_ficha.voltar.connect(_voltar)
 	_aviso = _texto(_espaco, "", 18, Color("#ffe5be"))
+	_aviso.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_aviso.add_theme_stylebox_override("normal", Tema.caixa(Color("#30271d"), AMBAR, 10))
 	_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_aviso.hide()
@@ -172,13 +196,23 @@ func _posicionar() -> void:
 	var quadro: Vector2 = size / escala
 	for camada: Control in [_espaco, _topo, _rodape]:
 		camada.scale = Vector2.ONE * escala
+	_data.visible = quadro.x >= 720.0
+	_data_compacta.visible = not _data.visible
+	_janela.add_theme_font_size_override("font_size", 14 if quadro.x < 540.0 else 17)
+	_atualizar_rotulo_transferencias()
+	for botao: Button in [_dinheiro, _botao_salvar, _botao_menu]:
+		botao.add_theme_font_size_override("font_size", 16 if quadro.x < 540.0 else 20)
 	_topo.size = Vector2(quadro.x, 81.0)
 	_rodape.size = Vector2(quadro.x, 59.0)
+	_posicionar_area()
+
+
+func _posicionar_area() -> void:
+	var escala: float = _espaco.scale.x
+	var quadro: Vector2 = size / escala
 	_rodape.position.y = size.y - _rodape.size.y * escala
 	_espaco.position.y = _topo.size.y * escala
 	_espaco.size = Vector2(quadro.x, maxf(200.0, quadro.y - _topo.size.y - _rodape.size.y))
-	_data.visible = quadro.x >= 720.0
-	_data_compacta.visible = not _data.visible
 	var largura: float = minf(_espaco.size.x, _espaco.size.y * 16.0 / 9.0)
 	_arte.size = Vector2(largura, largura * 9.0 / 16.0)
 	_arte.position = (_espaco.size - _arte.size) * Vector2(0.5, 0.5 if quadro.x >= 850.0 else 0.16)
@@ -213,9 +247,10 @@ func _atualizar_sede() -> void:
 	_nome.text = str(_resumo.get("nome", ""))
 	_data_compacta.text = str(dia.get("texto", ""))
 	_data.text = "%s  ·  %s" % [_data_compacta.text, dia.get("fase_nome", "")]
+	_data.tooltip_text = _data.text
+	_data_compacta.tooltip_text = _data_compacta.text
 	_dinheiro.text = "Dinheiro   %s" % _reais(int(_resumo.get("dinheiro", 0)))
-	_janela.text = "Transferências abertas" if _janela_aberta() else "Transferências fechadas"
-	_janela.add_theme_color_override("font_color", Tema.VERDE if _janela_aberta() else AMBAR)
+	_atualizar_rotulo_transferencias()
 	for id: String in POSICOES:
 		var botao: Button = _botoes[id]
 		var titular: Dictionary = Jogo.detalhe_jogador(str(_titulares.get(id, "")))
@@ -224,6 +259,14 @@ func _atualizar_sede() -> void:
 		botao.add_theme_color_override("icon_normal_color", AMBAR if vazio else Tema.VERDE)
 		botao.add_theme_stylebox_override("normal", Tema.caixa(
 			Color("#32291e") if vazio else FUNDO, Color("#a88962") if vazio else Tema.BORDA, 5))
+
+
+func _atualizar_rotulo_transferencias() -> void:
+	var abertas: bool = _janela_aberta()
+	var estado: String = "abertas" if abertas else "fechadas"
+	var separador: String = "\n" if size.x < size.y else " "
+	_janela.text = "Transferências%s%s" % [separador, estado]
+	_janela.add_theme_color_override("font_color", Tema.VERDE if abertas else AMBAR)
 
 
 func _janela_aberta() -> bool:
@@ -235,20 +278,22 @@ func _ligar_sinais() -> void:
 	Eventos.dia_avancou.connect(_dia_avancado)
 	Eventos.dinheiro_mudou.connect(func(_valor: int) -> void: _atualizar_sede())
 	Eventos.elenco_mudou.connect(_atualizar_sede)
-	Eventos.carreira_salva.connect(_guardar_bandeira)
+	Eventos.bandeira_mudou.connect(func(png: String) -> void:
+		_bandeira.aplicar(Bandeiras.decodificar(png)))
 	Eventos.contrato_vencendo.connect(_contrato_vencendo)
 	Eventos.candidatos_chegaram.connect(func(candidatos: Array[Dictionary]) -> void:
 		_avisos_dia.append("Candidatos a técnico: %d" % candidatos.size()))
 	Eventos.verba_recebida.connect(func(valor: int) -> void:
-		_registrar("Liga", valor))
+		_avisos_dia.append("Verba da liga · %s" % _reais(valor)))
 	Eventos.salarios_pagos.connect(func(valor: int) -> void:
-		_registrar("Salários pagos", -valor))
+		_avisos_dia.append("Salários pagos · %s" % _reais(valor)))
 	Eventos.salarios_atrasados.connect(func(valor: int, _meses: int) -> void:
 		_avisos_dia.append("Salários em atraso · %s" % _reais(valor)))
 	Eventos.parcela_paga.connect(func(valor: int, _restantes: int) -> void:
-		_registrar("Parcela do empréstimo", -valor))
+		_avisos_dia.append("Parcela paga · %s" % _reais(valor)))
 	Eventos.parcela_atrasada.connect(func(valor: int, _parcelas: int) -> void:
 		_avisos_dia.append("Parcelas em atraso · %s" % _reais(valor)))
+	Eventos.emprestimo_quitado.connect(func() -> void: _avisos_dia.append("Empréstimo quitado."))
 	Eventos.falencia.connect(_encerrar)
 
 
@@ -259,6 +304,11 @@ func _contrato_vencendo(pessoa: Dictionary, tipo: String, restantes: int) -> voi
 
 
 func _dia_avancado(_dados: Dictionary) -> void:
+	if not _avancando:
+		_atualizar_apos_avanco()
+
+
+func _atualizar_apos_avanco() -> void:
 	_atualizar_sede()
 	if _fim:
 		return
@@ -269,13 +319,6 @@ func _dia_avancado(_dados: Dictionary) -> void:
 		_avisos_dia.clear()
 
 
-func _registrar(descricao: String, valor: int, avisa_no_dia: bool = true) -> void:
-	var dia: Dictionary = Jogo.resumo_carreira().get("data", {})
-	_historico.push_front({"descricao": descricao, "valor": valor, "data": str(dia.get("texto", ""))})
-	if avisa_no_dia:
-		_avisos_dia.append("%s · %s" % [descricao, _reais(absi(valor))])
-
-
 func _mostrar_aviso(mensagem: String) -> void:
 	_aviso.text = mensagem
 	_aviso.size.y = 0.0
@@ -284,7 +327,7 @@ func _mostrar_aviso(mensagem: String) -> void:
 
 
 func _input(evento: InputEvent) -> void:
-	if not is_instance_valid(_ficha) or not _ficha.visible or _fim:
+	if not is_instance_valid(_ficha) or not _ficha.visible or _fim or is_instance_valid(_confirmacao):
 		return
 	if evento.is_action_pressed("ui_cancel"):
 		_voltar()
@@ -300,7 +343,7 @@ func _input(evento: InputEvent) -> void:
 
 
 func _abrir(id: String) -> void:
-	if _fim:
+	if _fim or _saindo:
 		return
 	_alvo = "financas" if id == "dinheiro" else id
 	_detalhe = "dinheiro" if id == "dinheiro" else ""
@@ -325,8 +368,7 @@ func _voltar() -> void:
 	if _fim:
 		_ir_menu()
 	elif _detalhe.is_empty():
-		_ficha.esconder()
-		_botoes[_alvo].grab_focus()
+		_ficha.esconder(true)
 	else:
 		match _detalhe:
 			"cancelar_contrato": _navegar(_retorno_cancelamento, _id_pessoa)
@@ -357,15 +399,23 @@ func _calendario() -> void:
 	_linha(corpo, "Dia de pagamento", _pagamento(Jogo.resumo_financeiro()))
 	_linha(corpo, "Transferências", "Abertas" if _janela_aberta() else "Fechadas")
 	_botao(corpo, "Avançar dia", _avancar, true)
+	_botao(corpo, "Avançar até o próximo evento", _avancar.bind(true))
 
 
-func _avancar() -> void:
+func _avancar(ate_evento: bool = false) -> void:
+	if _avancando or _fim or _saindo:
+		return
+	_avancando = true
 	_aviso.hide()
-	var resultado: Dictionary = Jogo.avancar_dia()
+	var resultado: Dictionary = Jogo.avancar_ate_evento() if ate_evento else Jogo.avancar_dia()
+	_avancando = false
 	if not bool(resultado.get("ok", false)):
 		_erro(resultado)
-	elif not _fim:
-		_ficha.corpo.get_child(-1).grab_focus()
+		return
+	_atualizar_apos_avanco()
+	if not _fim and _ficha.visible and _alvo == "calendario":
+		var acao: Control = _ficha.corpo.get_child(-1 if ate_evento else -2)
+		acao.grab_focus()
 
 
 func _estacao() -> void:
@@ -472,6 +522,7 @@ func _lista_equipe() -> void:
 			var perfil: Button = _botao(linha, "%s · %s" % [POSICOES[posicao], jogador["apelido"]],
 				_navegar.bind("perfil", jogador["id"]))
 			perfil.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			perfil.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 			var escalar: Button = _botao(linha, "Escalar", _abrir_escalacao.bind(posicao))
 			escalar.accessibility_name = "Escalar %s" % POSICOES[posicao]
 	_texto(corpo, "Reservas", 19, Tema.VERDE)
@@ -604,8 +655,7 @@ func _perfil_jogador(categoria: String, jogador: Dictionary) -> void:
 		_aba_jogador(abas, "Contrato", "contrato_jogador", id, aba)
 	match aba:
 		"campeoes_jogador":
-			_texto(corpo, "Campeões mais jogados", 19)
-			_texto(corpo, "Histórico indisponível.", 17, Tema.SUAVE)
+			_campeoes_jogador(corpo, jogador)
 		"contrato_jogador":
 			_linha(corpo, "Salário mensal", _reais(int(contrato["salario"])))
 			_linha(corpo, "Fim do contrato", "Dia %d" % int(contrato["dia_fim"]))
@@ -614,6 +664,8 @@ func _perfil_jogador(categoria: String, jogador: Dictionary) -> void:
 				_linha(corpo, "Titularidade", "Garantida")
 			if _pode_renovar(contrato):
 				_botao(corpo, "Renovar contrato", _navegar.bind("renovar", id), true)
+			elif int(contrato.get("dias_para_poder_renovar", 0)) > 0:
+				_linha(corpo, "Renovação disponível em", "%d dias" % int(contrato["dias_para_poder_renovar"]))
 			_botao_cancelar_contrato(corpo, id, aba)
 		_:
 			if not contrato.is_empty():
@@ -628,6 +680,30 @@ func _perfil_jogador(categoria: String, jogador: Dictionary) -> void:
 				estado[ESTADOS[chave]] = jogador[chave]
 			_barras(corpo, estado)
 			_atributos_jogador(corpo, jogador)
+
+
+func _campeoes_jogador(corpo: VBoxContainer, jogador: Dictionary) -> void:
+	_texto(corpo, "Domínio", 19)
+	var dominio: Array = jogador.get("dominio_campeoes", [])
+	for campeao: Dictionary in dominio:
+		_linha(corpo, _nome_campeao(str(campeao["id"])), str(campeao["nivel_nome"]))
+	if dominio.is_empty():
+		_texto(corpo, "Nenhum campeão conhecido.", 17, Tema.SUAVE)
+	_texto(corpo, "Campeões mais jogados", 19)
+	var historico: Dictionary = jogador.get("historico_campeoes", {})
+	if not bool(historico.get("disponivel", false)):
+		_texto(corpo, "Histórico indisponível.", 17, Tema.SUAVE)
+		return
+	var mais_jogados: Array = historico.get("mais_jogados", [])
+	for campeao: Dictionary in mais_jogados:
+		var n: int = int(campeao["partidas"])
+		_linha(corpo, _nome_campeao(str(campeao["id"])), "%d %s" % [n, "partida" if n == 1 else "partidas"])
+	if mais_jogados.is_empty():
+		_texto(corpo, "Nenhuma partida.", 17, Tema.SUAVE)
+
+
+func _nome_campeao(id: String) -> String:
+	return str(Jogo.detalhe_campeao(id).get("nome", id))
 
 
 func _aba_jogador(pai: Container, rotulo: String, destino: String, id: String, atual: String) -> void:
@@ -670,16 +746,12 @@ func _cancelar_contrato(id: String, custo_apresentado: int) -> void:
 	if not resultado["ok"]:
 		_erro(resultado)
 		return
-	var custo: int = int(resultado["custo"])
-	if custo > 0:
-		_registrar("Rescisão", -custo, false)
 	_navegar("")
 	_mostrar_aviso("Contrato cancelado.")
 
 
 func _pode_renovar(contrato: Dictionary) -> bool:
-	var restantes: int = int(contrato.get("dias_restantes", -1))
-	return restantes >= 0 and restantes <= 90
+	return bool(contrato.get("pode_renovar", false))
 
 
 func _formulario_renovacao(corpo: VBoxContainer, jogador: Dictionary, contrato: Dictionary) -> void:
@@ -689,7 +761,7 @@ func _formulario_renovacao(corpo: VBoxContainer, jogador: Dictionary, contrato: 
 	var salario: SpinBox = _salario(corpo, int(contrato["salario"]))
 	_texto(corpo, "Duração", 17, Tema.SUAVE)
 	var duracao: OptionButton = _duracoes(corpo)
-	var exige: bool = jogador.has("ego") and int(jogador["ego"]) >= int(Jogo.opcoes_contrato()["ego_exige_titular"])
+	var exige: bool = bool(jogador.get("exige_titularidade", false))
 	var titular: bool = exige or bool(contrato.get("clausula_titular", false))
 	if titular:
 		_linha(corpo, "Titularidade", "Exigida" if exige else "Garantida")
@@ -698,7 +770,10 @@ func _formulario_renovacao(corpo: VBoxContainer, jogador: Dictionary, contrato: 
 
 
 func _revisar_renovacao(id: String, salario: int, meses: int, titular: bool) -> void:
+	if is_instance_valid(_confirmacao) or _saindo:
+		return
 	var dialogo: ConfirmationDialog = ConfirmationDialog.new()
+	_confirmacao = dialogo
 	dialogo.title = "Renovar contrato"
 	dialogo.dialog_text = "%s por mês · %d meses" % [_reais(salario), meses]
 	if titular:
@@ -706,9 +781,9 @@ func _revisar_renovacao(id: String, salario: int, meses: int, titular: bool) -> 
 	dialogo.exclusive = true
 	dialogo.get_ok_button().text = "Enviar proposta"
 	dialogo.get_cancel_button().text = "Voltar"
-	dialogo.canceled.connect(dialogo.queue_free)
+	dialogo.canceled.connect(_fechar_confirmacao)
 	dialogo.confirmed.connect(func() -> void:
-		dialogo.queue_free()
+		_fechar_confirmacao()
 		var resultado: Dictionary = Jogo.renovar_contrato(id,
 			{"salario": salario, "duracao_meses": meses, "clausula_titular": titular})
 		if not resultado["ok"]:
@@ -795,11 +870,7 @@ func _formulario_anuncio(corpo: VBoxContainer) -> void:
 func _financas() -> void:
 	var resumo: Dictionary = Jogo.resumo_financeiro()
 	var renda: int = int(resumo["verba_mensal"])
-	var gastos: int = int(resumo["folha_mensal"]) + int(resumo["parcela_emprestimo"])
-	gastos += int(resumo["salarios_atrasados"])
-	var emprestimo: Dictionary = Jogo.estado_emprestimo()
-	if not emprestimo.is_empty():
-		gastos += int(emprestimo.get("divida_atrasada", 0))
+	var gastos: int = int(resumo["gastos_previstos"])
 	var rotulos: Dictionary = {"dinheiro": "Dinheiro", "renda": "Renda mensal", "gastos": "Gastos"}
 	var valores: Dictionary = {"dinheiro": resumo["dinheiro"], "renda": renda, "gastos": gastos}
 	if _detalhe.is_empty():
@@ -824,20 +895,20 @@ func _financas() -> void:
 			var contrato: Dictionary = tecnico["contrato"]
 			_linha(corpo, tecnico["nome"], _reais(int(contrato.get("salario", 0))))
 		for extra: String in ["parcela_emprestimo", "salarios_atrasados", "divida_atrasada"]:
-			var valor: int = int(resumo.get(extra, emprestimo.get(extra, 0)))
+			var valor: int = int(resumo.get(extra, 0))
 			if valor > 0:
 				_linha(corpo, {"parcela_emprestimo": "Parcela do empréstimo", "salarios_atrasados": "Salários em atraso", "divida_atrasada": "Parcelas em atraso"}[extra], _reais(valor))
 	if _detalhe != "dinheiro":
 		_linha(corpo, "Dia de pagamento", _pagamento(resumo))
-	var titulos: Dictionary = {"dinheiro": "Movimentações da sessão", "renda": "Recebido na sessão", "gastos": "Pago na sessão"}
+	var titulos: Dictionary = {"dinheiro": "Lançamentos recentes", "renda": "Recebimentos da liga", "gastos": "Pagamentos recentes"}
 	_texto(corpo, str(titulos[_detalhe]), 19)
 	var tem_registro: bool = false
-	for registro: Dictionary in _historico:
+	for registro: Dictionary in Jogo.listar_lancamentos():
 		var valor: int = registro["valor"]
-		if (_detalhe == "renda" and valor < 0) or (_detalhe == "gastos" and valor > 0):
+		if (_detalhe == "renda" and registro["categoria"] != "verba") or (_detalhe == "gastos" and valor >= 0):
 			continue
 		tem_registro = true
-		_linha(corpo, "%s · %s" % [registro["descricao"], registro["data"]], _reais(valor))
+		_linha(corpo, "%s · %s" % [registro["descricao"], registro["data_texto"]], _reais(valor))
 	if not tem_registro:
 		_texto(corpo, "Nenhum lançamento.", 17, Tema.SUAVE)
 
@@ -860,21 +931,16 @@ func _encerrar(_dados: Dictionary) -> void:
 func _salvar() -> void:
 	var resultado: Dictionary = Jogo.salvar()
 	if bool(resultado.get("ok", false)):
-		_mostrar_aviso("Carreira salva. Não foi possível gravar a bandeira." if _erro_bandeira else "Carreira salva.")
+		_mostrar_aviso("Carreira salva.")
 	else:
 		_erro(resultado)
 
 
-func _guardar_bandeira(slot: int) -> void:
-	_erro_bandeira = false
-	if _imagem_bandeira == null:
-		return
-	var erro: Error = Bandeiras.guardar(slot, Jogo.listar_saves()[slot], _imagem_bandeira)
-	_erro_bandeira = erro != OK
-
-
 func _pedir_saida() -> void:
+	if is_instance_valid(_confirmacao) or _saindo:
+		return
 	var dialogo: ConfirmationDialog = ConfirmationDialog.new()
+	_confirmacao = dialogo
 	dialogo.title = "Voltar ao menu"
 	dialogo.dialog_text = "O progresso desde o último save será perdido."
 	dialogo.get_ok_button().text = "Sair sem salvar"
@@ -885,16 +951,27 @@ func _pedir_saida() -> void:
 		if bool(resultado.get("ok", false)):
 			_ir_menu()
 		else:
-			dialogo.queue_free()
+			_fechar_confirmacao()
 			_erro(resultado))
 	dialogo.confirmed.connect(_ir_menu)
-	dialogo.canceled.connect(dialogo.queue_free)
+	dialogo.canceled.connect(_fechar_confirmacao)
 	add_child(dialogo)
 	dialogo.popup_centered()
 	dialogo.get_cancel_button().grab_focus()
 
 
+func _fechar_confirmacao() -> void:
+	if is_instance_valid(_confirmacao):
+		_confirmacao.hide()
+		_confirmacao.queue_free()
+		_confirmacao = null
+
+
 func _ir_menu() -> void:
+	if _saindo:
+		return
+	_saindo = true
+	Jogo.encerrar_draft()
 	get_tree().change_scene_to_file.call_deferred(MENU)
 
 
@@ -970,7 +1047,8 @@ func _botao(pai: Control, texto: String, acao: Callable, principal: bool = false
 	var botao: Button = Button.new()
 	botao.text = texto
 	botao.custom_minimum_size.y = 42
-	botao.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if is_instance_valid(_ficha) and pai is VBoxContainer and _ficha.is_ancestor_of(pai):
+		botao.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	botao.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	if principal:
 		botao.theme_type_variation = "AcaoPrincipal"

@@ -23,6 +23,7 @@ var _editor_bandeira: EditorBandeira
 var _animar: bool = true
 var _tempo_luzes: float = 0.0
 var _retrato: bool = false
+var _abrindo_carreira: bool
 
 var _fundo: TextureRect
 var _material: ShaderMaterial
@@ -272,6 +273,8 @@ func _ler_formulario() -> Dictionary:
 
 
 func _confirmar_equipe() -> void:
+	if _abrindo_carreira:
+		return
 	_rascunho_equipe = _ler_formulario()
 	var escolhas: Dictionary = _seletor.escolhas()
 	escolhas["nome"] = _nome.text
@@ -322,11 +325,14 @@ func _pedir_confirmacao(slot: int) -> void:
 
 
 func _fechar_confirmacao(dialogo: ConfirmationDialog) -> void:
+	dialogo.hide()
 	_confirmacao = null
 	dialogo.queue_free()
 
 
 func _substituir_save(slot: int, registro: Dictionary) -> void:
+	if _abrindo_carreira:
+		return
 	_saves = Jogo.listar_saves()
 	if _saves[slot] != registro:
 		_lista_saves.atualizar(_saves)
@@ -343,24 +349,22 @@ func _substituir_save(slot: int, registro: Dictionary) -> void:
 
 
 func _criar_carreira(escolhas: Dictionary) -> Dictionary:
-	var resultado: Dictionary = Jogo.nova_carreira(escolhas)
-	if not resultado["ok"]:
-		return resultado
-	var slot: int = int(resultado["slot"])
 	var imagem: Image = _imagem_bandeira if _imagem_bandeira != null else ArteBandeira.padrao()
-	var erro: Error = Bandeiras.guardar(slot, Jogo.listar_saves()[slot], imagem)
-	if erro != OK:
-		push_warning("Não foi possível guardar a bandeira do Save %d. Código %d." % [slot + 1, erro])
-	return resultado
+	escolhas["bandeira_png"] = Bandeiras.codificar(imagem)
+	return Jogo.nova_carreira(escolhas)
 
 
 func _continuar() -> void:
+	if _abrindo_carreira:
+		return
 	var resultado: Dictionary = Jogo.continuar()
 	if not resultado["ok"]:
 		_mostrar_erros(resultado["erros"])
 
 
 func _carregar(slot: int) -> void:
+	if _abrindo_carreira:
+		return
 	var resultado: Dictionary = Jogo.carregar(slot)
 	if not resultado["ok"]:
 		exibir_slots(Jogo.listar_saves(), Jogo.ultimo_slot())
@@ -368,6 +372,10 @@ func _carregar(slot: int) -> void:
 
 
 func _abrir_carreira(_resumo: Dictionary) -> void:
+	if _abrindo_carreira:
+		return
+	_abrindo_carreira = true
+	Jogo.encerrar_draft()
 	get_tree().change_scene_to_file.call_deferred("res://ui/telas/sede_carreira.tscn")
 
 
