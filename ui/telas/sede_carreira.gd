@@ -2,10 +2,13 @@ extends Control
 
 const Tema = preload("res://ui/temas/tema_abertura.gd")
 const Ficha = preload("res://ui/componentes/ficha_ancorada.gd")
+const Bandeiras = preload("res://ui/componentes/bandeira_da_carreira.gd")
+const BandeiraNaSede = preload("res://ui/componentes/bandeira_na_sede.gd")
 const ARTE: Texture2D = preload("res://assets/sprites/sede/aurora.webp")
 const MENU: String = "res://ui/telas/tela_inicial.tscn"
 const ICONE_ESTACAO: Texture2D = preload("res://assets/sprites/icones/sede_estacao.svg")
 const ICONES: Dictionary = {
+	"equipe": preload("res://assets/sprites/icones/sede_equipe.svg"),
 	"calendario": preload("res://assets/sprites/icones/sede_calendario.svg"),
 	"tecnico": preload("res://assets/sprites/icones/sede_reuniao.svg"),
 	"financas": preload("res://assets/sprites/icones/sede_contas.svg"),
@@ -18,7 +21,7 @@ const MARCADORES: Dictionary = {
 	"topo": Vector2(0.13, 0.57), "selva": Vector2(0.22, 0.49), "meio": Vector2(0.307, 0.42),
 	"atirador": Vector2(0.391, 0.351), "suporte": Vector2(0.472, 0.284),
 	"calendario": Vector2(0.673, 0.246), "tecnico": Vector2(0.615, 0.515),
-	"financas": Vector2(0.827, 0.706),
+	"financas": Vector2(0.827, 0.706), "equipe": Vector2(0.288, 0.291),
 }
 const ATRIBUTOS: Dictionary = {
 	"farm": "Farm", "micro": "Micro", "macro": "Macro", "resistencia": "Resistência", "mental": "Mental",
@@ -32,6 +35,9 @@ const FUNDO: Color = Color("#101a17")
 
 var _espaco: Control
 var _arte: TextureRect
+var _bandeira: BandeiraNaSede
+var _imagem_bandeira: Image
+var _rotulo_equipe: Button
 var _topo: PanelContainer
 var _rodape: PanelContainer
 var _nome: Label
@@ -51,6 +57,10 @@ var _avisos_dia: PackedStringArray = []
 var _alvo: String
 var _detalhe: String
 var _id_pessoa: String
+var _posicao_edicao: String
+var _retorno_cancelamento: String
+var _volta_perfil: String
+var _erro_bandeira: bool
 var _animar: bool = true
 var _fim: bool = false
 
@@ -64,6 +74,10 @@ func _ready() -> void:
 	_montar_cena()
 	_ligar_sinais()
 	_atualizar_sede()
+	var slot: int = int(_resumo.get("slot", -1))
+	if slot >= 0:
+		_imagem_bandeira = Bandeiras.carregar(slot, Jogo.listar_saves()[slot])
+		_bandeira.aplicar(_imagem_bandeira)
 	resized.connect(_posicionar)
 	_posicionar()
 	if bool(_resumo.get("encerrada", false)):
@@ -85,8 +99,11 @@ func _montar_cena() -> void:
 	_arte.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_arte.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_espaco.add_child(_arte)
+	_bandeira = BandeiraNaSede.new()
+	_bandeira.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_espaco.add_child(_bandeira)
 	for id: String in MARCADORES:
-		var rotulo: String = str(POSICOES.get(id, LOCAIS.get(id, "")))
+		var rotulo: String = "Equipe" if id == "equipe" else str(POSICOES.get(id, LOCAIS.get(id, "")))
 		var botao: Button = _botao(_espaco, "", _abrir.bind(id))
 		botao.icon = ICONES.get(id, ICONE_ESTACAO)
 		botao.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -99,6 +116,10 @@ func _montar_cena() -> void:
 			legenda.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			legenda.add_theme_stylebox_override("normal", Tema.caixa(FUNDO, Tema.BORDA, 4))
 			_legendas[id] = legenda
+	_rotulo_equipe = _botao(_espaco, "Equipe", _abrir.bind("equipe"))
+	_rotulo_equipe.focus_mode = Control.FOCUS_NONE
+	_rotulo_equipe.add_theme_font_size_override("font_size", 16)
+	_rotulo_equipe.add_theme_stylebox_override("normal", Tema.caixa(FUNDO, Tema.BORDA, 6))
 
 	_topo = _barra()
 	var cabecalho: HBoxContainer = HBoxContainer.new()
@@ -145,7 +166,8 @@ func _barra() -> PanelContainer:
 
 
 func _posicionar() -> void:
-	var escala: float = clampf(size.x / 1450.0, 0.69, 1.7)
+	var escala: float = maxf(0.1, size.x / 390.0) if size.x < size.y else (
+		clampf(size.x / 1450.0, 0.69, 1.7))
 	var quadro: Vector2 = size / escala
 	for camada: Control in [_espaco, _topo, _rodape]:
 		camada.scale = Vector2.ONE * escala
@@ -159,9 +181,11 @@ func _posicionar() -> void:
 	var largura: float = minf(_espaco.size.x, _espaco.size.y * 16.0 / 9.0)
 	_arte.size = Vector2(largura, largura * 9.0 / 16.0)
 	_arte.position = (_espaco.size - _arte.size) * Vector2(0.5, 0.5 if quadro.x >= 850.0 else 0.16)
+	_bandeira.position = _arte.position
+	_bandeira.size = _arte.size
 	for id: String in _botoes:
 		var botao: Button = _botoes[id]
-		var lado: float = 42.0 if POSICOES.has(id) else 49.0
+		var lado: float = 36.0 if id == "equipe" else (42.0 if POSICOES.has(id) else 49.0)
 		if quadro.x < 760.0:
 			lado = maxf(30.0, minf(lado, _arte.size.x / 14.0))
 		botao.custom_minimum_size = Vector2(lado, lado)
@@ -171,6 +195,10 @@ func _posicionar() -> void:
 			var legenda: Label = _legendas[id]
 			legenda.visible = quadro.x >= 850.0
 			legenda.position = botao.position + Vector2((lado - legenda.size.x) / 2.0, lado + 4.0)
+	var equipe: Button = _botoes["equipe"]
+	_rotulo_equipe.size = _rotulo_equipe.get_combined_minimum_size()
+	_rotulo_equipe.position = equipe.position + Vector2(
+		-_rotulo_equipe.size.x - 12.0, (equipe.size.y - _rotulo_equipe.size.y) / 2.0)
 	_ficha.size = _espaco.size
 	_ficha.reposicionar()
 	_aviso.position = Vector2(16.0, 14.0)
@@ -206,6 +234,7 @@ func _ligar_sinais() -> void:
 	Eventos.dia_avancou.connect(_dia_avancado)
 	Eventos.dinheiro_mudou.connect(func(_valor: int) -> void: _atualizar_sede())
 	Eventos.elenco_mudou.connect(_atualizar_sede)
+	Eventos.carreira_salva.connect(_guardar_bandeira)
 	Eventos.contrato_vencendo.connect(_contrato_vencendo)
 	Eventos.candidatos_chegaram.connect(func(candidatos: Array[Dictionary]) -> void:
 		_avisos_dia.append("Candidatos a técnico: %d" % candidatos.size()))
@@ -239,10 +268,11 @@ func _dia_avancado(_dados: Dictionary) -> void:
 		_avisos_dia.clear()
 
 
-func _registrar(descricao: String, valor: int) -> void:
+func _registrar(descricao: String, valor: int, avisa_no_dia: bool = true) -> void:
 	var dia: Dictionary = Jogo.resumo_carreira().get("data", {})
 	_historico.push_front({"descricao": descricao, "valor": valor, "data": str(dia.get("texto", ""))})
-	_avisos_dia.append("%s · %s" % [descricao, _reais(absi(valor))])
+	if avisa_no_dia:
+		_avisos_dia.append("%s · %s" % [descricao, _reais(absi(valor))])
 
 
 func _mostrar_aviso(mensagem: String) -> void:
@@ -262,7 +292,7 @@ func _input(evento: InputEvent) -> void:
 		if _ficha.painel.get_global_rect().has_point(evento.position):
 			return
 		_ficha.esconder()
-		for botao: Button in _botoes.values() + [_dinheiro]:
+		for botao: Button in _botoes.values() + [_dinheiro, _rotulo_equipe]:
 			if botao.get_global_rect().has_point(evento.position):
 				get_viewport().set_input_as_handled()
 				return
@@ -274,13 +304,17 @@ func _abrir(id: String) -> void:
 	_alvo = "financas" if id == "dinheiro" else id
 	_detalhe = "dinheiro" if id == "dinheiro" else ""
 	_id_pessoa = ""
+	_posicao_edicao = ""
+	_volta_perfil = ""
 	_montar_ficha()
 	_ficha.abrir(_dinheiro if id == "dinheiro" else _botoes[id], _animar)
 	_ficha.ajustar_altura.call_deferred()
 
 
 func _navegar(destino: String, pessoa: String = "") -> void:
-	_detalhe = destino
+	if _alvo == "equipe" and _detalhe in ["", "contratos"] and destino in ["perfil", "contrato_jogador"]:
+		_volta_perfil = _detalhe
+	_detalhe = "" if POSICOES.has(_alvo) and destino == "perfil" else destino
 	_id_pessoa = pessoa
 	_montar_ficha()
 	_ficha.seta.grab_focus()
@@ -293,7 +327,16 @@ func _voltar() -> void:
 		_ficha.esconder()
 		_botoes[_alvo].grab_focus()
 	else:
-		_navegar("mercado" if _detalhe == "proposta" else "")
+		match _detalhe:
+			"cancelar_contrato": _navegar(_retorno_cancelamento, _id_pessoa)
+			"renovar": _navegar("contrato_jogador", _id_pessoa)
+			"contrato_jogador", "campeoes_jogador":
+				_navegar("contratos" if _volta_perfil == "contratos" else "perfil", _id_pessoa)
+			"perfil": _navegar(_volta_perfil)
+			"comparar": _navegar("escalar")
+			"agentes_equipe": _navegar("mercado_equipe")
+			"proposta": _navegar("agentes_equipe" if _alvo == "equipe" else "mercado")
+			_: _navegar("")
 
 
 func _montar_ficha() -> void:
@@ -301,6 +344,7 @@ func _montar_ficha() -> void:
 		"calendario": _calendario()
 		"financas": _financas()
 		"tecnico": _tecnico()
+		"equipe": _equipe()
 		_: _estacao()
 	_ficha.ajustar_altura.call_deferred()
 
@@ -327,7 +371,7 @@ func _estacao() -> void:
 	var categoria: String = "Estação · %s" % POSICOES[_alvo]
 	var jogador: Dictionary = Jogo.detalhe_jogador(str(_titulares.get(_alvo, "")))
 	if not jogador.is_empty():
-		_ficha_jogador(categoria, jogador, false)
+		_perfil_jogador(categoria, jogador)
 		return
 	if not _janela_aberta():
 		_texto(_ficha.atualizar(categoria, "Vaga aberta", false), "Transferências fechadas.", 19, Tema.SUAVE)
@@ -335,7 +379,7 @@ func _estacao() -> void:
 	if _detalhe == "proposta":
 		jogador = Jogo.detalhe_jogador(_id_pessoa)
 		if not jogador.is_empty():
-			_ficha_jogador(categoria, jogador, true)
+			_ficha_proposta(categoria, jogador)
 			return
 		_detalhe = "mercado"
 	if _detalhe == "mercado":
@@ -349,33 +393,25 @@ func _estacao() -> void:
 	_botao(_ficha.atualizar(categoria, "Vaga aberta", false), "Ver agentes livres", _navegar.bind("mercado"), true)
 
 
-func _ficha_jogador(categoria: String, jogador: Dictionary, proposta: bool) -> void:
-	var corpo: VBoxContainer = _ficha.atualizar("%s · %d anos" % [categoria, jogador["idade"]], jogador["apelido"], proposta)
+func _atributos_jogador(corpo: VBoxContainer, jogador: Dictionary) -> void:
 	_texto(corpo, "Atributos", 19)
 	var atributos: Dictionary = jogador.get("atributos", {})
 	var notas: Dictionary = {"Nível": jogador["nivel_geral"]}
 	for id: String in ATRIBUTOS:
 		notas[ATRIBUTOS[id]] = atributos[id]
 	_barras(corpo, notas)
-	if proposta:
-		_texto(corpo, "Proposta", 19)
-		var salario: SpinBox = _salario(corpo, int(jogador["salario_pedido"]))
-		var duracao: OptionButton = _duracoes(corpo)
-		var titular: CheckButton = CheckButton.new()
-		titular.text = "Cláusula de titular"
-		corpo.add_child(titular)
-		_botao(corpo, "Enviar proposta", func() -> void:
-			_contratar_jogador(jogador["id"], int(salario.value), int(duracao.get_selected_id()), titular.button_pressed), true)
-		return
-	_texto(corpo, "Estado do jogador", 19)
-	var estado: Dictionary = {}
-	for id: String in ESTADOS:
-		estado[ESTADOS[id]] = jogador[id]
-	_barras(corpo, estado)
-	var contrato: Dictionary = jogador.get("contrato", {})
-	if not contrato.is_empty():
-		_linha(corpo, "Salário mensal", _reais(int(contrato["salario"])))
-		_linha(corpo, "Fim do contrato", "Dia %d" % int(contrato["dia_fim"]))
+
+
+func _ficha_proposta(categoria: String, jogador: Dictionary) -> void:
+	var corpo: VBoxContainer = _ficha.atualizar("%s · %d anos" % [categoria, jogador["idade"]], jogador["apelido"], true)
+	_atributos_jogador(corpo, jogador)
+	var salario: SpinBox = _salario(corpo, int(jogador["salario_pedido"]))
+	var duracao: OptionButton = _duracoes(corpo)
+	var titular: CheckButton = CheckButton.new()
+	titular.text = "Garantir titularidade"
+	corpo.add_child(titular)
+	_botao(corpo, "Enviar proposta", func() -> void:
+		_contratar_jogador(jogador["id"], int(salario.value), duracao.get_selected_id(), titular.button_pressed), true)
 
 
 func _contratar_jogador(id: String, salario: int, meses: int, clausula: bool) -> void:
@@ -385,12 +421,304 @@ func _contratar_jogador(id: String, salario: int, meses: int, clausula: bool) ->
 		return
 	_mostrar_aviso(str(resultado.get("mensagem", "")))
 	if bool(resultado.get("aceita", false)):
+		if _alvo == "equipe":
+			_navegar("")
+			return
 		var titulares: Dictionary = Jogo.titulares()
 		titulares[_alvo] = id
 		var escalacao: Dictionary = Jogo.definir_titulares(titulares)
 		if not bool(escalacao.get("ok", false)):
 			_erro(escalacao)
 		_navegar("")
+
+
+func _equipe() -> void:
+	match _detalhe:
+		"escalar":
+			_escolher_titular()
+		"comparar":
+			_comparar_titular()
+		"mercado_equipe":
+			var corpo: VBoxContainer = _ficha.atualizar("Equipe", "Agentes livres", true)
+			for posicao: String in POSICOES:
+				_botao(corpo, POSICOES[posicao], _abrir_mercado_equipe.bind(posicao))
+		"agentes_equipe", "proposta":
+			_mercado_equipe()
+		"contratos":
+			_lista_contratos()
+		"perfil", "campeoes_jogador", "contrato_jogador", "renovar", "cancelar_contrato":
+			var jogador: Dictionary = Jogo.detalhe_jogador(_id_pessoa)
+			if bool(jogador.get("no_elenco", false)):
+				_perfil_jogador("Equipe", jogador)
+			else:
+				_detalhe = ""
+				_lista_equipe()
+		_:
+			_lista_equipe()
+
+
+func _lista_equipe() -> void:
+	var corpo: VBoxContainer = _ficha.atualizar("Sede da equipe", "Equipe", false)
+	_texto(corpo, "Titulares", 19, Tema.VERDE)
+	for posicao: String in POSICOES:
+		var jogador: Dictionary = Jogo.detalhe_jogador(str(_titulares.get(posicao, "")))
+		var linha: HBoxContainer = HBoxContainer.new()
+		corpo.add_child(linha)
+		if jogador.is_empty():
+			var vaga: Button = _botao(linha, "%s · Vaga aberta" % POSICOES[posicao], _abrir_escalacao.bind(posicao))
+			vaga.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		else:
+			var perfil: Button = _botao(linha, "%s · %s" % [POSICOES[posicao], jogador["apelido"]],
+				_navegar.bind("perfil", jogador["id"]))
+			perfil.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			var escalar: Button = _botao(linha, "Escalar", _abrir_escalacao.bind(posicao))
+			escalar.accessibility_name = "Escalar %s" % POSICOES[posicao]
+	_texto(corpo, "Reservas", 19, Tema.VERDE)
+	var tem_reservas: bool = false
+	for jogador: Dictionary in Jogo.listar_elenco():
+		if not jogador["titular"]:
+			tem_reservas = true
+			_botao(corpo, "%s · Nível %d" % [jogador["apelido"], jogador["nivel_geral"]],
+				_navegar.bind("perfil", jogador["id"]))
+	if not tem_reservas:
+		_texto(corpo, "Sem reservas.", 17, Tema.SUAVE)
+	_botao(corpo, "Contratos", _navegar.bind("contratos"))
+	_botao(corpo, "Ver agentes livres", _navegar.bind("mercado_equipe"))
+
+
+func _lista_contratos() -> void:
+	var corpo: VBoxContainer = _ficha.atualizar("Equipe", "Contratos", true)
+	var jogadores: Array[Dictionary] = Jogo.listar_elenco()
+	jogadores.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return int(a["contrato"].get("dia_fim", 0)) < int(b["contrato"].get("dia_fim", 0)))
+	for jogador: Dictionary in jogadores:
+		var salario: String = _reais(int(jogador["contrato"].get("salario", 0)))
+		_botao(corpo, "%s · %s/mês" % [jogador["apelido"], salario],
+			_navegar.bind("contrato_jogador", jogador["id"]))
+	if jogadores.is_empty():
+		_texto(corpo, "Sem contratos.", 17, Tema.SUAVE)
+
+
+func _abrir_mercado_equipe(posicao: String) -> void:
+	_posicao_edicao = posicao
+	_navegar("agentes_equipe")
+
+
+func _mercado_equipe() -> void:
+	var categoria: String = "Mercado · %s" % POSICOES[_posicao_edicao]
+	if _detalhe == "proposta":
+		var jogador: Dictionary = Jogo.detalhe_jogador(_id_pessoa)
+		if not jogador.is_empty() and not bool(jogador.get("no_elenco", false)):
+			_ficha_proposta(categoria, jogador)
+			return
+		_detalhe = "agentes_equipe"
+	var corpo: VBoxContainer = _ficha.atualizar(categoria, "Agentes livres", true)
+	var agentes: Array[Dictionary] = Jogo.listar_mercado({"posicao": _posicao_edicao})
+	for agente: Dictionary in agentes:
+		_botao(corpo, "%s · Nível %d · %s" % [agente["apelido"], agente["nivel_geral"], _reais(agente["salario_pedido"])],
+			_navegar.bind("proposta", agente["id"]))
+	if agentes.is_empty():
+		_texto(corpo, "Sem agentes livres para esta posição.", 17, Tema.SUAVE)
+
+
+func _abrir_escalacao(posicao: String) -> void:
+	_posicao_edicao = posicao
+	_navegar("escalar")
+
+
+func _afinidade(jogador: Dictionary) -> int:
+	var afinidades: Dictionary = jogador["afinidade_posicao"]
+	return roundi(float(afinidades.get(_posicao_edicao, 0.0)) * 100.0)
+
+
+func _escolher_titular() -> void:
+	var corpo: VBoxContainer = _ficha.atualizar("Equipe", "Escalar · %s" % POSICOES[_posicao_edicao], true)
+	var atual: String = str(_titulares.get(_posicao_edicao, ""))
+	var jogadores: Array[Dictionary] = Jogo.listar_elenco()
+	jogadores.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return _afinidade(a) > _afinidade(b))
+	var tem_candidatos: bool = false
+	for jogador: Dictionary in jogadores:
+		if jogador["id"] != atual:
+			tem_candidatos = true
+			_botao(corpo, "%s · Afinidade %d%%" % [jogador["apelido"], _afinidade(jogador)],
+				_navegar.bind("comparar", jogador["id"]))
+	if not atual.is_empty():
+		_botao(corpo, "Deixar vaga aberta", _navegar.bind("comparar"))
+	elif not tem_candidatos:
+		_texto(corpo, "Sem jogadores na equipe.", 17, Tema.SUAVE)
+		_botao(corpo, "Ver agentes livres", _abrir_mercado_equipe.bind(_posicao_edicao))
+
+
+func _comparar_titular() -> void:
+	var atual: Dictionary = Jogo.detalhe_jogador(str(_titulares.get(_posicao_edicao, "")))
+	var candidato: Dictionary = Jogo.detalhe_jogador(_id_pessoa)
+	var corpo: VBoxContainer = _ficha.atualizar("Equipe", "Escalar · %s" % POSICOES[_posicao_edicao], true)
+	for rotulo: String in ["Atual", "Proposta"]:
+		var jogador: Dictionary = atual if rotulo == "Atual" else candidato
+		_linha(corpo, rotulo, str(jogador.get("apelido", "Vaga aberta")))
+		if not jogador.is_empty():
+			_linha(corpo, "Nível / Afinidade", "%d / %d%%" % [jogador["nivel_geral"], _afinidade(jogador)])
+	var anterior: String = str(candidato.get("posicao_titular", ""))
+	if POSICOES.has(anterior) and anterior != _posicao_edicao:
+		_texto(corpo, "%s ficará sem titular." % POSICOES[anterior], 16, AMBAR)
+	_botao(corpo, "Confirmar escalação", _escalar.bind(_id_pessoa), true)
+
+
+func _escalar(id: String) -> void:
+	var titulares: Dictionary = Jogo.titulares()
+	if not id.is_empty():
+		var anterior: Variant = titulares.find_key(id)
+		if anterior != null:
+			titulares.erase(anterior)
+		titulares[_posicao_edicao] = id
+	else:
+		titulares.erase(_posicao_edicao)
+	var resultado: Dictionary = Jogo.definir_titulares(titulares)
+	if resultado["ok"]:
+		_navegar("")
+	else:
+		_erro(resultado)
+
+
+func _perfil_jogador(categoria: String, jogador: Dictionary) -> void:
+	var id: String = jogador["id"]
+	var contrato: Dictionary = jogador.get("contrato", {})
+	var corpo: VBoxContainer = _ficha.atualizar(categoria, jogador["apelido"],
+		_alvo == "equipe" or not _detalhe.is_empty())
+	var aba: String = _detalhe if not _detalhe.is_empty() else "perfil"
+	match aba:
+		"cancelar_contrato":
+			_tela_cancelamento(corpo, jogador)
+			return
+		"renovar":
+			_formulario_renovacao(corpo, jogador, contrato)
+			return
+	var posicao: String = str(jogador.get("posicao_principal", ""))
+	_texto(corpo, "%s · %d anos" % [POSICOES.get(posicao, ""), jogador["idade"]], 17, Tema.SUAVE)
+	var abas: HBoxContainer = HBoxContainer.new()
+	corpo.add_child(abas)
+	_aba_jogador(abas, "Ficha", "perfil", id, aba)
+	_aba_jogador(abas, "Campeões", "campeoes_jogador", id, aba)
+	if not contrato.is_empty():
+		_aba_jogador(abas, "Contrato", "contrato_jogador", id, aba)
+	match aba:
+		"campeoes_jogador":
+			_texto(corpo, "Campeões mais jogados", 19)
+			_texto(corpo, "Histórico indisponível.", 17, Tema.SUAVE)
+		"contrato_jogador":
+			_linha(corpo, "Salário mensal", _reais(int(contrato["salario"])))
+			_linha(corpo, "Fim do contrato", "Dia %d" % int(contrato["dia_fim"]))
+			_linha(corpo, "Dias restantes", str(contrato["dias_restantes"]))
+			if contrato.get("clausula_titular", false):
+				_linha(corpo, "Titularidade", "Garantida")
+			if _pode_renovar(contrato):
+				_botao(corpo, "Renovar contrato", _navegar.bind("renovar", id), true)
+			_botao_cancelar_contrato(corpo, id, aba)
+		_:
+			if not contrato.is_empty():
+				_botao_cancelar_contrato(corpo, id, aba)
+			_texto(corpo, "Estado do jogador", 19)
+			var estado: Dictionary = {}
+			if jogador.has("ego"):
+				estado["Ego"] = jogador["ego"]
+			else:
+				_linha(corpo, "Ego", "Não revelado")
+			for chave: String in ESTADOS:
+				estado[ESTADOS[chave]] = jogador[chave]
+			_barras(corpo, estado)
+			_atributos_jogador(corpo, jogador)
+
+
+func _aba_jogador(pai: Container, rotulo: String, destino: String, id: String, atual: String) -> void:
+	var acao: Button = _botao(pai, rotulo, _navegar.bind(destino, id), destino == atual)
+	acao.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	acao.add_theme_font_size_override("font_size", 17)
+	acao.add_theme_stylebox_override("normal", Tema.caixa(
+		Color("#284437") if destino == atual else FUNDO, Tema.BORDA, 6))
+
+
+func _botao_cancelar_contrato(pai: Container, id: String, aba: String) -> void:
+	var botao: Button = _botao(pai, "Cancelar contrato", _pedir_cancelamento.bind(id, aba))
+	botao.theme_type_variation = "AcaoPerigosa"
+
+
+func _pedir_cancelamento(id: String, aba: String) -> void:
+	_retorno_cancelamento = aba
+	_navegar("cancelar_contrato", id)
+
+
+func _tela_cancelamento(corpo: VBoxContainer, jogador: Dictionary) -> void:
+	var id: String = jogador["id"]
+	var custo: int = Jogo.custo_rescisao(id)
+	_texto(corpo, "Cancelar contrato", 22)
+	if custo >= 0:
+		_linha(corpo, "Multa rescisória", _reais(custo))
+		var posicao: String = str(jogador.get("posicao_titular", ""))
+		if POSICOES.has(posicao):
+			_texto(corpo, "%s ficará sem titular." % POSICOES[posicao], 17, AMBAR)
+		var botao: Button = _botao(corpo, "Confirmar cancelamento", _cancelar_contrato.bind(id, custo))
+		botao.theme_type_variation = "AcaoPerigosa"
+	_botao(corpo, "Manter contrato", _voltar)
+
+
+func _cancelar_contrato(id: String, custo_apresentado: int) -> void:
+	if Jogo.custo_rescisao(id) != custo_apresentado:
+		_navegar("cancelar_contrato", id)
+		return
+	var resultado: Dictionary = Jogo.dispensar_jogador(id)
+	if not resultado["ok"]:
+		_erro(resultado)
+		return
+	var custo: int = int(resultado["custo"])
+	if custo > 0:
+		_registrar("Rescisão", -custo, false)
+	_navegar("")
+	_mostrar_aviso("Contrato cancelado.")
+
+
+func _pode_renovar(contrato: Dictionary) -> bool:
+	var restantes: int = int(contrato.get("dias_restantes", -1))
+	return restantes >= 0 and restantes <= 90
+
+
+func _formulario_renovacao(corpo: VBoxContainer, jogador: Dictionary, contrato: Dictionary) -> void:
+	_texto(corpo, "Renovar contrato", 22)
+	if not _pode_renovar(contrato):
+		return
+	var salario: SpinBox = _salario(corpo, int(contrato["salario"]))
+	_texto(corpo, "Duração", 17, Tema.SUAVE)
+	var duracao: OptionButton = _duracoes(corpo)
+	var exige: bool = jogador.has("ego") and int(jogador["ego"]) >= int(Jogo.opcoes_contrato()["ego_exige_titular"])
+	var titular: bool = exige or bool(contrato.get("clausula_titular", false))
+	if titular:
+		_linha(corpo, "Titularidade", "Exigida" if exige else "Garantida")
+	_botao(corpo, "Revisar proposta", func() -> void:
+		_revisar_renovacao(jogador["id"], int(salario.value), duracao.get_selected_id(), titular), true)
+
+
+func _revisar_renovacao(id: String, salario: int, meses: int, titular: bool) -> void:
+	var dialogo: ConfirmationDialog = ConfirmationDialog.new()
+	dialogo.title = "Renovar contrato"
+	dialogo.dialog_text = "%s por mês · %d meses" % [_reais(salario), meses]
+	if titular:
+		dialogo.dialog_text += "\nTitularidade garantida"
+	dialogo.exclusive = true
+	dialogo.get_ok_button().text = "Enviar proposta"
+	dialogo.get_cancel_button().text = "Voltar"
+	dialogo.canceled.connect(dialogo.queue_free)
+	dialogo.confirmed.connect(func() -> void:
+		dialogo.queue_free()
+		var resultado: Dictionary = Jogo.renovar_contrato(id,
+			{"salario": salario, "duracao_meses": meses, "clausula_titular": titular})
+		if not resultado["ok"]:
+			_erro(resultado)
+			return
+		if resultado["aceita"]:
+			_navegar("contrato_jogador", id)
+		_mostrar_aviso(str(resultado["mensagem"])))
+	add_child(dialogo)
+	dialogo.popup_centered()
+	dialogo.get_cancel_button().grab_focus()
 
 
 func _tecnico() -> void:
@@ -531,9 +859,17 @@ func _encerrar(_dados: Dictionary) -> void:
 func _salvar() -> void:
 	var resultado: Dictionary = Jogo.salvar()
 	if bool(resultado.get("ok", false)):
-		_mostrar_aviso("Carreira salva.")
+		_mostrar_aviso("Carreira salva. Não foi possível gravar a bandeira." if _erro_bandeira else "Carreira salva.")
 	else:
 		_erro(resultado)
+
+
+func _guardar_bandeira(slot: int) -> void:
+	_erro_bandeira = false
+	if _imagem_bandeira == null:
+		return
+	var erro: Error = Bandeiras.guardar(slot, Jogo.listar_saves()[slot], _imagem_bandeira)
+	_erro_bandeira = erro != OK
 
 
 func _pedir_saida() -> void:

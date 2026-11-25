@@ -46,6 +46,13 @@ static func criar() -> Theme:
 	for estado: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
 		tema.set_color(estado, "AcaoPrincipal", Color("#102318"))
 
+	tema.set_type_variation("AcaoPerigosa", "Button")
+	tema.set_stylebox("normal", "AcaoPerigosa", caixa(Color("#502b26"), Color("#ad7062"), 8))
+	tema.set_stylebox("hover", "AcaoPerigosa", caixa(Color("#653a32"), Color("#df9c8b"), 8))
+	tema.set_stylebox("pressed", "AcaoPerigosa", caixa(Color("#542c25"), Color("#df9c8b"), 8))
+	for estado: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+		tema.set_color(estado, "AcaoPerigosa", Color("#ffe6dc"))
+
 	_botoes_dificuldade(tema)
 
 	tema.set_type_variation("OpcaoMenu", "Button")
