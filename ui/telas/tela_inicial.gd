@@ -1,6 +1,6 @@
 extends Control
 
-enum Tela { MENU, EQUIPE, SAVES, OPCOES, CREDITOS, CHEGADA, SUBSTITUIR }
+enum Tela { MENU, EQUIPE, SAVES, OPCOES, CREDITOS, SUBSTITUIR }
 
 const TemaAbertura = preload("res://ui/temas/tema_abertura.gd")
 const SeletorDificuldade = preload("res://ui/componentes/seletor_dificuldade.gd")
@@ -12,7 +12,6 @@ const PREFERENCIAS: String = "user://preferencias_apresentacao.cfg"
 var _tela: Tela = Tela.MENU
 var _saves: Array[Dictionary] = []
 var _ultimo_slot: int = -1
-var _carreira_visivel: Dictionary = {}
 var _rascunho_equipe: Dictionary = {}
 var _animar: bool = true
 var _tempo_luzes: float = 0.0
@@ -113,7 +112,6 @@ func abrir(tela: Tela) -> void:
 		Tela.SAVES: _montar_saves()
 		Tela.OPCOES: _montar_opcoes()
 		Tela.CREDITOS: _montar_creditos()
-		Tela.CHEGADA: _montar_chegada()
 		Tela.SUBSTITUIR: _montar_saves(true)
 
 	if _foco_inicial != null:
@@ -216,19 +214,9 @@ func _montar_opcoes() -> void:
 
 func _montar_creditos() -> void:
 	var bloco: VBoxContainer = _cartao("Créditos")
-	var creditos: Label = _texto(bloco, "Arena e equipe geradas com IA para o MOBA Manager.\nCorrentes e cadeados modelados e renderizados no Blender.", 21)
+	var creditos: Label = _texto(bloco, "Arena, equipe e sede geradas com IA para o MOBA Manager.\nCorrentes e cadeados modelados e renderizados no Blender.", 21)
 	creditos.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_foco_inicial = _botao(bloco, "Voltar", abrir.bind(Tela.MENU))
-
-func _montar_chegada() -> void:
-	var bloco: VBoxContainer = _coluna(_conteudo)
-	bloco.alignment = BoxContainer.ALIGNMENT_END
-	_texto(bloco, str(_carreira_visivel.get("fase", "")).to_upper(), 21, TemaAbertura.DOURADO)
-	var titulo: Label = _texto(bloco, str(_carreira_visivel.get("nome", "")), 60)
-	titulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	var acoes: HBoxContainer = _acoes(bloco)
-	_foco_inicial = _botao(acoes, "Menu principal", abrir.bind(Tela.MENU))
-
 
 func _nova_equipe() -> void:
 	_rascunho_equipe = {}
@@ -325,9 +313,8 @@ func _carregar(slot: int) -> void:
 		_mostrar_erros(resultado["erros"])
 
 
-func _abrir_carreira(resumo: Dictionary) -> void:
-	_carreira_visivel = resumo
-	abrir(Tela.CHEGADA)
+func _abrir_carreira(_resumo: Dictionary) -> void:
+	get_tree().change_scene_to_file.call_deferred("res://ui/telas/sede_carreira.tscn")
 
 
 func _atualizar_continuar() -> void:
