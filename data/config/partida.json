@@ -176,6 +176,8 @@
 		"chance_roubo_base": 0.12,
 		"forma_desvio_base": 0.02,
 		"forma_desvio_mental": 0.06,
-		"quadro_a_cada": 5
+		"quadro_a_cada": 5,
+		"energia_sem_perda": 70,
+		"energia_perda_maxima": 0.15
 	}
 }

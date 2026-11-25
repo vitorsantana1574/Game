@@ -158,7 +158,7 @@ func _criar_participante(time: int, item: Dictionary, curvas: Dictionary, forcas
 	# Forma do dia: o Mental deixa o jogador mais constante.
 	var desvio: float = float(sim["forma_desvio_base"]) + float(sim["forma_desvio_mental"]) * (1.0 - float(j.atributos.get("mental", 50)) / 100.0)
 	var forma: float = clampf(1.0 + rng.randfn(0.0, desvio), 0.85, 1.15)
-	var energia: float = 0.85 + 0.15 * clampf(j.energia / 100.0, 0.0, 1.0)
+	var energia: float = SistemaEnergia.fator_rendimento(j.energia)
 	p.micro = clampf(float(j.atributos.get("micro", 50)) * rendimento * forma * energia, 1.0, 110.0)
 	p.farm = clampf(float(j.atributos.get("farm", 50)) * (1.0 - (1.0 - rendimento) * 0.5) * forma, 1.0, 110.0)
 	p.macro = clampf(float(j.atributos.get("macro", 50)) * forma * energia, 1.0, 110.0)

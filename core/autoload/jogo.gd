@@ -379,9 +379,22 @@ func simular_partida_do_draft(opcoes: Dictionary = {}) -> Dictionary:
 	partida["lado_jogador"] = _lado_jogador
 	partida["venceu"] = Draft.LADOS[int(partida["vencedor"])] == _lado_jogador
 	partida["treino"] = draft_atual.times[Draft.outro(_lado_jogador)].get("id", "") == "treino"
+	_aplicar_partida_ao_elenco(draft_atual.times[_lado_jogador]["jogadores"], draft_atual.posicoes[_lado_jogador], not partida["treino"])
 	ultima_partida = partida
 	Eventos.partida_simulada.emit(partida)
 	return {"ok": true, "partida": partida}
+
+
+## Depois de uma partida: cada titular gasta energia (oficial = o dobro do treino) e,
+## só na oficial, o campeão jogado entra no histórico.
+func _aplicar_partida_ao_elenco(jogadores: Dictionary, campeoes: Dictionary, oficial: bool) -> void:
+	for posicao: String in jogadores:
+		var jogador: Jogador = jogadores[posicao]
+		SistemaEnergia.gastar_partida(jogador, oficial)
+		if oficial:
+			var id: String = str(campeoes[posicao])
+			jogador.partidas_por_campeao[id] = int(jogador.partidas_por_campeao.get(id, 0)) + 1
+	Eventos.elenco_mudou.emit()
 
 
 ## Geometria do mapa para desenhar a partida (coordenadas de 0 a 1). Ver docs/CONTRATO.md, seção 2.7.
@@ -890,6 +903,9 @@ func _processar_dia() -> void:
 		Eventos.patch_novo.emit(patch)
 	_processar_anuncio()
 	_processar_contratos()
+	# Sem agenda ainda (etapa 3): todo dia é descanso.
+	for jogador: Jogador in carreira.organizacao.elenco:
+		SistemaEnergia.descansar_dia(jogador)
 	if (carreira.dia - 1) % Dados.dias_por_mes() == 0:
 		_dia_de_pagamento()
 		SistemaMercado.renovar(carreira)

@@ -208,3 +208,43 @@ func teste_partida_depois_do_draft() -> void:
 	var repetida: Dictionary = Jogo.simular_partida_do_draft({"semente": int(p["semente"])})["partida"]
 	executor.igual(repetida["duracao"], p["duracao"], "a semente devolvida repete a partida")
 	executor.verificar(not JSON.stringify(p).contains("forca"), "a partida não revela a força de patch")
+
+
+# --- Energia --------------------------------------------------------------------------
+
+func teste_energia_rendimento_e_custos() -> void:
+	executor.igual(SistemaEnergia.fator_rendimento(100.0), 1.0, "energia cheia não perde rendimento")
+	executor.igual(SistemaEnergia.fator_rendimento(70.0), 1.0, "até 70 também não")
+	executor.verificar(absf(SistemaEnergia.fator_rendimento(0.0) - 0.85) < 0.0001, "energia zerada perde 15%")
+	var jogador: Jogador = GeradorJogadores.new(8).gerar({"qualidade": 50})
+	executor.verificar(absf(SistemaEnergia.custo_partida(jogador, true) - 2.0 * SistemaEnergia.custo_partida(jogador, false)) < 0.0001,
+		"partida oficial gasta o dobro do treino")
+	var forte: Jogador = GeradorJogadores.new(9).gerar({"qualidade": 50})
+	forte.atributos["resistencia"] = 90
+	jogador.atributos["resistencia"] = 20
+	executor.verificar(SistemaEnergia.custo_partida(forte, true) < SistemaEnergia.custo_partida(jogador, true), "Resistência alta gasta menos")
+	executor.verificar(SistemaEnergia.recuperacao_diaria(forte) > SistemaEnergia.recuperacao_diaria(jogador), "e recupera mais rápido")
+
+
+func teste_partida_gasta_energia_e_oficial_conta_historico() -> void:
+	_concluir_draft()
+	var titulares: Dictionary = Jogo.draft_atual.times["azul"]["jogadores"]
+	var antes: Dictionary = {}
+	for posicao: String in titulares:
+		antes[posicao] = titulares[posicao].energia
+	Jogo.simular_partida_do_draft()
+	var gastou_certo: bool = true
+	for posicao: String in titulares:
+		var j: Jogador = titulares[posicao]
+		gastou_certo = gastou_certo and absf((antes[posicao] - j.energia) - SistemaEnergia.custo_partida(j, false)) < 0.0001
+	executor.verificar(gastou_certo, "partida de treino gasta a energia de uma partida interna")
+	# Oficial: o mesmo caminho, com histórico.
+	var meio: Jogador = titulares["meio"]
+	var campeao: String = Jogo.draft_atual.posicoes["azul"]["meio"]
+	var energia_antes: float = meio.energia
+	Jogo._aplicar_partida_ao_elenco(titulares, Jogo.draft_atual.posicoes["azul"], true)
+	executor.verificar(absf((energia_antes - meio.energia) - SistemaEnergia.custo_partida(meio, true)) < 0.0001, "oficial gasta o dobro")
+	executor.igual(int(meio.partidas_por_campeao.get(campeao, 0)), 1, "oficial conta no histórico de campeões")
+	var cansado: float = meio.energia
+	Jogo.avancar_dia()
+	executor.verificar(meio.energia > cansado, "um dia de descanso recupera energia")

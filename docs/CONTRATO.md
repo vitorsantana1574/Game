@@ -543,7 +543,9 @@ A partida é **simulada inteira de uma vez** (regras + semente, sem IA de lingua
 
 **Sinal:** `Eventos.partida_simulada(partida)`.
 
-Partida de **treino** (contra o time de treino) não conta no histórico de campeões dos jogadores.
+Depois da partida, cada titular seu **gasta energia**: a de treino gasta como uma partida interna; a oficial, o dobro (GDD 6.1). Só a **oficial** conta no histórico de campeões (`campeoes_mais_jogados` na ficha). O sinal `Eventos.elenco_mudou` avisa para atualizar as fichas.
+
+Enquanto a agenda não existe, **cada dia avançado recupera energia** de todo o elenco (o campo `energia` da ficha, de 0 a 100). Energia só pesa no jogo abaixo de 70.
 
 ### Partida
 

@@ -144,3 +144,11 @@ A **partida simulada está pronta** (etapa 5 da minha coluna). O Matheus decidiu
 Fim do draft → botão "Jogar partida" → tela da partida em melhores momentos → tela de resultado com a estatística. Enquanto a liga não existe, é tudo contra o time de treino (`partida["treino"] = true`).
 
 Testes: 352 verificações, 0 falhas.
+
+---
+
+**25/11/2026 · Claude**
+
+Duas decisões novas do Matheus sobre a partida (GDD 6.1 e 7.4, `CONTRATO.md` 2.7):
+- **Partida oficial gasta o dobro de energia** de uma partida interna; a de treino gasta como uma interna. Depois de cada partida, a energia dos titulares cai e o sinal `elenco_mudou` é emitido. Cada dia avançado recupera energia (por enquanto todo dia é descanso, até existir a agenda). Energia só atrapalha o jogo abaixo de 70, então vale a barra de energia da ficha mostrar uma marca nesse ponto (pergunte ao Matheus).
+- **Partida oficial conta no histórico de campeões** da ficha; treino não conta.

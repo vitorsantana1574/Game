@@ -46,5 +46,14 @@
 	"_comentario_aparencias": "Quantas aparências visuais existem para jogadores e técnicos (só apresentação). A lógica guarda o índice; a arte é do GPT.",
 	"aparencias": 20,
 	"_comentario_historico": "Fica true quando a simulação de partidas registrar os campeões jogados.",
-	"historico_de_partidas_ativo": false
+	"historico_de_partidas_ativo": false,
+	"energia": {
+		"_comentario": "Energia de 0 a 100 (GDD 6.1). Valores provisórios até a agenda e o treino (etapa 3). Partida de treino gasta o mesmo que uma partida interna; partida oficial gasta o dobro (decisão do dono, 25/11). Resistência alta gasta menos e recupera mais rápido.",
+		"partida_interna": 6,
+		"multiplicador_partida_oficial": 2,
+		"custo_resistencia_base": 1.3,
+		"custo_resistencia_reducao": 0.6,
+		"recuperacao_diaria_base": 6,
+		"recuperacao_diaria_por_resistencia": 8
+	}
 }

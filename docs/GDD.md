@@ -83,6 +83,22 @@ A Resistência funciona em duas partes:
 - **Energia baixa reduz a eficiência de todos os outros atributos.**
 - A Resistência pode ser **treinada**; a energia é **recuperada com descanso**.
 
+**Energia nas partidas (decidido em 25/11; números provisórios até a agenda e o treino, etapa 3):**
+- **Partida oficial gasta o dobro** de uma partida interna. Partida de treino gasta o mesmo que uma interna.
+- Custo para Resistência 50: **6** na interna, **12** na oficial. Resistência alta gasta menos (90: 9 na oficial) e Resistência baixa gasta mais (20: 14).
+- Descanso recupera **6 + 8 × Resistência/100** por dia (Resistência 50: 10 por dia). Enquanto a agenda não existe, todo dia é descanso.
+- **Energia só pesa abaixo de 70:** daí até zero, Micro e Macro caem até 15%. Um time descansado não perde nada.
+
+Teste dos valores (calendário do GDD, 1 jogo por semana e 4 partidas internas por semana na liga):
+
+| Situação | Resistência 20 | Resistência 50 | Resistência 90 |
+|---|---|---|---|
+| Liga (pior momento da etapa) | energia 86, sem perda | 88, sem perda | 91, sem perda |
+| Jogo 5 de uma MD5 no mesmo dia, chegando descansado | 43 (−6%) | 52 (−4%) | 64 (−1%) |
+| Mundial, pior jogo de quem joga tudo (mediana) | 0 (−15%) | 28 (−9%) | 64 (−1%) |
+
+Conclusão: na liga o dobro não pesa (sobram 6 dias para recuperar); o custo aparece nas MD5 e, principalmente, no **mata-mata do mundial**, com só 3 dias entre séries. É lá que Resistência e rodízio de reservas decidem, como o GDD pede. Para dar a medida: o time inteiro com −15% equivale a uns 7 pontos de qualidade a menos (o time descansado venceria cerca de 6 em 10).
+
 ### 6.2 Como os atributos interagem na partida
 
 - **Farm vs. Micro:** o farm de cada jogador na fase de rotas = seu atributo Farm, **ajustado pela diferença de Micro** contra o oponente direto. Um jogador com Farm ótimo e Micro fraco perde farm para um rival agressivo.
@@ -528,7 +544,7 @@ Cada partida leva menos de 0,1 s para simular.
 
 **Mapa** (`data/config/mapa.json`): coordenadas de 0 a 1, azul embaixo à esquerda, vermelho em cima à direita, rota do meio numa diagonal e rio na outra (Hydra do lado azul do rio, Cérbero do lado vermelho). A arte segue essa geometria ou pede ajuste.
 
-**Ainda não decidido:** se uma partida oficial gasta energia dos jogadores e quanto; se partida oficial conta no histórico de campeões (treino não conta).
+**Decidido em 25/11:** partida oficial gasta o **dobro de energia** de uma partida interna (ver 6.1) e **conta no histórico de campeões**; partida de treino gasta como uma interna e não conta.
 
 ## 8. Draft (pick & ban)
 
@@ -841,7 +857,6 @@ Detalhes: **[A DEFINIR]**
 
 - Valores de dinheiro inicial e de cada nível de dificuldade
 - Penalidade por jogar fora da posição principal
-- Energia gasta por partida oficial
 - Detalhes dos acampamentos da selva (posição, reaparição, bônus)
 - Técnico: custos e tempos dos anúncios, efeitos do cansaço e duração das férias
 - Reputação: outros efeitos e exibição
