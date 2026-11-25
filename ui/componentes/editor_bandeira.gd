@@ -2,7 +2,8 @@ extends VBoxContainer
 
 const Arte = preload("res://ui/componentes/arte_bandeira.gd")
 const BandeiraNaSede = preload("res://ui/componentes/bandeira_na_sede.gd")
-const SEDE: Texture2D = preload("res://assets/sprites/sede/aurora.webp")
+const TexturasWebp = preload("res://ui/componentes/texturas_webp.gd")
+const SEDE: String = "res://assets/sprites/sede/aurora.webp"
 const LIMITE_HISTORICO: int = 24
 
 var _modelo: String = "dragao"
@@ -71,7 +72,7 @@ func montar(dados: Dictionary, retrato: bool) -> void:
 		botao.add_theme_font_size_override("font_size", 14)
 		botao.add_theme_constant_override("icon_max_width", 42)
 		botao.custom_minimum_size.y = 69
-		botao.icon = Arte.TEXTURAS[id]
+		botao.icon = Arte.textura_modelo(id)
 		botao.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		botao.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 		botao.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -118,7 +119,7 @@ func montar(dados: Dictionary, retrato: bool) -> void:
 	_tela.gui_input.connect(_pintar)
 	tecido.add_child(_tela)
 	_sede = TextureRect.new()
-	_sede.texture = SEDE
+	_sede.texture = TexturasWebp.carregar(SEDE)
 	_sede.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_sede.custom_minimum_size = Vector2(254, 143)
 	_sede.mouse_filter = Control.MOUSE_FILTER_IGNORE

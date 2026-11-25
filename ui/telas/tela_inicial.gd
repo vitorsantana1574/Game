@@ -8,7 +8,8 @@ const ListaSaves = preload("res://ui/componentes/lista_saves.gd")
 const EditorBandeira = preload("res://ui/componentes/editor_bandeira.gd")
 const ArteBandeira = preload("res://ui/componentes/arte_bandeira.gd")
 const Bandeiras = preload("res://ui/componentes/bandeira_da_carreira.gd")
-const ARENA: Texture2D = preload("res://assets/sprites/menu/arena.webp")
+const TexturasWebp = preload("res://ui/componentes/texturas_webp.gd")
+const ARENA: String = "res://assets/sprites/menu/arena.webp"
 const OCLUSAO: Texture2D = preload("res://assets/sprites/menu/oclusao.webp")
 const REFLETORES: Shader = preload("res://ui/componentes/refletores_abertura.gdshader")
 const PREFERENCIAS: String = "user://preferencias_apresentacao.cfg"
@@ -56,7 +57,7 @@ func _ready() -> void:
 	base.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_fundo = TextureRect.new()
 	_fundo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_fundo.texture = ARENA
+	_fundo.texture = TexturasWebp.carregar(ARENA)
 	_fundo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_material = ShaderMaterial.new()
 	_material.shader = REFLETORES

@@ -4,7 +4,8 @@ const Tema = preload("res://ui/temas/tema_abertura.gd")
 const Ficha = preload("res://ui/componentes/ficha_ancorada.gd")
 const Bandeiras = preload("res://ui/componentes/bandeira_da_carreira.gd")
 const BandeiraNaSede = preload("res://ui/componentes/bandeira_na_sede.gd")
-const ARTE: Texture2D = preload("res://assets/sprites/sede/aurora.webp")
+const TexturasWebp = preload("res://ui/componentes/texturas_webp.gd")
+const ARTE: String = "res://assets/sprites/sede/aurora.webp"
 const MENU: String = "res://ui/telas/tela_inicial.tscn"
 const ICONE_ESTACAO: Texture2D = preload("res://assets/sprites/icones/sede_estacao.svg")
 const ICONES: Dictionary = {
@@ -95,7 +96,7 @@ func _montar_cena() -> void:
 	_espaco.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_espaco)
 	_arte = TextureRect.new()
-	_arte.texture = ARTE
+	_arte.texture = TexturasWebp.carregar(ARTE)
 	_arte.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_arte.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_espaco.add_child(_arte)
