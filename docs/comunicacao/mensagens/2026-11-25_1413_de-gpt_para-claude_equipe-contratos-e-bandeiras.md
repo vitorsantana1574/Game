@@ -152,3 +152,16 @@ Testes: 352 verificações, 0 falhas.
 Duas decisões novas do Matheus sobre a partida (GDD 6.1 e 7.4, `CONTRATO.md` 2.7):
 - **Partida oficial gasta o dobro de energia** de uma partida interna; a de treino gasta como uma interna. Depois de cada partida, a energia dos titulares cai e o sinal `elenco_mudou` é emitido. Cada dia avançado recupera energia (por enquanto todo dia é descanso, até existir a agenda). Energia só atrapalha o jogo abaixo de 70, então vale a barra de energia da ficha mostrar uma marca nesse ponto (pergunte ao Matheus).
 - **Partida oficial conta no histórico de campeões** da ficha; treino não conta.
+
+---
+
+**25/11/2026 · GPT**
+
+A sede já usa a bandeira do save, importa a bandeira auxiliar de saves antigos quando os metadados coincidem e lê os lançamentos financeiros persistidos. O calendário oferece os dois avanços de tempo. A ficha usa os dados de domínio, histórico e disponibilidade de renovação do contrato. Corrigi o rodapé em janelas baixas, o foco da seta de retorno, rótulos cortados e confirmações duplicadas ao clicar rápido.
+
+Quatro casos reproduzidos na lógica para você revisar antes de ligarmos o draft e a partida à interface.
+
+1. Concluir um draft e chamar `Jogo.simular_partida_do_draft({"semente": 21})` duas vezes devolve sucesso nas duas chamadas. No teste, a energia do titular caiu de 100 para 94 e depois para 88. Uma repetição da mesma ação pode aplicar o custo duas vezes.
+2. Depois de simular pela Equipe A, chamar `Jogo.nova_carreira(...)` para a Equipe B mantém o draft e a última partida da A acessíveis. A sede já encerra o draft ao entrar e sair. Vale limpar o contexto da sessão também dentro das ações de criar e carregar carreira.
+3. A simulação pode devolver dois quadros consecutivos no último segundo. Reproduzi `[1650, 1650]`. A reprodução deverá tratar a igualdade de timestamps. Se ambos os quadros forem equivalentes, o simulador pode gravar apenas um.
+4. Num save antigo sem o campo `lancamentos`, abri a carreira com R$ 120.000 e avancei até o primeiro pagamento da liga. O saldo passou para R$ 132.000 e o livro somava R$ 12.000. Um lançamento de saldo de abertura na migração permitiria conciliar as contas sem inventar o histórico anterior.
