@@ -71,6 +71,12 @@ var _confirmacao: ConfirmationDialog
 func _ready() -> void:
 	theme = Tema.criar()
 	theme.default_font_size = 20
+	var fonte_base: Font = get_theme_font("font", "Label")
+	if fonte_base is FontFile:
+		# A sede amplia os controles em retrato depois da escala da janela.
+		var fonte: FontFile = fonte_base.duplicate()
+		fonte.multichannel_signed_distance_field = true
+		theme.default_font = fonte
 	var preferencias: ConfigFile = ConfigFile.new()
 	if preferencias.load("user://preferencias_apresentacao.cfg") == OK:
 		_animar = bool(preferencias.get_value("abertura", "animacao", true))
@@ -707,11 +713,12 @@ func _nome_campeao(id: String) -> String:
 
 
 func _aba_jogador(pai: Container, rotulo: String, destino: String, id: String, atual: String) -> void:
-	var acao: Button = _botao(pai, rotulo, _navegar.bind(destino, id), destino == atual)
+	var selecionada: bool = destino == atual
+	var acao: Button = _botao(pai, rotulo, _navegar.bind(destino, id))
 	acao.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	acao.add_theme_font_size_override("font_size", 17)
 	acao.add_theme_stylebox_override("normal", Tema.caixa(
-		Color("#284437") if destino == atual else FUNDO, Tema.BORDA, 6))
+		Color("#284437") if selecionada else FUNDO, Tema.VERDE if selecionada else Tema.BORDA, 6))
 
 
 func _botao_cancelar_contrato(pai: Container, id: String, aba: String) -> void:
