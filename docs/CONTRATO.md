@@ -3,7 +3,7 @@
 Este documento é a **ponte entre a lógica (Claude) e a interface (GPT)**.
 A interface só pode usar o que está escrito aqui. Se precisar de algo que não existe, peça por mensagem em [comunicacao/](comunicacao/README.md).
 
-> **Status: v3.** Etapas 1 (tela inicial), 2 (mercado, elenco, contratos, técnico) e economia/calendário **[PRONTAS]**. Os nomes abaixo são a proposta inicial. A cada etapa de construção, o Claude atualiza este documento **antes** de o GPT começar a tela correspondente. Itens marcados **[PLANEJADO]** ainda não existem no código.
+> **Status: v4.** Etapas 1 (tela inicial), 2 (mercado, elenco, contratos, técnico), economia/calendário e catálogo de campeões e itens **[PRONTOS]**. Os nomes abaixo são a proposta inicial. A cada etapa de construção, o Claude atualiza este documento **antes** de o GPT começar a tela correspondente. Itens marcados **[PLANEJADO]** ainda não existem no código.
 
 Regras do contrato: [ARQUITETURA.md](ARQUITETURA.md), seção 2.
 
@@ -322,6 +322,87 @@ Com 3 parcelas atrasadas e sem dinheiro para a dívida atrasada, a carreira term
 | `Eventos.emprestimo_quitado()` | Última parcela paga ou quitação antecipada |
 | `Eventos.falencia(resumo)` | Fim da carreira |
 
+## 2.4 Catálogo de campeões e itens de Crystal Legends — **[PRONTO]**
+
+Leitura pura, com ou sem carreira ativa. Os IDs são **estáveis** (minúsculos, sem acento): use-os em arquivos de arte (`assets/sprites/campeoes/<id>.webp`, por exemplo) e para guardar escolhas.
+A interface **não recebe** a força no patch (meta), a mecânica interna da simulação nem os registros de calibração.
+
+### Leitura
+
+| Função | Retorno |
+|---|---|
+| `Jogo.listar_campeoes(filtros = {})` | `Array[Dictionary]` de resumos, em ordem alfabética. Filtros opcionais: `{"classe": "mago", "posicao": "meio", "curva": "fim"}` (a posição pode ser principal ou secundária) |
+| `Jogo.detalhe_campeao(id)` | Ficha completa (abaixo). `{}` se o ID não existir |
+| `Jogo.atributos_campeao(id, nivel)` | Atributos num nível de 1 a 16, sem itens: `{nivel, vida, armadura, resistencia_magica, dano_fisico, velocidade_ataque, alcance, velocidade_movimento}` |
+| `Jogo.listar_itens(filtros = {})` | Botas primeiro, depois os 27 itens. Filtro opcional: `{"classe": "suporte"}` |
+| `Jogo.detalhe_item(id)` | Ficha do item (abaixo). `{}` se o ID não existir |
+
+### Resumo de campeão (`listar_campeoes`)
+
+```gdscript
+{
+    "id": "veluria", "nome": "Velúria", "titulo": "a arquivista dos ventos",
+    "classe": "mago", "classe_nome": "Mago",
+    "posicoes": ["meio"], "posicoes_nomes": ["Meio"], "posicao_principal": "meio",
+    "curva": "fim", "curva_nome": "Forte no fim",      # "inicio" | "constante" | "fim"
+    "dificuldade": 3,            # 1 a 3: quanto o Micro do jogador pesa
+    "dependencia_macro": 2,      # 1 a 3: quanto o Macro do jogador pesa
+    "recurso": "mana", "recurso_nome": "Mana",          # "mana" | "energia" | "furia" | "vida" | "nenhum"
+}
+```
+
+### Ficha completa (`detalhe_campeao`)
+
+Tudo do resumo, mais:
+
+```gdscript
+{
+    "tema": "...", "forte_contra": "...", "fraco_contra": "...",
+    "recurso_detalhe": {"tipo": "mana", "nome": "Mana", "maximo_nivel_1": 420, "maximo_por_nivel": 28,
+                        "regeneracao_5s_nivel_1": 25, "regeneracao_5s_por_nivel": 1.7},   # só os campos do recurso
+    "atributos": { ...nível 1, mesmo formato de atributos_campeao... },
+    "crescimento": {"vida": 107.56, "armadura": 4.48, "resistencia_magica": 1.45, "dano_fisico": 3.37, "velocidade_ataque_pct": 2.7},
+    "passiva": {"nome": "...", "descricao": "...", "efeito": "..."},
+    "habilidades": [               # sempre 3; a 3ª é a especial
+        {
+            "posicao": 1, "nome": "...", "descricao": "...",
+            "narracao": "{campeao} dispara o primeiro estalo sobre {alvo}!",   # modelo para a narração
+            "tipo_dano": "magico", "alvo": "linha",      # alvo: "linha" | "cone" | "area" | "unico" | "si_mesmo" | "aliado"
+            "efeitos": ["Alcance 885, largura 66", "..."], "tags": ["desgaste", "..."],
+            "especial": false, "nivel_minimo": 1,         # especial: true e nivel_minimo: 6 na 3ª
+            "recarga": 6.5, "custo": 36, "custo_texto": "36 de mana",
+            "dano_texto": "11,21 (+22,92 por nível) + 172,46% do poder mágico, dano mágico",   # "" se não causa dano
+        },
+    ],
+    "build": [ {resumo de item}, ... ],      # bota + 4 itens, na ordem de compra
+    "itens_alternativos": [
+        {"item": {resumo}, "substitui": {resumo}, "quando": "contra explosão física...", "condicao": "fisico"},
+    ],
+}
+```
+
+`condicao` é a leitura da lógica para a troca (`pouca_magia`, `muita_magia`, `critico`, `cura`, `armadura`, `fisico`, `misto`, `resistencia_magica`, `frageis`, `vida_alta`, `situacional`). Para o jogador, mostre o texto `quando`.
+
+Os números de atributos e dano podem mudar a cada calibração; leia sempre da função, nunca fixe na tela.
+
+Sobre o custo de fúria: as habilidades **não exigem** fúria. Com a barra cheia (100), a próxima habilidade sai fortalecida e gasta o custo indicado.
+
+### Item
+
+```gdscript
+# resumo (em builds e listas):
+{"id": "orbe_da_tempestade", "nome": "Orbe da Tempestade", "preco": 2600, "categoria": "magico"}   # "fisico" | "magico" | "hibrido" | "defesa" | "suporte" | "bota"
+# ficha (detalhe_item e listar_itens):
+{ ...resumo..., "ideia": "...", "atributos": [{"id": "poder_magico", "nome": "Poder mágico", "valor": 65}, ...],
+  "classes": ["mago"], "passiva": {"nome": "...", "descricao": "..."} }   # "passiva" só se o item tiver
+```
+
+O item inicial do suporte (`medalhao_do_tributo`) também pode ser lido com `detalhe_item`.
+
+### Ainda não existe
+
+Draft (estado, disponibilidade de cada campeão, domínio dos jogadores, escolha e banimento) entra na etapa do draft. Este contrato será atualizado **antes** de o GPT precisar dessas funções.
+
 ## 3. Dados que a interface pode ler **[PLANEJADO]**
 
 Resumo dos modelos. Os campos exatos serão listados aqui quando cada modelo for implementado.
@@ -330,7 +411,7 @@ Resumo dos modelos. Os campos exatos serão listados aqui quando cada modelo for
 |---|---|
 | `Jogador` | **[PRONTO na lógica, ainda sem ação para a interface]** apelido, nome real, idade, posição principal e secundárias, atributos (Resistência, Mental, Farm, Micro, Macro), energia, satisfação, lealdade, experiência, domínio de campeões, contrato. Traços ocultos só aparecem quando descobertos. |
 | `Tecnico` | nome, atributos (Macro, Conhecimento, Olheiro), cansaço, salário, disponibilidade (treinando, de férias) |
-| `Campeao` | nome, posições, características |
+| `Campeao` | **[PRONTO]** ver seção 2.4 |
 | `Time` | nome, elenco (5 titulares + 5 reservas), técnico, dinheiro, reputação |
 | `Contrato` | duração, salário, luvas, multa rescisória, bônus, cláusula de titular |
 | `Liga` | nível (regional/nacional), times, tabela, rodada atual, playoffs |

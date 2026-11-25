@@ -1,0 +1,152 @@
+{
+	"alvenora": {
+		"fim": 1.342,
+		"inicio": 1.214,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"brumeria": {
+		"fim": 2.0,
+		"inicio": 0.541,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"calzugo": {
+		"fim": 0.552,
+		"inicio": 2.0,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"cintarro": {
+		"fim": 2.0,
+		"inicio": 1.342,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"clavento": {
+		"fim": 0.5,
+		"inicio": 0.948,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"dorsalio": {
+		"fim": 2.0,
+		"inicio": 1.048,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"eirafim": {
+		"fim": 1.258,
+		"inicio": 0.901,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"fulcrim": {
+		"fim": 1.551,
+		"inicio": 1.025,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"fulgaveu": {
+		"fim": 1.564,
+		"inicio": 0.635,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"iscavro": {
+		"fim": 0.5,
+		"inicio": 0.584,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"kordume": {
+		"fim": 0.5,
+		"inicio": 1.048,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"luminela": {
+		"fim": 2.0,
+		"inicio": 1.356,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"marulva": {
+		"fim": 2.0,
+		"inicio": 0.869,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"mirfuso": {
+		"fim": 2.0,
+		"inicio": 1.387,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"nalcora": {
+		"fim": 0.879,
+		"inicio": 0.769,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"ocravia": {
+		"fim": 1.856,
+		"inicio": 2.0,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"orvante": {
+		"fim": 0.5,
+		"inicio": 1.342,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"perlivia": {
+		"fim": 1.267,
+		"inicio": 0.738,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"prismora": {
+		"fim": 1.982,
+		"inicio": 0.5,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"ravineo": {
+		"fim": 0.855,
+		"inicio": 1.19,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"riscavela": {
+		"fim": 1.265,
+		"inicio": 1.02,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"suteria": {
+		"fim": 0.632,
+		"inicio": 1.31,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"terralume": {
+		"fim": 0.5,
+		"inicio": 1.135,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"tessari": {
+		"fim": 2.0,
+		"inicio": 0.836,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"trevalio": {
+		"fim": 0.5,
+		"inicio": 1.166,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"trisquilo": {
+		"fim": 0.776,
+		"inicio": 1.814,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"vardilha": {
+		"fim": 1.041,
+		"inicio": 1.173,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"vedrassa": {
+		"fim": 2.0,
+		"inicio": 0.57,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"veluria": {
+		"fim": 0.876,
+		"inicio": 0.609,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	},
+	"zarcavil": {
+		"fim": 1.118,
+		"inicio": 0.981,
+		"motivo": "Calibração do laboratório de campeões (taxa de vitória por momento da partida)."
+	}
+}

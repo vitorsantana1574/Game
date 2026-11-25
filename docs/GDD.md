@@ -442,9 +442,31 @@ Catálogo completo em `data/itens/itens.json`; modelo de combate em `data/config
 - **Nenhuma passiva carrega o item sozinha** (peso máximo ~44% do valor).
 - **Eficiência em ouro** de todos os itens entre 84% e 101% (o resto do valor está na passiva).
 
-**Pontos a revisar quando os campeões existirem:**
-- A **Orbe da Tempestade** apareceu em todas as melhores builds do mago (item central). Com habilidades diferentes por campeão, outras opções devem competir.
-- Para o **suporte**, itens de vida e defesa rendem mais que os de poder mágico, porque as curas e escudos em aliados ainda não estão no modelo (dependem dos kits dos campeões).
+**Pontos revistos com os campeões reais (25/11, `tools/relatorios/laboratorio_campeoes.md`):**
+- **Orbe da Tempestade:** colocar ou tirar a Orbe da build dos 5 magos muda a vitória em ±2 a 4 pontos (ruído). Deixou de ser item obrigatório.
+- **Itens de poder mágico do suporte:** com escudos e curas que crescem com o PM, eles passaram a render o mesmo que os de defesa (diferença média perto de zero, variando por campeão).
+
+## 7.3 Campeões
+
+O dono do projeto aprovou os **30 campeões** propostos pelo GPT (`docs/propostas/campeoes.md`, revisão de 24/11). Eles são 5 por classe e 6 por posição principal, com 10 fortes no início, 10 constantes e 10 fortes no fim. Há 19 campeões de mana, 4 de energia, 3 de fúria, 2 de vida e 2 sem recurso.
+
+- **Dados:** `data/campeoes/campeoes.json`, gerado por `tools/conversao/converter_campeoes.py`. Os textos (nome, título, tema, habilidades, passiva, narração) são os do GPT. A lógica acrescenta a mecânica estruturada que a simulação usa e os ajustes de equilíbrio. Cada campeão tem um **ID estável** (ex.: `veluria`).
+- **A interface vê:** nome, classe, posições, curva, dificuldade (peso do Micro), dependência de Macro, recurso, atributos, textos e builds. **Não vê** a força no patch (meta) nem a mecânica interna.
+- **Recursos:**
+  - **Mana:** a regeneração a cada 5 s é cerca de 6% da mana máxima.
+  - **Energia:** 200, volta 10 por segundo.
+  - **Fúria:** as habilidades **não exigem** fúria. Lançar com a barra cheia fortalece a habilidade e gasta o custo dela. *(Interpretação do Claude; aguarda confirmação do dono do projeto.)*
+  - **Vida:** a habilidade custa % da vida máxima.
+  - **Sem recurso:** recargas 15% maiores.
+- **Itens alternativos:** cada ficha traz trocas situacionais ("contra muita magia", "contra crítico", "contra cura"…). A lógica marcou cada troca com uma condição. Na partida, quem decide a troca é o **Macro** do jogador; no laboratório, um Macro médio troca sempre que a condição vale.
+- **Equilíbrio (laboratório de campeões, 25/11):** as lutas 5x5 foram simuladas com os kits e os itens reais. A conversão aplicou três correções:
+  1. dano contínuo das habilidades básicas (o guia comparava a rotação com a especial a um combo de 7 s);
+  2. diferenças entre classes;
+  3. dois botões por campeão (sem itens / com itens).
+
+  Resultado: médias por classe entre 47% e 54% em todos os momentos, e curvas na direção certa (fortes no início 56% → 49%; fortes no fim 45% → 53%).
+- **Fora do alvo:** Clavento e Prismora (fortes), Vedrassa e Nalcora (fracas). A correção desses quatro depende de mudança de kit (texto), com o dono do projeto e o GPT.
+- **Valor de nível:** com os atributos dos campeões, 1 nível a mais vale cerca de +6 a 8% de força, como no protótipo de ritmo. **A simulação da partida não soma um bônus genérico por nível** quando usar os atributos dos campeões, para não contar o nível duas vezes.
 
 ## 8. Draft (pick & ban)
 
@@ -732,7 +754,8 @@ Detalhes: **[A DEFINIR]**
 - [ ] Geração de jogadores com posição, atributos, lista de campeões e traços ocultos
 - [ ] Contratação do elenco (5 titulares + 5 reservas)
 - [ ] Sistema de energia, descanso e treino
-- [ ] Campeões fictícios e draft
+- [x] Campeões fictícios (30, catálogo e laboratório de equilíbrio)
+- [ ] Draft
 - [ ] Simulação de partida
 - [ ] Liga e calendário
 - [ ] Salvar e carregar
@@ -751,7 +774,8 @@ Detalhes: **[A DEFINIR]**
 - Técnico: custos e tempos dos anúncios, efeitos do cansaço e duração das férias
 - Reputação: outros efeitos e exibição
 - Como o conhecimento do meta é exibido e evolui
-- Nomes e habilidades dos campeões
+- Kits de Clavento, Prismora, Vedrassa e Nalcora (fora do alvo no laboratório de campeões)
+- Regra da fúria: confirmar que as habilidades não exigem fúria
 - Mundial: vagas por região, séries do play-in e da fase suíça, premiação
 - Contratos: ganho de experiência, regras de rescisão
 - Ego e lealdade: valores e velocidade de mudança (balanceamento)

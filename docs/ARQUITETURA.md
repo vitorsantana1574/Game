@@ -74,13 +74,13 @@ A partida é **simulada primeiro e exibida depois**. O visual "reproduz" a linha
 │   ├── systems/           Sistemas: liga, contratos, treino, ego, economia, reputação
 │   └── simulation/        Simulação da partida e do draft
 ├── data/                  ── DADOS (Claude) ──
-│   ├── campeoes/          Definição dos campeões
+│   ├── campeoes/          Catálogo dos campeões (campeoes.json, gerado a partir da proposta do GPT)
 │   ├── itens/             Itens e botas (data/itens/itens.json)
 │   ├── config/            Dificuldades, balanceamento, constantes
 │   ├── nomes/             Listas para gerar nomes de jogadores, times e regiões
 │   └── narracao/          Modelos de frase da narração
 ├── tests/                 ── TESTES (Claude) ── testes automáticos da lógica
-├── tools/                 ── FERRAMENTAS (Claude) ── protótipos de balanceamento (prototipos/), relatórios (relatorios/) e geradores de documentação (documentacao/)
+├── tools/                 ── FERRAMENTAS (Claude) ── protótipos e laboratórios de balanceamento (prototipos/), relatórios (relatorios/), conversão de propostas em dados (conversao/), validadores (validacao/) e geradores de documentação (documentacao/)
 │
 ├── ui/                    ── INTERFACE (GPT) ──
 │   ├── telas/             Telas: menu, elenco, contratação, agenda, draft, tabela da liga...
@@ -159,7 +159,7 @@ As cenas da Godot dão conflito quando duas pessoas editam o mesmo arquivo. Por 
 | 1 ✅ | Modelos de dados, gerador de jogadores, estado do jogo, saves | Tema visual, tela inicial, tela de configuração da carreira |
 | 2 ✅ | Contratos, contratação, técnico, calendário | Telas de mercado, contratação e elenco |
 | 3 | Agenda, treino, energia, ego | Tela de agenda semanal e perfil do jogador |
-| 4 | Campeões e draft | Tela de draft |
+| 4 (em andamento) | Campeões ✅ (catálogo, laboratório de equilíbrio) e draft | Fichas e arte dos campeões; tela de draft |
 | 5 | Simulação da partida (linha do tempo) | Cena visual da partida e painel de narração |
 | 6 | Liga, calendário, playoffs | Tabela, calendário, chaveamento |
 | 7 | Save/load | Menus de salvar e carregar |

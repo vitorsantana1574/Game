@@ -14,6 +14,7 @@ const ARQUIVOS_DE_TESTE: Array[String] = [
 	"res://tests/teste_tempo_e_tecnico.gd",
 	"res://tests/teste_calendario.gd",
 	"res://tests/teste_economia.gd",
+	"res://tests/teste_campeoes.gd",
 ]
 
 var _falhas: int = 0

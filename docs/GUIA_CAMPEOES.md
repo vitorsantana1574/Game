@@ -78,6 +78,8 @@ Cada campeão deve ficar **dentro de 10 a 15% da base da sua classe**. Fora diss
 
 ### 3.2 Dano total das 3 habilidades (uma rotação completa)
 
+> **Correção (24/11, depois do laboratório de campeões):** o laboratório de itens disparava o "combo" abaixo **a cada ~7 s**. Como a especial tem recarga de 60 a 110 s, comparar a rotação completa (com a especial) com o combo fazia as duas básicas entregarem só cerca de metade do dano previsto no uso contínuo. A regra certa é: **as duas habilidades básicas e a passiva, a cada 7 s, entregam o orçamento do campeão × o combo da classe; a especial é dano extra, o pico das lutas.** A conversão para `data/campeoes/` já aplica essa correção (`tools/conversao/converter_campeoes.py`), além de uma correção por classe e de ajustes individuais medidos na luta 5x5 (`tools/relatorios/laboratorio_campeoes.md`). Campeões novos devem seguir a regra corrigida.
+
 A soma do dano das 3 habilidades (mais o dano extra da passiva, se houver) deve ficar perto do "combo" testado:
 
 | Classe | Fórmula testada do combo | Nível 9 (2 itens) | Nível 15 (4 itens) | Recarga média |
@@ -126,7 +128,7 @@ Exemplo: um mago com atordoamento em área e um salto deve causar uns 60 a 65% d
 |---|---|---|
 | **Mana** | Barra que gasta com habilidades e volta devagar. Acabou, só ataques básicos até recuperar. | Magos, suportes, maioria dos atiradores e tanques |
 | **Energia** | Barra pequena e fixa (200, não cresce) que volta rápido (~10 por segundo). Limita a sequência, não a luta inteira. | Assassinos e lutadores ágeis |
-| **Fúria** | Começa vazia, enche atacando e recebendo dano, esvazia fora de combate. Com a barra cheia, as habilidades ficam mais fortes. | Lutadores |
+| **Fúria** | Começa vazia, enche atacando e recebendo dano, esvazia fora de combate. As habilidades **não exigem** fúria; lançar com a barra cheia (100) fortalece a habilidade e gasta o custo dela. | Lutadores |
 | **Vida** | Habilidades custam vida. Precisa de algum jeito de recuperar (roubo de vida, passiva). | Lutadores e magos de risco |
 | **Sem recurso** | Só recarga, mas recargas um pouco maiores (+15%). | Alguns tanques e atiradores |
 

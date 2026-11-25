@@ -9,6 +9,9 @@ const NOMES_JOGADORES: String = "res://data/nomes/jogadores.json"
 const CONTRATOS: String = "res://data/config/contratos.json"
 const MERCADO: String = "res://data/config/mercado.json"
 const TECNICOS: String = "res://data/config/tecnicos.json"
+const CAMPEOES: String = "res://data/campeoes/campeoes.json"
+const ITENS: String = "res://data/itens/itens.json"
+const COMBATE: String = "res://data/config/combate.json"
 
 static var _cache: Dictionary = {}
 
@@ -47,6 +50,18 @@ static func mercado() -> Dictionary:
 
 static func tecnicos() -> Dictionary:
 	return carregar(TECNICOS)
+
+
+static func campeoes() -> Dictionary:
+	return carregar(CAMPEOES)
+
+
+static func itens() -> Dictionary:
+	return carregar(ITENS)
+
+
+static func combate() -> Dictionary:
+	return carregar(COMBATE)
 
 
 static func dias_por_mes() -> int:

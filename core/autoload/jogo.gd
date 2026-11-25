@@ -179,6 +179,34 @@ func desbloquear_pesadelo() -> void:
 	Eventos.dificuldade_desbloqueada.emit("pesadelo")
 
 
+# --- Catálogo de Crystal Legends (campeões e itens) ---------------------------
+# Leitura pura: funciona com ou sem carreira. Não expõe a força no patch (meta) nem a mecânica interna da simulação.
+
+## Campeões para listas e grades. filtros (opcionais): {"classe": "mago", "posicao": "meio", "curva": "fim"}.
+func listar_campeoes(filtros: Dictionary = {}) -> Array[Dictionary]:
+	return CatalogoCampeoes.listar(filtros)
+
+
+## Ficha completa de um campeão pelo ID estável (ex.: "veluria"). {} se não existir.
+func detalhe_campeao(id: String) -> Dictionary:
+	return CatalogoCampeoes.detalhe(id)
+
+
+## Atributos de um campeão num nível de 1 a 16, sem itens. {} se não existir.
+func atributos_campeao(id: String, nivel: int) -> Dictionary:
+	return CatalogoCampeoes.atributos(id, nivel)
+
+
+## Itens e botas. filtros (opcional): {"classe": "suporte"} mostra só o que a classe pode comprar.
+func listar_itens(filtros: Dictionary = {}) -> Array[Dictionary]:
+	return CatalogoCampeoes.listar_itens(filtros)
+
+
+## Ficha de um item pelo ID (ex.: "orbe_da_tempestade"). {} se não existir.
+func detalhe_item(id: String) -> Dictionary:
+	return CatalogoCampeoes.detalhe_item(id)
+
+
 # --- Etapa 2: leitura de elenco, mercado e técnico ---------------------------
 
 ## Opções para montar uma proposta de contrato.
