@@ -19,6 +19,8 @@ var meses_em_atraso: int = 0
 var ultima_posicao: int = 0
 ## Empréstimo ativo: {} ou {"valor", "meses", "parcela", "parcelas_restantes", "parcelas_atrasadas", "divida_atrasada"}
 var emprestimo: Dictionary = {}
+## Bandeira desenhada na criação: PNG em base64 (ver Bandeira.validar). "" = arte padrão.
+var bandeira_png: String = ""
 
 
 func jogador_por_id(id: String) -> Jogador:
@@ -58,6 +60,7 @@ func para_dicionario() -> Dictionary:
 		"meses_em_atraso": meses_em_atraso,
 		"ultima_posicao": ultima_posicao,
 		"emprestimo": emprestimo,
+		"bandeira_png": bandeira_png,
 	}
 
 
@@ -76,6 +79,7 @@ static func de_dicionario(dados: Dictionary) -> Organizacao:
 	organizacao.salarios_atrasados = int(dados.get("salarios_atrasados", 0))
 	organizacao.meses_em_atraso = int(dados.get("meses_em_atraso", 0))
 	organizacao.ultima_posicao = int(dados.get("ultima_posicao", 0))
+	organizacao.bandeira_png = str(dados.get("bandeira_png", ""))
 	var emprestimo_dados: Dictionary = dados.get("emprestimo", {})
 	for chave: String in emprestimo_dados:
 		organizacao.emprestimo[chave] = int(emprestimo_dados[chave])

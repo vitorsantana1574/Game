@@ -15,6 +15,8 @@ var cansaco: float = 0.0
 ## Salário mensal que ele pede, em reais.
 var salario_pedido: int = 0
 var contrato: Contrato = null
+## Aparência visual (só apresentação), estável a partir do id.
+var aparencia: int = 0
 
 
 func nivel_geral() -> float:
@@ -34,6 +36,7 @@ func resumo(dia_atual: int) -> Dictionary:
 		"cansaco": roundi(cansaco),
 		"salario_pedido": salario_pedido,
 		"contrato": contrato.resumo(dia_atual) if contrato else {},
+		"aparencia": aparencia,
 	}
 
 
@@ -45,6 +48,7 @@ func para_dicionario() -> Dictionary:
 		"atributos": atributos,
 		"cansaco": cansaco,
 		"salario_pedido": salario_pedido,
+		"aparencia": aparencia,
 		"contrato": contrato.para_dicionario() if contrato else {},
 	}
 
@@ -58,6 +62,7 @@ static func de_dicionario(dados: Dictionary) -> Tecnico:
 		tecnico.atributos[atributo] = int(dados["atributos"][atributo])
 	tecnico.cansaco = float(dados["cansaco"])
 	tecnico.salario_pedido = int(dados["salario_pedido"])
+	tecnico.aparencia = int(dados["aparencia"]) if dados.has("aparencia") else Jogador.aparencia_do_id(tecnico.id)
 	if not dados["contrato"].is_empty():
 		tecnico.contrato = Contrato.de_dicionario(dados["contrato"])
 	return tecnico

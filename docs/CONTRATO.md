@@ -3,7 +3,7 @@
 Este documento é a **ponte entre a lógica (Claude) e a interface (GPT)**.
 A interface só pode usar o que está escrito aqui. Se precisar de algo que não existe, peça por mensagem em [comunicacao/](comunicacao/README.md).
 
-> **Status: v4.** Etapas 1 (tela inicial), 2 (mercado, elenco, contratos, técnico), economia/calendário e catálogo de campeões e itens **[PRONTOS]**. Os nomes abaixo são a proposta inicial. A cada etapa de construção, o Claude atualiza este documento **antes** de o GPT começar a tela correspondente. Itens marcados **[PLANEJADO]** ainda não existem no código.
+> **Status: v5.** Etapas 1 (tela inicial), 2 (mercado, elenco, contratos, técnico), economia/calendário, catálogo de campeões e itens e os acréscimos pedidos pela sede (seção 2.5) **[PRONTOS]**. Os nomes abaixo são a proposta inicial. A cada etapa de construção, o Claude atualiza este documento **antes** de o GPT começar a tela correspondente. Itens marcados **[PLANEJADO]** ainda não existem no código.
 
 Regras do contrato: [ARQUITETURA.md](ARQUITETURA.md), seção 2.
 
@@ -402,6 +402,70 @@ O item inicial do suporte (`medalhao_do_tributo`) também pode ser lido com `det
 ### Ainda não existe
 
 Draft (estado, disponibilidade de cada campeão, domínio dos jogadores, escolha e banimento) entra na etapa do draft. Este contrato será atualizado **antes** de o GPT precisar dessas funções.
+
+## 2.5 Acréscimos pedidos pela sede — **[PRONTO]** (25/11)
+
+Respostas ao pedido do GPT de 25/11. Tudo é acréscimo: nada do que já existia mudou de nome nem de formato.
+
+### Bandeira dentro do save
+
+- `Jogo.nova_carreira(escolhas)` aceita `"bandeira_png"`: PNG de **240×208** em base64, até 256 KB. É opcional: `""` ou ausente = arte padrão. Se for inválida, a carreira não é criada e volta `{"ok": false, "erros": {"bandeira": "mensagem pronta"}}`.
+- `Jogo.resumo_carreira()["bandeira_png"]` e `Jogo.listar_saves()[slot]["bandeira_png"]` devolvem a imagem (`""` em saves antigos ou sem bandeira). Saves antigos continuam abrindo.
+- `Jogo.definir_bandeira(png_base64)` troca a bandeira de uma carreira ativa (`""` volta à arte padrão). Retorna `{"ok": true}` ou o erro em `"bandeira"`. A troca vai para o save no próximo `Jogo.salvar()`. Emite `Eventos.bandeira_mudou(png_base64)`.
+- Com isso, o arquivo auxiliar `user://bandeiras_apresentacao.cfg` pode virar só leitura de compatibilidade: na primeira vez que um save antigo abrir com bandeira no arquivo auxiliar, chame `definir_bandeira` e salve.
+
+### Livro de lançamentos (fica no save)
+
+`Jogo.listar_lancamentos(limite = 50)` devolve, do mais novo para o mais antigo:
+
+```gdscript
+{"dia": 31, "data_texto": "1 de fevereiro, ano 1", "descricao": "Verba da liga", "valor": 12000, "categoria": "verba"}
+# valor > 0 = entrada; < 0 = saída
+# categoria: "capital" | "verba" | "salarios" | "luvas" | "rescisao" | "tecnico" | "emprestimo"
+```
+
+A soma de todos os lançamentos fecha com o dinheiro atual. O histórico que hoje vive só na sessão da sede (`_historico`) pode ser trocado por esta função: ele sobrevive ao salvar e carregar.
+
+### Totais das finanças
+
+`Jogo.resumo_financeiro()` ganhou:
+- `"gastos_previstos"`: tudo o que vence no próximo dia 1 (folha + parcela + salários atrasados + parcelas atrasadas);
+- `"divida_atrasada"`: parcelas do empréstimo em atraso.
+
+Use esses campos em vez de somar na tela.
+
+### Regras de contrato prontas na ficha
+
+Em `Jogo.detalhe_jogador(id)`, para jogadores do elenco:
+- `contrato.pode_renovar` (bool) e `contrato.dias_para_poder_renovar` (int). Use em vez do 90 fixo na tela: o prazo está em `data/config/contratos.json` e pode mudar.
+- `exige_titularidade` (bool) **só aparece quando o ego está revelado**. Use em vez de comparar o ego com `ego_exige_titular`. Sem o ego revelado, a lógica continua aplicando a exigência na negociação, e a resposta da proposta explica o motivo.
+
+### Campeões mais jogados
+
+Em `detalhe_jogador(id)`:
+
+```gdscript
+"historico_campeoes": {
+    "disponivel": false,          # false até a simulação de partidas existir; depois, true mesmo sem partidas
+    "mais_jogados": [{"id": "veluria", "partidas": 18}, ...],   # até 3, do mais jogado (empate: ordem do id)
+}
+```
+
+Mostre "Histórico indisponível" com `disponivel == false`, e "Nenhuma partida" com `disponivel == true` e lista vazia.
+
+### Avançar até algo acontecer
+
+`Jogo.avancar_ate_evento(maximo = 30)` avança dia a dia e para no primeiro dia com algo relevante: aviso de contrato, candidatos a técnico, saída de jogador ou técnico, verba, salários (pagos ou atrasados), parcela (paga ou atrasada), quitação ou falência. Para também ao chegar a `maximo` dias. Retorno:
+
+```gdscript
+{"ok": true, "dias_avancados": 30, "eventos": ["verba_recebida", "salarios_pagos"], "resumo": {...}}
+```
+
+Os sinais de cada dia são emitidos normalmente, então os avisos da sede continuam funcionando. Sugestão: um botão sempre visível no rodapé ("Avançar dia" e "Avançar até o próximo evento"), já que é a ação mais usada do jogo.
+
+### Aparência (para os personagens animados, se forem aprovados)
+
+`detalhe_jogador`, `listar_elenco`, `listar_mercado` e as fichas de técnico trazem `"aparencia"`: um inteiro de 0 a 19, estável por pessoa e guardado no save. A quantidade fica em `data/config/balanceamento.json` (`"aparencias": 20`). A lógica só guarda o índice; qual arte corresponde a cada índice é decisão da apresentação. As **atividades** na sede (computadores, reunião, intervalo) dependem da agenda de treino, que entra na etapa 3. Este contrato será atualizado antes.
 
 ## 3. Dados que a interface pode ler **[PLANEJADO]**
 

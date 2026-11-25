@@ -47,6 +47,7 @@ func resumo_carreira() -> Dictionary:
 		"tem_emprestimo": not carreira.organizacao.emprestimo.is_empty(),
 		"encerrada": carreira.encerrada,
 		"motivo_encerramento": carreira.motivo_encerramento,
+		"bandeira_png": carreira.organizacao.bandeira_png,
 	}
 
 
@@ -104,12 +105,19 @@ func nova_carreira(escolhas: Dictionary) -> Dictionary:
 	elif not SistemaSaves.slot_valido(slot):
 		return _erro("slot", ERRO_SLOT_INVALIDO, "Espaço de save inválido.")
 
+	var bandeira: String = str(escolhas.get("bandeira_png", ""))
+	var erro_bandeira: String = Bandeira.validar(bandeira)
+	if not erro_bandeira.is_empty():
+		return {"ok": false, "erros": {"bandeira": Bandeira.mensagem_erro(erro_bandeira)}}
+
 	var config: Dictionary = resolucao["config"]
 	var nova: Carreira = Carreira.new()
 	nova.config = config
 	nova.semente = randi() & 0x7fffffff
 	nova.organizacao.nome = config["nome"]
 	nova.organizacao.dinheiro = int(config["capital_valor"])
+	nova.organizacao.bandeira_png = bandeira
+	nova.registrar_lancamento("Capital inicial", nova.organizacao.dinheiro, "capital")
 	SistemaMercado.gerar_inicial(nova)
 
 	if not saves.salvar(slot, nova):
@@ -287,7 +295,40 @@ func resumo_financeiro() -> Dictionary:
 		"parcela_emprestimo": int(carreira.organizacao.emprestimo.get("parcela", 0)),
 		"saldo_mensal_previsto": Financas.verba_mensal(carreira.nivel_liga, carreira.organizacao.ultima_posicao)
 			- carreira.organizacao.folha_mensal() - int(carreira.organizacao.emprestimo.get("parcela", 0)),
+		# Total a pagar no próximo dia 1: folha + parcela + tudo o que está atrasado.
+		"gastos_previstos": carreira.organizacao.folha_mensal() + int(carreira.organizacao.emprestimo.get("parcela", 0))
+			+ carreira.organizacao.salarios_atrasados + int(carreira.organizacao.emprestimo.get("divida_atrasada", 0)),
+		"divida_atrasada": int(carreira.organizacao.emprestimo.get("divida_atrasada", 0)),
 	}
+
+
+## Livro de lançamentos, do mais novo para o mais antigo: [{dia, data_texto, descricao, valor, categoria}].
+## valor > 0 é entrada; < 0 é saída. categoria: "capital", "verba", "salarios", "luvas", "rescisao", "tecnico", "emprestimo".
+func listar_lancamentos(limite: int = 50) -> Array[Dictionary]:
+	var saida: Array[Dictionary] = []
+	if carreira == null:
+		return saida
+	for indice: int in range(carreira.lancamentos.size() - 1, -1, -1):
+		if saida.size() >= limite:
+			break
+		var item: Dictionary = carreira.lancamentos[indice].duplicate()
+		item["data_texto"] = String(Calendario.data(int(item["dia"]))["texto"])
+		saida.append(item)
+	return saida
+
+
+## Troca a bandeira da organização (PNG 240×208 em base64; "" volta à arte padrão).
+## Retorno: {"ok": true} ou {"ok": false, "erros": {"bandeira": "mensagem"}}. Vai para o save no próximo salvar().
+func definir_bandeira(png_base64: String) -> Dictionary:
+	var bloqueio: Dictionary = _verificar_ativa()
+	if not bloqueio.is_empty():
+		return bloqueio
+	var codigo: String = Bandeira.validar(png_base64)
+	if not codigo.is_empty():
+		return _erro("bandeira", codigo, Bandeira.mensagem_erro(codigo))
+	carreira.organizacao.bandeira_png = png_base64
+	Eventos.bandeira_mudou.emit(png_base64)
+	return {"ok": true}
 
 
 ## Tamanhos de anúncio para técnico: [{id, nome, candidatos, custo, dias_espera}].
@@ -379,7 +420,7 @@ func dispensar_jogador(jogador_id: String) -> Dictionary:
 	var custo: int = _custo_rescisao(jogador.contrato) if jogador.contrato else 0
 	if custo > carreira.organizacao.dinheiro:
 		return _erro("dinheiro", "sem_dinheiro", "Não há dinheiro para pagar a rescisão (R$ %s)." % Negociacao._formatar(custo))
-	_mudar_dinheiro(-custo)
+	_mudar_dinheiro(-custo, "Rescisão de %s" % jogador.apelido, "rescisao")
 	_remover_do_elenco(jogador, "dispensado")
 	return {"ok": true, "custo": custo}
 
@@ -423,7 +464,7 @@ func publicar_anuncio(tamanho: String, oferta_minima: int) -> Dictionary:
 		return _erro("oferta_minima", "oferta_baixa", "A oferta mínima é R$ %s." % Negociacao._formatar(int(regra["oferta"]["minima"])))
 	if int(anuncio["custo"]) > carreira.organizacao.dinheiro:
 		return _erro("dinheiro", "sem_dinheiro", "Não há dinheiro para o anúncio.")
-	_mudar_dinheiro(-int(anuncio["custo"]))
+	_mudar_dinheiro(-int(anuncio["custo"]), "Anúncio de técnico (%s)" % str(anuncio.get("nome", tamanho)), "tecnico")
 	var espera: int = SistemaTecnicos.dias_de_espera(tamanho, oferta_minima)
 	carreira.anuncio_tecnico = {"tamanho": tamanho, "oferta_minima": oferta_minima, "dia_chegada": carreira.dia + espera}
 	return {"ok": true, "dias_espera": espera}
@@ -466,7 +507,7 @@ func dispensar_tecnico() -> Dictionary:
 	var custo: int = _custo_rescisao(tecnico.contrato) if tecnico.contrato else 0
 	if custo > carreira.organizacao.dinheiro:
 		return _erro("dinheiro", "sem_dinheiro", "Não há dinheiro para pagar a rescisão (R$ %s)." % Negociacao._formatar(custo))
-	_mudar_dinheiro(-custo)
+	_mudar_dinheiro(-custo, "Rescisão do técnico %s" % tecnico.nome, "rescisao")
 	carreira.organizacao.tecnico = null
 	Eventos.tecnico_saiu.emit(tecnico.resumo(carreira.dia), "dispensado")
 	return {"ok": true, "custo": custo}
@@ -485,6 +526,40 @@ func avancar_dia(dias: int = 1) -> Dictionary:
 		if carreira.encerrada:
 			break
 	return {"ok": true, "resumo": resumo_carreira()}
+
+
+## Sinais que interrompem avancar_ate_evento(): algo que o jogador provavelmente quer ver.
+const EVENTOS_QUE_PARAM: Array[String] = [
+	"contrato_vencendo", "candidatos_chegaram", "jogador_saiu", "tecnico_saiu",
+	"salarios_pagos", "salarios_atrasados", "verba_recebida", "parcela_paga",
+	"parcela_atrasada", "emprestimo_quitado", "falencia",
+]
+var _eventos_do_dia: Array[String] = []
+
+
+## Avança dia a dia até acontecer algo relevante (aviso de contrato, candidatos, pagamentos, saída de jogador,
+## falência) ou até `maximo` dias. Retorno: {"ok", "dias_avancados", "eventos": [nomes dos sinais], "resumo"}.
+## Os sinais de cada dia continuam sendo emitidos normalmente.
+func avancar_ate_evento(maximo: int = 30) -> Dictionary:
+	var bloqueio: Dictionary = _verificar_ativa()
+	if not bloqueio.is_empty():
+		return bloqueio
+	var observadores: Array[Callable] = []
+	for nome: String in EVENTOS_QUE_PARAM:
+		var observador: Callable = func(_a: Variant = null, _b: Variant = null, _c: Variant = null) -> void:
+			_eventos_do_dia.append(nome)
+		Eventos.connect(nome, observador)
+		observadores.append(observador)
+	var dias: int = 0
+	_eventos_do_dia.clear()
+	while dias < maxi(1, maximo) and _eventos_do_dia.is_empty() and not carreira.encerrada:
+		avancar_dia(1)
+		dias += 1
+	for indice: int in range(EVENTOS_QUE_PARAM.size()):
+		Eventos.disconnect(EVENTOS_QUE_PARAM[indice], observadores[indice])
+	var eventos: Array[String] = _eventos_do_dia.duplicate()
+	_eventos_do_dia.clear()
+	return {"ok": true, "dias_avancados": dias, "eventos": eventos, "resumo": resumo_carreira()}
 
 
 # --- Etapa 2: interno --------------------------------------------------------
@@ -506,7 +581,7 @@ func _negociar(jogador: Jogador, proposta: Dictionary, renovacao: bool) -> Dicti
 	var avaliacao: Dictionary = Negociacao.avaliar(jogador, normalizada, carreira.organizacao.reputacao, renovacao)
 	if avaliacao["aceita"]:
 		carreira.negociacoes.erase(jogador.id)
-		_mudar_dinheiro(-int(normalizada["luvas"]))
+		_mudar_dinheiro(-int(normalizada["luvas"]), "Luvas de %s" % jogador.apelido, "luvas")
 		jogador.contrato = Negociacao.criar_contrato(jogador, normalizada, carreira.dia)
 		_limpar_avisos(jogador.id)
 		if not renovacao:
@@ -543,6 +618,14 @@ func _resumo_elenco(jogador: Jogador) -> Dictionary:
 	resumo["titular"] = carreira.organizacao.eh_titular(jogador.id)
 	resumo["posicao_titular"] = carreira.organizacao.titulares.find_key(jogador.id) if resumo["titular"] else ""
 	resumo["custo_rescisao"] = _custo_rescisao(jogador.contrato) if jogador.contrato else 0
+	if jogador.contrato:
+		var dias_regra: int = int(Dados.contratos()["renovacao"]["dias_restantes_para_renovar"])
+		var restantes: int = jogador.contrato.dias_restantes(carreira.dia)
+		resumo["contrato"]["pode_renovar"] = restantes <= dias_regra
+		resumo["contrato"]["dias_para_poder_renovar"] = maxi(0, restantes - dias_regra)
+	# Só aparece quando o ego está revelado (senão entregaria o traço oculto).
+	if jogador.traco_revelado("ego"):
+		resumo["exige_titularidade"] = jogador.ego >= int(Dados.contratos()["negociacao"]["ego_exige_titular"])
 	return resumo
 
 
@@ -560,9 +643,10 @@ func _remover_do_elenco(jogador: Jogador, motivo: String) -> void:
 	Eventos.elenco_mudou.emit()
 
 
-func _mudar_dinheiro(variacao: int) -> void:
+func _mudar_dinheiro(variacao: int, descricao: String, categoria: String) -> void:
 	if variacao == 0:
 		return
+	carreira.registrar_lancamento(descricao, variacao, categoria)
 	carreira.organizacao.dinheiro += variacao
 	Eventos.dinheiro_mudou.emit(carreira.organizacao.dinheiro)
 
@@ -636,7 +720,7 @@ func _pagar_salarios() -> void:
 	if organizacao.dinheiro >= devido:
 		organizacao.salarios_atrasados = 0
 		organizacao.meses_em_atraso = 0
-		_mudar_dinheiro(-devido)
+		_mudar_dinheiro(-devido, "Salários", "salarios")
 		Eventos.salarios_pagos.emit(devido)
 		return
 	var regra: Dictionary = Dados.contratos()["atraso_salarial"]
@@ -707,7 +791,7 @@ func contratar_emprestimo(valor: int, meses: int) -> Dictionary:
 		"parcelas_atrasadas": 0,
 		"divida_atrasada": 0,
 	}
-	_mudar_dinheiro(valor)
+	_mudar_dinheiro(valor, "Empréstimo bancário", "emprestimo")
 	Eventos.emprestimo_contratado.emit(estado_emprestimo())
 	return {"ok": true, "emprestimo": estado_emprestimo()}
 
@@ -723,7 +807,7 @@ func quitar_emprestimo() -> Dictionary:
 	var saldo: int = int(estado["saldo_para_quitar"])
 	if saldo > carreira.organizacao.dinheiro:
 		return _erro("dinheiro", "sem_dinheiro", "Não há dinheiro para quitar (R$ %s)." % Negociacao._formatar(saldo))
-	_mudar_dinheiro(-saldo)
+	_mudar_dinheiro(-saldo, "Quitação do empréstimo", "emprestimo")
 	carreira.organizacao.emprestimo = {}
 	Eventos.emprestimo_quitado.emit()
 	return {"ok": true, "pago": saldo}
@@ -741,7 +825,7 @@ func _verificar_ativa() -> Dictionary:
 func _dia_de_pagamento() -> void:
 	var verba: int = Financas.verba_mensal(carreira.nivel_liga, carreira.organizacao.ultima_posicao)
 	if verba > 0:
-		_mudar_dinheiro(verba)
+		_mudar_dinheiro(verba, "Verba da liga", "verba")
 		Eventos.verba_recebida.emit(verba)
 	_cobrar_parcela()
 	_pagar_salarios()
@@ -754,7 +838,7 @@ func _cobrar_parcela() -> void:
 		return
 	var devido: int = int(emprestimo["parcela"]) + int(emprestimo["divida_atrasada"])
 	if carreira.organizacao.dinheiro >= devido:
-		_mudar_dinheiro(-devido)
+		_mudar_dinheiro(-devido, "Parcela do empréstimo", "emprestimo")
 		emprestimo["parcelas_restantes"] = int(emprestimo["parcelas_restantes"]) - 1
 		emprestimo["parcelas_atrasadas"] = 0
 		emprestimo["divida_atrasada"] = 0

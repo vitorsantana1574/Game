@@ -42,5 +42,9 @@
 		"expoente": 2.2,
 		"bonus_por_experiencia": 0.004,
 		"minimo": 1200
-	}
+	},
+	"_comentario_aparencias": "Quantas aparências visuais existem para jogadores e técnicos (só apresentação). A lógica guarda o índice; a arte é do GPT.",
+	"aparencias": 20,
+	"_comentario_historico": "Fica true quando a simulação de partidas registrar os campeões jogados.",
+	"historico_de_partidas_ativo": false
 }

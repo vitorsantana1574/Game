@@ -38,8 +38,29 @@ var salario_pedido: int = 0
 ## Domínio de campeões (id do campeão -> nível). Preenchido na etapa dos campeões.
 var dominio_campeoes: Dictionary = {}
 
+## Partidas oficiais por campeão (id do campeão -> partidas). Preenchido pela simulação de partidas.
+var partidas_por_campeao: Dictionary = {}
+
+## Aparência visual (0 a N-1, ver "aparencias" em data/config/balanceamento.json). Só apresentação.
+var aparencia: int = 0
+
 ## Contrato atual, ou null para agentes livres.
 var contrato: Contrato = null
+
+
+## Aparência estável derivada do id (usada em saves antigos, que não tinham o campo).
+static func aparencia_do_id(id_jogador: String) -> int:
+	return absi(hash(id_jogador)) % maxi(1, int(Dados.balanceamento().get("aparencias", 20)))
+
+
+## Até `limite` campeões mais jogados: [{"id", "partidas"}], do mais para o menos jogado.
+func campeoes_mais_jogados(limite: int = 3) -> Array[Dictionary]:
+	var lista: Array[Dictionary] = []
+	for id_campeao: String in partidas_por_campeao:
+		lista.append({"id": id_campeao, "partidas": int(partidas_por_campeao[id_campeao])})
+	lista.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return a["partidas"] > b["partidas"] or (a["partidas"] == b["partidas"] and String(a["id"]) < String(b["id"])))
+	return lista.slice(0, limite)
 
 
 ## Nível geral do jogador numa posição (1 a 100), ponderando os atributos pelos pesos da posição.
@@ -85,6 +106,12 @@ func resumo_publico(dia_atual: int = 1) -> Dictionary:
 		"salario_pedido": salario_pedido,
 		"fama": snappedf(fama(), 0.01),
 		"contrato": contrato.resumo(dia_atual) if contrato else {},
+		"aparencia": aparencia,
+		"historico_campeoes": {
+			# false até a simulação de partidas existir; depois, true mesmo sem partidas.
+			"disponivel": bool(Dados.balanceamento().get("historico_de_partidas_ativo", false)),
+			"mais_jogados": campeoes_mais_jogados(),
+		},
 	}
 	if traco_revelado("potencial"):
 		resumo["potencial"] = potencial
@@ -112,6 +139,8 @@ func para_dicionario() -> Dictionary:
 		"tracos_revelados": tracos_revelados,
 		"salario_pedido": salario_pedido,
 		"dominio_campeoes": dominio_campeoes,
+		"partidas_por_campeao": partidas_por_campeao,
+		"aparencia": aparencia,
 		"contrato": contrato.para_dicionario() if contrato else {},
 	}
 
@@ -138,6 +167,9 @@ static func de_dicionario(dados: Dictionary) -> Jogador:
 		jogador.tracos_revelados.append(str(traco))
 	jogador.salario_pedido = int(dados["salario_pedido"])
 	jogador.dominio_campeoes = dados.get("dominio_campeoes", {}).duplicate()
+	for id_campeao: String in dados.get("partidas_por_campeao", {}):
+		jogador.partidas_por_campeao[id_campeao] = int(dados["partidas_por_campeao"][id_campeao])
+	jogador.aparencia = int(dados["aparencia"]) if dados.has("aparencia") else aparencia_do_id(jogador.id)
 	var contrato_dados: Dictionary = dados.get("contrato", {})
 	if not contrato_dados.is_empty():
 		jogador.contrato = Contrato.de_dicionario(contrato_dados)

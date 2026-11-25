@@ -43,6 +43,9 @@ Ao começar uma carreira, o jogador escolhe, na tela **Criar Equipe**:
 - **Pesadelo:** predefinição extra, **bloqueada no início**. É desbloqueada quando o jogador **vence o mundial (fica em 1º lugar no mundial) jogando no Difícil**. O desbloqueio vale para todas as carreiras futuras.
 - **Moeda:** real brasileiro, no formato **R$ 80.000**.
 - **Saves:** 4 espaços para carreiras, com as opções Continuar (último save jogado) e Carregar.
+- **Bandeira (aprovado em 25/11):** em Criar Equipe → Bandeira, o jogador monta a bandeira com 15 emblemas originais, seis paletas e três cores, ou desenha à mão livre. A bandeira aparece na parede da sede e fica **dentro do save** (PNG 240×208), podendo ser trocada depois.
+- **Sede (25/11):** o painel da carreira é uma sala isométrica: estações dos 5 titulares, bandeira com o acesso à Equipe, calendário, mesa de reunião (técnico) e livro de contas (finanças). O livro de contas mostra o histórico de entradas e saídas, guardado no save.
+- **Ideia em avaliação, sem aprovação:** personagens animados na sede, com pelo menos 20 aparências de jogadores e técnicos em situações como computadores, reunião e intervalo. A lógica já guarda uma aparência estável por pessoa. As atividades dependem da agenda de treino (etapa 3).
 
 Valores de capital e força dos rivais de cada predefinição estão em `data/config/dificuldades.json`. São provisórios e serão calibrados junto com a economia: **[A DEFINIR — balanceamento]**
 

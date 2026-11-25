@@ -58,6 +58,7 @@ func salvar(slot: int, carreira: Carreira) -> bool:
 			"fase": carreira.descricao_fase(),
 			"dificuldade": carreira.config.get("dificuldade", ""),
 			"salvo_em": Time.get_datetime_string_from_system(false, true),
+			"bandeira_png": carreira.organizacao.bandeira_png,
 		},
 		"carreira": carreira.para_dicionario(),
 	}

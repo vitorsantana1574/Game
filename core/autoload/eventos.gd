@@ -11,6 +11,8 @@ signal carreira_salva(slot: int)
 ## A lista de saves mudou (criação, gravação ou exclusão).
 signal saves_mudaram(resumos: Array[Dictionary], ultimo_slot: int)
 ## O caixa da organização mudou.
+## A bandeira da organização mudou (png_base64 = "" volta à arte padrão).
+signal bandeira_mudou(png_base64: String)
 signal dinheiro_mudou(valor: int)
 ## Uma dificuldade foi desbloqueada (ex.: "pesadelo").
 signal dificuldade_desbloqueada(id: String)

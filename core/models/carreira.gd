@@ -28,6 +28,16 @@ var avisos_enviados: Array[String] = []
 ## Carreira encerrada (ex.: falência). Nenhuma ação é aceita depois disso.
 var encerrada: bool = false
 var motivo_encerramento: String = ""
+## Livro de lançamentos (entradas e saídas de dinheiro), do mais antigo para o mais novo.
+## Cada item: {"dia", "descricao", "valor", "categoria"}. Guarda só os últimos MAXIMO_LANCAMENTOS.
+var lancamentos: Array[Dictionary] = []
+const MAXIMO_LANCAMENTOS: int = 200
+
+
+func registrar_lancamento(descricao: String, valor: int, categoria: String) -> void:
+	lancamentos.append({"dia": dia, "descricao": descricao, "valor": valor, "categoria": categoria})
+	if lancamentos.size() > MAXIMO_LANCAMENTOS:
+		lancamentos = lancamentos.slice(lancamentos.size() - MAXIMO_LANCAMENTOS)
 
 
 ## Mês atual da carreira (começa em 1).
@@ -68,6 +78,7 @@ func para_dicionario() -> Dictionary:
 		"avisos_enviados": avisos_enviados,
 		"encerrada": encerrada,
 		"motivo_encerramento": motivo_encerramento,
+		"lancamentos": lancamentos,
 	}
 
 
@@ -105,4 +116,7 @@ static func de_dicionario(dados: Dictionary) -> Carreira:
 		carreira.avisos_enviados.append(str(aviso))
 	carreira.encerrada = bool(dados.get("encerrada", false))
 	carreira.motivo_encerramento = str(dados.get("motivo_encerramento", ""))
+	for item: Dictionary in dados.get("lancamentos", []):
+		carreira.lancamentos.append({"dia": int(item["dia"]), "descricao": str(item["descricao"]),
+			"valor": int(item["valor"]), "categoria": str(item["categoria"])})
 	return carreira

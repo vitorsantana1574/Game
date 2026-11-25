@@ -28,6 +28,7 @@ func gerar(opcoes: Dictionary = {}) -> Jogador:
 
 	_contador += 1
 	jogador.id = "j%06d" % _contador
+	jogador.aparencia = Jogador.aparencia_do_id(jogador.id)
 	_gerar_nomes(jogador)
 
 	var idade_padrao: int = _rng.randi_range(int(geracao["idade_minima"]), int(geracao["idade_maxima"]))

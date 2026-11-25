@@ -49,6 +49,7 @@ static func gerar_candidatos(carreira: Carreira, tamanho: String, oferta_minima:
 		carreira.contador_tecnicos += 1
 		var tecnico: Tecnico = Tecnico.new()
 		tecnico.id = "t%05d" % carreira.contador_tecnicos
+		tecnico.aparencia = Jogador.aparencia_do_id(tecnico.id)
 		tecnico.nome = "%s %s" % [
 			nomes["primeiros_nomes"][rng.randi() % nomes["primeiros_nomes"].size()],
 			nomes["sobrenomes"][rng.randi() % nomes["sobrenomes"].size()],
