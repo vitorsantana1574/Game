@@ -4,60 +4,73 @@
 
 São 30 campeões, cinco por classe e seis por posição principal. As curvas se dividem em dez campeões de início, dez de fim e dez constantes. Há 19 campeões com mana, quatro com energia, três com fúria, dois com vida e dois sem recurso. A primeira posição de cada ficha indica a principal.
 
-A proposta usa a versão do [guia de campeões](../GUIA_CAMPEOES.md) do commit `33e7921` e os nomes do [catálogo de itens](../../data/itens/itens.json). Os números são ponto de partida para a conversão em dados. O laboratório original mediu campeões genéricos e uma habilidade combinada por ciclo. Alcance, mana, cura de aliados e efeitos separados ainda precisam passar pelo laboratório com estes kits.
+A proposta usa a versão do [guia de campeões](../GUIA_CAMPEOES.md) do commit `e4e2917` e os nomes do [catálogo de itens](../../data/itens/itens.json). Os números são ponto de partida para a conversão em dados. O laboratório original mediu campeões genéricos e uma habilidade combinada por ciclo. Alcance, mana, cura de aliados e efeitos separados ainda precisam passar pelo laboratório com estes kits.
 
 ## Convenções para leitura das fichas
 
 - **Níveis e recargas.** As duplas de números em atributos, dano e recurso indicam o valor de nível 1 e o ganho por nível acima dele, até o nível 16. Na velocidade de ataque, o segundo número é o crescimento percentual aditivo sobre o valor de nível 1. As recargas estão em segundos antes da aceleração. A cadência da seção 3.2 orienta as duas básicas. A terceira habilidade é a especial, entra no nível 6 e tem seu próprio intervalo mais longo. A checagem de rotação avalia um uso de cada habilidade quando a especial está disponível.
-- **Recursos.** Em kits de mana, `custo` indica o valor inicial. Multiplique pela razão entre a mana máxima natural do nível atual e a do nível 1, e arredonde cada habilidade para o inteiro mais próximo, com meio ponto para cima. A rotação fica em 25–35% da barra em todos os níveis. A regeneração do guia foi preservada. Por decisão aprovada, recuperar uma rotação em 20–30 s fica para o balanceamento, pois entra em conflito com as faixas de mana e custo vigentes. Energia fica em 200 e volta a 10 por segundo. Fúria tem barra de 100, inicia vazia e segue a regra de cada passiva. O efeito de barra cheia usa o valor antes do gasto. Em kits de vida, `custo` é o percentual da vida máxima atual, incluindo itens. O recurso acompanha a própria vida e a habilidade exige vida suficiente para pagar o custo e continuar vivo. Em kits sem recurso, as recargas já incluem os 15% adicionais.
-- **Dano, cura e proteção.** Nas proporções de dano, `0.02` equivale a 2%, `1.10` a 110%. Os efeitos listam as condições de cada parcela. Quando um efeito dá a versão normal e a fortalecida, o campo de dano registra o teto daquela parcela. Em dano misto, a divisão descrita no efeito se aplica ao dano bruto total da habilidade. Cada parcela é mitigada pela resistência correspondente. A parcela de vida perdida é avaliada imediatamente antes do acerto. Parcelas baseadas na vida do alvo usam a vida de campeões, uma vez por alvo por lançamento. Nenhuma delas aumenta dano a estruturas ou objetivos épicos. Dano extra acoplado a um ataque continua no orçamento da habilidade e não repete o efeito de item ou o crítico do ataque básico. Curas seguem a regra de anticura do [modelo de combate](../../data/config/combate.json).
+- **Recursos.** Em kits de mana, `custo` indica o valor inicial. Multiplique pela razão entre a mana máxima natural do nível atual e a do nível 1, e arredonde cada habilidade para o inteiro mais próximo, com meio ponto para cima. A rotação fica em 25–35% da barra em todos os níveis. A regeneração segue a tabela corrigida da seção 4.1, com cerca de 6% da mana máxima a cada 5 s. Os custos desta proposta equivalem a cerca de 25 s de regeneração natural por rotação. Energia fica em 200 e volta a 10 por segundo. Fúria tem barra de 100, inicia vazia e segue a regra de cada passiva. O efeito de barra cheia usa o valor antes do gasto. Em kits de vida, `custo` é o percentual da vida máxima atual, incluindo itens. O recurso acompanha a própria vida e a habilidade exige vida suficiente para pagar o custo e continuar vivo. Em kits sem recurso, as recargas já incluem os 15% adicionais.
+- **Dano, cura e proteção.** Nas proporções de dano, `0.02` equivale a 2%, `1.10` a 110%. Os efeitos listam as condições de cada parcela. Quando um efeito dá a versão normal e a fortalecida, o campo de dano registra o teto daquela parcela. Em dano misto, a divisão descrita no efeito se aplica ao dano bruto total da habilidade. Cada parcela é mitigada pela resistência correspondente. A parcela de vida perdida é avaliada imediatamente antes do acerto. Parcelas baseadas na vida do alvo usam a vida de campeões, uma vez por alvo por lançamento. Nenhuma delas aumenta dano a estruturas ou objetivos épicos. Dano extra acoplado a um ataque continua no orçamento da habilidade e não repete o efeito de item ou o crítico do ataque básico. Curas seguem a regra de anticura do [modelo de combate](../../data/config/combate.json). Cada passiva tem gatilho e limite definidos na ficha. O dano passivo vem de redistribuição do orçamento das habilidades. DF bônus significa dano físico bônus e PM, poder mágico.
 - **Poder de jogador.** Dificuldade é a sensibilidade ao Micro, de 1 a 3. Dependência de Macro mede decisões de chegada, leitura de mapa e preparação das lutas. O crescimento da ficha expressa a curva sobre os atributos da classe. O peso por nível já pertence ao modelo de partida. Convém revisar a aplicação conjunta para evitar cobrar duas vezes a mesma vantagem de nível.
 - **Compra.** Cada lista tem uma bota e quatro itens em ordem. Cada alternativa é uma troca individual para a situação descrita. Essa comparação preserva os limites de classe e os grupos de passivas dos itens existentes.
 
 ## Conferência de rotação
 
-O orçamento é a fração planejada da referência de dano da classe antes do ajuste de curva. Controles, mobilidade, cura, escudos e visão consomem parte desse orçamento, conforme a seção 3.3. Os números abaixo são dano bruto por alvo, com a bota e dois itens no nível 9 e a bota e quatro no nível 15. Usam a build recomendada. Os valores entre parênteses são as metas que orientaram a calibração.
+O orçamento é a fração planejada da referência de dano da classe antes do ajuste de curva. Controles, mobilidade, cura, escudos e visão consomem parte desse orçamento, conforme a seção 3.3. Os números abaixo são dano bruto por alvo, com a bota e dois itens no nível 9 e a bota e quatro no nível 15. Usam a build recomendada. Os valores entre parênteses são as metas de calibração. A amostra admite um disparo da passiva quando ela causa dano, com seu requisito atendido. Nas fichas com abertura em fúria, o dano percentual de execução de Iscavro pressupõe barra cheia e a primeira básica de Kordume usa seu valor regular.
 
-Para parcela de vida máxima inimiga, usei a vida do lutador de referência do próprio laboratório. Para execução, usei um atirador de referência com 60% de vida perdida e o requisito do kit atendido. Para vida própria, usei os atributos da ficha com a build do nível. O cálculo soma as parcelas de dano das habilidades. Ataques normais e ativações de itens ficam fora dessa soma. O alvo único serve para comparar o orçamento da ficha. Impacto em múltiplos alvos deve ser verificado à parte.
+Para a parcela de vida máxima inimiga, usei a vida do lutador de referência do laboratório. Para execução, usei um atirador de referência com 60% de vida perdida. Para vida própria, usei os atributos da ficha com a build do nível. Ataques normais e ativações de itens ficam fora da soma. Efeitos em vários alvos e valor em combate de escudos, curas e visão pedem simulação específica.
 
 | Campeão | Orçamento | Nível 9 | Nível 15 |
 |---|---:|---:|---:|
-| Orvante | 65% | 135 (135) | 182 (181) |
-| Bruméria | 71% | 142 (135) | 223 (234) |
-| Dorsálio | 78% | 168 (156) | 256 (234) |
+| Orvante | 64% | 133 (133) | 180 (179) |
+| Bruméria | 68% | 139 (129) | 218 (224) |
+| Dorsálio | 75% | 157 (150) | 239 (225) |
 | Calzugo | 65% | 131 (135) | 185 (181) |
-| Vedrassa | 64% | 129 (128) | 192 (192) |
-| Ravíneo | 85% | 485 (495) | 652 (640) |
+| Vedrassa | 62% | 126 (124) | 188 (186) |
+| Ravíneo | 85% | 492 (495) | 628 (640) |
 | Téssari | 90% | 496 (479) | 775 (802) |
 | Nalcora | 88% | 501 (513) | 675 (663) |
-| Iscavro | 92% | 510 (489) | 787 (820) |
-| Mirfuso | 85% | 475 (476) | 690 (688) |
-| Kordume | 87% | 253 (262) | 350 (340) |
-| Marulva | 82% | 234 (226) | 365 (379) |
-| Trisquilo | 90% | 261 (261) | 378 (378) |
-| Vardilha | 91% | 265 (274) | 368 (355) |
-| Eirafim | 84% | 240 (231) | 374 (388) |
+| Iscavro | 88% | 499 (468) | 770 (784) |
+| Mirfuso | 79% | 438 (442) | 637 (640) |
+| Kordume | 85% | 240 (256) | 331 (332) |
+| Marulva | 80% | 233 (220) | 363 (370) |
+| Trisquilo | 87% | 247 (252) | 356 (365) |
+| Vardilha | 89% | 262 (268) | 364 (348) |
+| Eirafim | 81% | 238 (223) | 371 (374) |
 | Velúria | 86% | 477 (462) | 803 (832) |
-| Cintarro | 62% | 353 (364) | 521 (507) |
-| Perlívia | 80% | 450 (452) | 707 (704) |
+| Cintarro | 60% | 346 (353) | 487 (491) |
+| Perlívia | 77% | 449 (435) | 703 (678) |
 | Prismora | 88% | 504 (472) | 790 (852) |
-| Fulgavéu | 73% | 413 (412) | 643 (642) |
-| Sutéria | 73% | 134 (133) | 197 (197) |
-| Alvenora | 71% | 128 (118) | 205 (226) |
+| Fulgavéu | 65% | 367 (367) | 571 (572) |
+| Sutéria | 70% | 128 (127) | 189 (189) |
+| Alvenora | 69% | 125 (115) | 199 (220) |
 | Luminela | 66% | 115 (116) | 193 (191) |
-| Clavento | 60% | 110 (109) | 161 (162) |
+| Clavento | 56% | 104 (102) | 137 (151) |
 | Ocravia | 65% | 114 (114) | 187 (188) |
-| Terralume | 91% | 139 (134) | 266 (275) |
-| Zarcavil | 92% | 143 (143) | 253 (253) |
-| Riscavela | 90% | 139 (133) | 255 (272) |
-| Fulcrim | 92% | 153 (148) | 228 (235) |
-| Treválio | 91% | 153 (141) | 227 (250) |
+| Terralume | 90% | 138 (133) | 267 (272) |
+| Zarcavil | 89% | 135 (138) | 240 (245) |
+| Riscavela | 90% | 143 (133) | 265 (272) |
+| Fulcrim | 92% | 155 (148) | 214 (235) |
+| Treválio | 86% | 138 (133) | 210 (236) |
 
-Foram conferidos 300 valores de atributos base e crescimento, as 91 substituições de itens e os limites de mana e dano percentual. O maior desvio observado entre dano da ficha e meta de orçamento foi de 9,6%. As duas habilidades com dano verdadeiro também foram verificadas nos 16 níveis com as builds recomendadas e cada troca individual.
+## Curvas revisadas
+
+A tabela usa dano bruto num alvo sem atributos de itens. No nível 3 entram as duas básicas. No nível 16 entra a rotação completa. Inclui um disparo de dano passivo nas fichas que o têm, com o requisito atendido. Os dois níveis utilizam o mesmo método antes e depois. A redução de Treválio e Mirfuso no fim preserva orçamento para o escudo ou para a pressão lateral. Em Perlívia, a base sobe ligeiramente, o ganho por nível recua e parte da sustentação passa da especial para um gatilho disponível desde o início.
+
+| Campeão | Nível 3, antes → revisado | Nível 16, antes → revisado |
+|---|---:|---:|
+| Ravíneo | 111 → 131 | 413 → 384 |
+| Mirfuso | 103 → 91 | 518 → 462 |
+| Trisquilo | 66 → 62 | 299 → 275 |
+| Cintarro | 103 → 114 | 392 → 354 |
+| Perlívia | 107 → 108 | 436 → 431 |
+| Clavento | 35 → 45 | 170 → 142 |
+| Fulcrim | 36 → 58 | 182 → 165 |
+| Treválio | 26 → 31 | 202 → 157 |
 
 ## Pontos para a próxima simulação
 
-- Medir a diferença entre ter e perder a especial. Sutéria, Alvenora e Luminela trocam dano por janelas de proteção, e Fulgavéu troca dano por visão. A frequência real de cura, escudo e visão deve pesar na avaliação dessas builds.
+- Medir a diferença entre ter e perder a especial. Sutéria, Alvenora e Luminela trocam dano por janelas de proteção, e Fulgavéu troca parte do dano por visão e proteção em uma torre aliada ativa, com alcance global. A frequência real de cura, escudo e visão deve pesar na avaliação dessas builds.
 - Verificar se ordens de compra divergem na prática. Terralume favorece crítico, Zarcavil valoriza permanência no alvo com ataques rápidos e Riscavela aproveita os efeitos ao acertar de dano misto. Para magos, comparar desgaste com Tocha do Tormento, escalamento com Grimório Cristalino e a primeira troca com Orbe da Tempestade.
 - Medir sustento com e sem anticura em Marulva e Perlívia, com atenção à vida gasta quando a habilidade erra. Testar entrada de luta com barra de fúria vazia em Calzugo, Iscavro e Kordume, além das janelas que energia impede usar as três habilidades imediatamente.
 - Medir dano por vida em alvos frágeis, lutadores e tanques. A comparação com habilidades separadas deve observar a frequência das passivas de itens. O laboratório aplicava o Martelo das Montanhas uma vez por ciclo combinado. Na ficha, evitei recomendá-lo para os kits com dano próprio pela vida máxima inimiga.
@@ -81,7 +94,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [330, 24],
-    "regeneracao_5s": [7, 0.5]
+    "regeneracao_5s": [20, 1.4]
   },
   "atributos": {
     "vida": [706, 96.19],
@@ -93,9 +106,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 335
   },
   "passiva": {
-    "nome": "Lastro cravado",
-    "descricao": "Orvante firma os pés antes de segurar uma entrada.",
-    "efeito": "Ao permanecer 1,2 s sem se deslocar, ganha 8% de resistência a deslocamentos por 2 s. O efeito só rearma após andar 200 unidades. Não reduz atordoamentos."
+    "nome": "Parede de lastro",
+    "descricao": "Orvante torna a primeira passagem estreita o pior lugar para enfrentá-lo.",
+    "efeito": "Após plantar os pés por 0,7 s, bloquear o próximo dano de campeão ativa um escudo pessoal de 8% da própria vida máxima por 2 s antes da aplicação do acerto. Intervalo de 18 s, contado no bloqueio. Não acumula com outros escudos deste kit."
   },
   "habilidades": [
     {
@@ -106,13 +119,13 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "cone",
       "dano": {
-        "base": [25, 2.53],
+        "base": [24.5, 2.48],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
-          "vida_maxima_propria_pct": 0.01207
+          "vida_maxima_propria_pct": 0.01183
         }
       },
       "custo": 26,
@@ -123,8 +136,8 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     {
       "posicao": 2,
       "nome": "Contrapeso de ombro",
-      "descricao": "Prende uma placa junto ao peito para absorver o primeiro impacto.",
-      "narracao": "{campeao} encaixa o contrapeso e fecha a guarda!",
+      "descricao": "Apoia a placa e firma posição contra empurrões.",
+      "narracao": "{campeao} ancora o contrapeso contra a investida!",
       "tipo_dano": "magico",
       "alvo": "si_mesmo",
       "dano": {
@@ -140,10 +153,10 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "custo": 25,
       "recarga": 9,
       "efeitos": [
-        "Escudo em si de 5% da própria vida máxima por 2 s",
-        "Não acumula com outro escudo de Contrapeso de Ombro"
+        "Por 1,6 s, reduz em 25% o deslocamento causado por empurrões e puxões recebidos",
+        "Não reduz atordoamento e não adianta a recarga da passiva"
       ],
-      "tags": ["escudo"]
+      "tags": ["protecao"]
     },
     {
       "posicao": 3,
@@ -223,7 +236,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [330, 24],
-    "regeneracao_5s": [7, 0.5]
+    "regeneracao_5s": [20, 1.4]
   },
   "atributos": {
     "vida": [607, 124.54],
@@ -235,9 +248,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 330
   },
   "passiva": {
-    "nome": "Anéis de abrigo",
-    "descricao": "Bruméria reforça o abrigo ao segurar a linha de frente.",
-    "efeito": "Quando Vedação de Campo absorve pelo menos 60 de dano de campeão, ganha um anel. Intervalo de 40 s entre anéis, até 5. Cada anel adiciona 0,2 ponto percentual da vida máxima àquele escudo. Sem ganho de atributos base."
+    "nome": "Círculos de abrigo",
+    "descricao": "A carapaça acumula anéis que tornam o abrigo coletivo mais seguro.",
+    "efeito": "Quando Vedação de Campo absorve ao menos 45 de dano de campeão, Bruméria ganha 1 anel, com intervalo de 35 s e teto de 5. A partir de 3 anéis, abrir Abrigo de Maré protege o aliado com menor porcentagem de vida dentro da área com um escudo de 4% da vida máxima dele por 2 s. O escudo ganha 0,5 ponto percentual por anel acima de 3, até 5%. Um aliado por especial."
   },
   "habilidades": [
     {
@@ -285,7 +298,10 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       },
       "custo": 23,
       "recarga": 9,
-      "efeitos": ["Escudo em si de 4% da própria vida máxima por 3 s", "Os anéis aumentam este valor até 5%"],
+      "efeitos": [
+        "Escudo de 4% da vida máxima de Bruméria por 3 s",
+        "O escudo que absorver ao menos 45 de dano de campeão pode gerar um anel"
+      ],
       "tags": [
         "escudo",
         "vida_propria",
@@ -301,13 +317,13 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "area",
       "dano": {
-        "base": [7, 3.43],
+        "base": [6.65, 3.26],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
-          "vida_maxima_propria_pct": 0.00965
+          "vida_maxima_propria_pct": 0.00917
         }
       },
       "custo": 45,
@@ -315,7 +331,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "efeitos": [
         "Raio 235 ao redor de Bruméria",
         "Causa dano uma vez na abertura",
-        "Aliados no raio recebem 8% de redução de dano por 1,6 s. A proteção termina ao saírem",
+        "Círculos de Abrigo dá um escudo a um aliado quando Bruméria tem três ou mais anéis",
         "Disponível a partir do nível 6."
       ],
       "tags": ["protecao", "zona"]
@@ -378,9 +394,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 335
   },
   "passiva": {
-    "nome": "Pé de mina",
-    "descricao": "Dorsálio se recompõe quando resiste à primeira investida.",
-    "efeito": "Após 3 s consecutivos em combate contra campeão, recupera 20 + 2 por nível além do primeiro ao longo de 3 s. Intervalo de 18 s desde o início da recuperação. Cura afetada por anticura."
+    "nome": "Chão de volta",
+    "descricao": "Dorsálio ganha fôlego se encarar o mesmo oponente de frente.",
+    "efeito": "Acertar duas habilidades no mesmo campeão em até 10 s recupera 5% da própria vida máxima ao longo de 3 s. Intervalo de 16 s. Cura afetada por anticura e não se acumula."
   },
   "habilidades": [
     {
@@ -428,7 +444,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       },
       "custo": 0,
       "recarga": 9.2,
-      "efeitos": ["Escudo em si de 4% da própria vida máxima por 2 s"],
+      "efeitos": ["Escudo em si de 2% da própria vida máxima por 2 s"],
       "tags": ["escudo", "vida_propria"]
     },
     {
@@ -440,13 +456,13 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "unico",
       "dano": {
-        "base": [11, 1.26],
+        "base": [9.9, 1.13],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
           "poder_magico": 0.0,
-          "vida_maxima_alvo_pct": 0.021,
+          "vida_maxima_alvo_pct": 0.018,
           "vida_perdida_alvo_pct": 0,
-          "vida_maxima_propria_pct": 0.00918
+          "vida_maxima_propria_pct": 0.00826
         }
       },
       "custo": 0,
@@ -517,9 +533,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 340
   },
   "passiva": {
-    "nome": "Guizo de desafio",
-    "descricao": "Atacar e apanhar carrega o arreio de Calzugo.",
-    "efeito": "Ganha 12 de fúria no ataque básico e 8 ao receber um acerto de campeão ou monstro. Até um ganho por categoria por 1 s. Após 4 s sem combate, perde 10 por segundo. Com 100 de fúria antes do gasto, a próxima habilidade recebe o efeito indicado."
+    "nome": "Debandada presa",
+    "descricao": "Quando os guizos enchem, Calzugo pode escolher como fechar de vez a briga.",
+    "efeito": "Recebe 12 de fúria no ataque básico e 8 ao receber acerto de campeão ou monstro, uma vez por categoria por segundo. Após 4 s sem combate, perde 10 por segundo. A primeira habilidade gasta com 100 de fúria recebe o efeito indicado. Além disso, contra os campeões que acertar nessa habilidade, Calzugo recebe 9% menos dano por 1,6 s. Essa proteção tem recarga de 16 s, começa no primeiro acerto e não estende a duração com novos alvos."
   },
   "habilidades": [
     {
@@ -567,7 +583,10 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       },
       "custo": 20,
       "recarga": 8,
-      "efeitos": ["Escudo em si de 4% da própria vida máxima por 2 s", "Com fúria cheia, o escudo sobe a 5%"],
+      "efeitos": [
+        "Escudo em si de 3% da própria vida máxima por 2 s",
+        "Com fúria cheia, sobe a 4%. Mesmo ao gastar fúria cheia, o poste não ativa a redução de dano pois não acerta campeões"
+      ],
       "tags": ["escudo"]
     },
     {
@@ -592,7 +611,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "recarga": 72,
       "efeitos": [
         "Raio 190, alcance 450, aviso de 0,7 s",
-        "Atordoamento de 0,65 s. Com fúria cheia, 0,85 s",
+        "Atordoa por 0,55 s. Com fúria cheia, por 0,85 s",
         "Disponível a partir do nível 6."
       ],
       "tags": [
@@ -648,7 +667,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [330, 24],
-    "regeneracao_5s": [7, 0.5]
+    "regeneracao_5s": [20, 1.4]
   },
   "atributos": {
     "vida": [667, 109.73],
@@ -660,9 +679,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 325
   },
   "passiva": {
-    "nome": "Um pé na soleira",
-    "descricao": "Vedrassa resiste melhor ao primeiro impacto perto do aliado que protege.",
-    "efeito": "Ao permanecer até 280 de um aliado por 1 s, amortece em 30 o próximo dano de campeão contra si. Uma vez a cada 18 s. O efeito termina ao se afastar por mais de 1 s."
+    "nome": "Batente de emergência",
+    "descricao": "Vedrassa protege quem está perto quando uma investida pega um aliado de surpresa.",
+    "efeito": "Quando um acerto inimigo reduzir um aliado a menos de 40% de vida a até 360 de Vedrassa, protege esse aliado com escudo de 6% da vida máxima dele por 2 s, se sobreviver. Recarga de 20 s, partilhada entre aliados. Contra a mesma ameaça, mantém apenas o maior valor restante entre este escudo e Batente Emprestado."
   },
   "habilidades": [
     {
@@ -690,7 +709,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     {
       "posicao": 2,
       "nome": "Batente emprestado",
-      "descricao": "Reforça a guarda de um aliado exposto.",
+      "descricao": "Dá uma proteção leve a um aliado antes da investida.",
       "narracao": "{campeao} põe um batente na frente de {alvo}!",
       "tipo_dano": "magico",
       "alvo": "aliado",
@@ -706,7 +725,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       },
       "custo": 28,
       "recarga": 8,
-      "efeitos": ["Alcance 500", "Escudo de 5% da vida máxima do aliado por 2,5 s"],
+      "efeitos": ["Alcance 500", "Escudo de 3% da vida máxima do aliado por 2,5 s"],
       "tags": ["escudo", "aliado"]
     },
     {
@@ -718,13 +737,13 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "area",
       "dano": {
-        "base": [14, 2.57],
+        "base": [13.16, 2.42],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
-          "vida_maxima_propria_pct": 0.008
+          "vida_maxima_propria_pct": 0.00752
         }
       },
       "custo": 46,
@@ -799,22 +818,22 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 345
   },
   "passiva": {
-    "nome": "Eco solitário",
-    "descricao": "Ravíneo localiza rivais longe dos companheiros.",
-    "efeito": "Se o alvo de Primeiro Estalo estiver a mais de 425 de qualquer outro campeão de sua equipe, o projétil dessa habilidade viaja 35% mais depressa. Checagem no lançamento. Sem alteração de dano ou alcance."
+    "nome": "Ponto cego",
+    "descricao": "Ravíneo abre a luta com mais força quando encontra um rival sozinho.",
+    "efeito": "Primeiro Estalo, ao atingir um campeão a mais de 425 dos aliados do alvo, aplica dano extra no impacto, uma vez a cada 12 s. O isolamento é conferido no acerto. O efeito causa 25,09 + 1,18 por nível além do primeiro + 20,244% do DF bônus de dano físico. Não ativa efeitos de item e não causa dano a minions, monstros ou estruturas."
   },
   "habilidades": [
     {
       "posicao": 1,
       "nome": "Primeiro estalo",
-      "descricao": "Dispara a forquilha numa linha estreita; acertar cedo abre o abate.",
+      "descricao": "Dispara a forquilha numa linha estreita para aproveitar o isolamento do primeiro alvo.",
       "narracao": "{campeao} dispara o primeiro estalo sobre {alvo}!",
       "tipo_dano": "fisico",
       "alvo": "linha",
       "dano": {
-        "base": [94, 8.34],
+        "base": [94.4, 4.44],
         "proporcoes": {
-          "dano_fisico_bonus": 0.964,
+          "dano_fisico_bonus": 0.76156,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
@@ -826,7 +845,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "efeitos": [
         "Alcance 480, largura 62",
         "Só atinge o primeiro campeão",
-        "Concentra a maior fração de dano do kit"
+        "A passiva confere isolamento antes de adicionar dano"
       ],
       "tags": ["explosao", "isolamento"]
     },
@@ -838,7 +857,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "si_mesmo",
       "dano": {
-        "base": [0, 0.0],
+        "base": [0.0, 0.0],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
           "poder_magico": 0.0,
@@ -861,7 +880,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "unico",
       "dano": {
-        "base": [83, 7.39],
+        "base": [105.51, 4.98],
         "proporcoes": {
           "dano_fisico_bonus": 0.855,
           "poder_magico": 0.0,
@@ -937,9 +956,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 340
   },
   "passiva": {
-    "nome": "Corda de verificação",
-    "descricao": "Uma nota bem acertada prepara o corte final.",
-    "efeito": "Acertar Tom de Prova põe uma marca visível no campeão por 4 s. A marca só existe em um alvo por vez e é consumida por Corda Rompida. Sem dano próprio ou amplificação."
+    "nome": "Corda sob tensão",
+    "descricao": "A nota inicial deixa uma corda pronta para estourar quando a presa tenta correr.",
+    "efeito": "Tom de Prova marca um campeão por 4 s. Mudança de Afinação em campeão marcado faz a corda estalar, uma vez a cada 12 s, sem consumir a marca de Corda Rompida. Só um campeão pode estar marcado. O efeito causa 7,05 + 3,27 por nível além do primeiro + 13,677% do DF bônus de dano físico. Não ativa efeitos de item e não causa dano a minions, monstros ou estruturas."
   },
   "habilidades": [
     {
@@ -972,9 +991,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "cone",
       "dano": {
-        "base": [15, 6.95],
+        "base": [7.95, 3.68],
         "proporcoes": {
-          "dano_fisico_bonus": 0.291,
+          "dano_fisico_bonus": 0.15423,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
@@ -1009,7 +1028,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "efeitos": [
         "Alcance 340",
         "A parcela de vida perdida exige a marca de Tom de Prova e só vale contra campeões",
-        "A marca é consumida mesmo quando o alvo tem pouca vida perdida",
+        "Corda Rompida consome a marca mesmo quando o alvo tem pouca vida perdida",
         "Disponível a partir do nível 6."
       ],
       "tags": ["execucao", "precisao"]
@@ -1060,7 +1079,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [280, 20],
-    "regeneracao_5s": [7, 0.5]
+    "regeneracao_5s": [17, 1.2]
   },
   "atributos": {
     "vida": [558, 90.56],
@@ -1072,9 +1091,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 340
   },
   "passiva": {
-    "nome": "Ângulo assentado",
-    "descricao": "Nalcora ajusta a lâmina ao entrar pelo lado menos vigiado.",
-    "efeito": "Após 2 s fora de combate contra campeões, a primeira abertura de Estilete de Solda perde 0,1 s de preparação. Rearma somente após sair de combate. Sem dano adicional."
+    "nome": "Solda de entrada",
+    "descricao": "Depois de preparar o flanco, o primeiro golpe deixa uma descarga de calor no alvo.",
+    "efeito": "Após 3 s sem causar ou receber dano de campeão, Estilete de Solda aplica uma descarga mágica no primeiro campeão atingido, uma vez a cada 13 s. A descarga não acelera o lançamento. O efeito causa 20,93 + 1,91 por nível além do primeiro + 20,286% do DF bônus de dano mágico. Não ativa efeitos de item e não causa dano a minions, monstros ou estruturas."
   },
   "habilidades": [
     {
@@ -1085,9 +1104,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "misto",
       "alvo": "linha",
       "dano": {
-        "base": [91, 8.32],
+        "base": [70.07, 6.41],
         "proporcoes": {
-          "dano_fisico_bonus": 0.882,
+          "dano_fisico_bonus": 0.67914,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
@@ -1098,7 +1117,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "recarga": 6.5,
       "efeitos": [
         "Alcance 380, largura 70",
-        "Preparação de 0,35 s antes da passiva",
+        "Preparação fixa de 0,35 s",
         "Para no primeiro campeão",
         "Divisão do dano final bruto: 69% físico e 31% mágico, com mitigação separada."
       ],
@@ -1217,8 +1236,8 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   },
   "passiva": {
     "nome": "Calor de retorno",
-    "descricao": "A fornalha de Iscavro precisa esquentar antes da finalização.",
-    "efeito": "Ganha 13 de fúria ao acertar ataque básico e 7 ao receber acerto de campeão ou monstro, no máximo um ganho por categoria por segundo. Após 4 s sem combate, perde 10 por segundo. A especial com fúria cheia recebe a parcela de execução."
+    "descricao": "Iscavro precisa sobreviver com a fornalha aquecida até surgir uma execução.",
+    "efeito": "Ganha 13 de fúria ao acertar ataque básico e 7 ao receber acerto de campeão ou monstro, um ganho por categoria por segundo. Após 4 s sem combate, perde 10 por segundo. Ao alcançar 100 contra campeão, recupera 4% da própria vida máxima ao longo de 2 s, com recarga de 17 s e sujeita a anticura. Só a especial recebe a parcela de execução ao gastar fúria cheia."
   },
   "habilidades": [
     {
@@ -1229,9 +1248,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "cone",
       "dano": {
-        "base": [25, 12.87],
+        "base": [24.25, 12.48],
         "proporcoes": {
-          "dano_fisico_bonus": 0.465,
+          "dano_fisico_bonus": 0.45105,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
@@ -1279,7 +1298,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
           "dano_fisico_bonus": 0.453,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
-          "vida_perdida_alvo_pct": 0.073,
+          "vida_perdida_alvo_pct": 0.065,
           "vida_maxima_propria_pct": 0.0
         }
       },
@@ -1287,8 +1306,8 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "recarga": 81,
       "efeitos": [
         "Alcance 265",
-        "Com 100 de fúria antes do gasto, aplica a parcela pela vida perdida a campeões",
-        "Sem fúria cheia, só aplica o dano regular",
+        "Com 100 de fúria antes do gasto, aplica a parcela de 6,5% da vida perdida, só a campeões",
+        "Sem fúria cheia, aplica apenas o dano regular",
         "Disponível a partir do nível 6."
       ],
       "tags": ["execucao", "furia"]
@@ -1351,9 +1370,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 345
   },
   "passiva": {
-    "nome": "Recibo aberto",
-    "descricao": "Mirfuso se reposiciona melhor depois de trabalhar sozinho na rota.",
-    "efeito": "Após derrotar um minion sem outro campeão aliado a até 600, ganha 8 unidades de movimento por 3 s. Intervalo de 9 s, sem acúmulo. Não vale em monstros ou estruturas."
+    "nome": "Cobrança por isolamento",
+    "descricao": "Mirfuso ganha a troca lateral quando força o rival a defender sozinho.",
+    "efeito": "Acertar Fita de Cobrança num campeão a mais de 440 dos campeões das duas equipes, exceto Mirfuso e sua vítima, marca o alvo por 3 s. O próximo ataque básico de Mirfuso contra aquele campeão aplica dano adicional, uma vez a cada 13 s. O efeito causa 15,46 + 3,08 por nível além do primeiro + 20,336% do DF bônus de dano físico. Não ativa efeitos de item e não causa dano a minions, monstros ou estruturas."
   },
   "habilidades": [
     {
@@ -1364,9 +1383,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "linha",
       "dano": {
-        "base": [57, 11.05],
+        "base": [34.42, 6.85],
         "proporcoes": {
-          "dano_fisico_bonus": 0.656,
+          "dano_fisico_bonus": 0.45264,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
@@ -1375,7 +1394,11 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       },
       "custo": 70,
       "recarga": 6.5,
-      "efeitos": ["Alcance 418, largura 72", "Só o primeiro campeão recebe dano completo. Minions recebem 65%"],
+      "efeitos": [
+        "Alcance 418 e largura 72",
+        "Só o primeiro campeão recebe dano completo. Minions recebem 65%",
+        "A passiva só marca campeões separados das duas equipes"
+      ],
       "tags": ["pressao_lateral", "precisao"]
     },
     {
@@ -1386,7 +1409,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "verdadeiro",
       "alvo": "linha",
       "dano": {
-        "base": [17, 3.34],
+        "base": [14.88, 3.0],
         "proporcoes": {
           "dano_fisico_bonus": 0.198,
           "poder_magico": 0.0,
@@ -1412,7 +1435,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "unico",
       "dano": {
-        "base": [58, 11.31],
+        "base": [50.75, 10.17],
         "proporcoes": {
           "dano_fisico_bonus": 0.671,
           "poder_magico": 0.0,
@@ -1488,9 +1511,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 335
   },
   "passiva": {
-    "nome": "Peso de carga",
-    "descricao": "Atacar e suportar a pancada enche a barra de fúria.",
-    "efeito": "Recebe 15 de fúria por ataque básico acertado e 7 ao receber um acerto de campeão ou monstro, uma vez por categoria a cada 1 s. Fora de combate por 4 s, perde 10 por segundo. A quilha fica mais pesada com a barra cheia."
+    "nome": "Quilha na espuma",
+    "descricao": "Kordume abre espaço com o peso da quilha e só ganha proteção se continuar em contato.",
+    "efeito": "Ganha 15 de fúria por ataque básico acertado e 7 ao receber um acerto de campeão ou monstro, uma vez por categoria por segundo. Fora de combate por 4 s, perde 10 por segundo. Gastar uma habilidade com 100 de fúria dá um escudo pessoal de 6% da própria vida máxima por 2 s, com recarga de 18 s. Se disparar com Fivela Presa, vale só o maior escudo."
   },
   "habilidades": [
     {
@@ -1521,7 +1544,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     {
       "posicao": 2,
       "nome": "Fivela presa",
-      "descricao": "Aperta as tiras da quilha e se protege por um instante.",
+      "descricao": "Aperta as tiras da quilha. A proteção é maior quando descarrega a fúria cheia.",
       "narracao": "{campeao} aperta a fivela e segura a pancada!",
       "tipo_dano": "fisico",
       "alvo": "si_mesmo",
@@ -1537,7 +1560,10 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       },
       "custo": 22,
       "recarga": 6,
-      "efeitos": ["Escudo em si de 4% da própria vida máxima por 2 s. Com fúria cheia, 5%"],
+      "efeitos": [
+        "Escudo em si de 2,5% da própria vida máxima por 2 s",
+        "Com fúria cheia, vale apenas o maior entre este escudo e Quilha na Espuma"
+      ],
       "tags": ["escudo", "vida_propria"]
     },
     {
@@ -1549,13 +1575,13 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "unico",
       "dano": {
-        "base": [59, 3.88],
+        "base": [56.64, 3.72],
         "proporcoes": {
-          "dano_fisico_bonus": 0.355,
+          "dano_fisico_bonus": 0.3408,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
-          "vida_maxima_propria_pct": 0.012
+          "vida_maxima_propria_pct": 0.01152
         }
       },
       "custo": 43,
@@ -1632,8 +1658,8 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   },
   "passiva": {
     "nome": "Ponto de restituição",
-    "descricao": "A fiandeira recupera vida se encadear ataques depois de gastar a própria.",
-    "efeito": "Ao acertar 2 ataques básicos contra campeões em até 4 s depois de pagar um custo de vida, cura 3% da própria vida máxima. Uma vez a cada 9 s. A cura sofre anticura e não reembolsa a habilidade perdida."
+    "descricao": "Marulva recupera a vida que gastou se ficar perto o bastante para terminar a costura.",
+    "efeito": "Pagar um custo de vida abre uma janela de 4 s. O segundo ataque básico contra o mesmo campeão dentro da janela recupera 6% da própria vida máxima ao longo de 2 s. Uma vez a cada 13 s, sem acumular janelas. Cura afetada por anticura."
   },
   "habilidades": [
     {
@@ -1666,9 +1692,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "si_mesmo",
       "dano": {
-        "base": [7, 3.53],
+        "base": [6.79, 3.42],
         "proporcoes": {
-          "dano_fisico_bonus": 0.14,
+          "dano_fisico_bonus": 0.1358,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
@@ -1679,7 +1705,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "recarga": 7,
       "efeitos": [
         "Custa 2,0% da vida máxima própria",
-        "Em 3 s, o primeiro ataque contra campeão causa a parcela de dano extra da habilidade e cura 25% do dano extra efetivamente causado",
+        "Em 3 s, o primeiro ataque contra campeão causa a parcela de dano extra da habilidade e cura 10% do dano extra efetivamente causado",
         "O dano extra não é crítico e não aplica roubo de vida. O ataque normal mantém seu cálculo"
       ],
       "tags": ["cura", "roubo_vida"]
@@ -1774,9 +1800,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 345
   },
   "passiva": {
-    "nome": "Par distinto",
-    "descricao": "Trisquilo repõe um pouco de energia quando alterna bem as ferramentas.",
-    "efeito": "Se acertar Choque de Chave em até 2,2 s após acertar Dente de Roda, devolve 15 de energia depois do segundo impacto. Intervalo de 8 s. Só vale em campeões."
+    "nome": "Contraponto das ferramentas",
+    "descricao": "A sequência correta solta uma vibração que muda o resultado da escaramuça.",
+    "efeito": "Acertar Choque de Chave no mesmo campeão até 2,2 s após Dente de Roda causa dano mágico extra e devolve 12 de energia. Recarga de 12 s, compartilhada entre alvos. O efeito causa 10,62 + 2,09 por nível além do primeiro + 10,241% do DF bônus + 5,243% do PM de dano mágico. Não ativa efeitos de item e não causa dano a minions, monstros ou estruturas."
   },
   "habilidades": [
     {
@@ -1787,7 +1813,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "cone",
       "dano": {
-        "base": [24, 4.96],
+        "base": [22.62, 4.54],
         "proporcoes": {
           "dano_fisico_bonus": 0.222,
           "poder_magico": 0.114,
@@ -1809,10 +1835,10 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "linha",
       "dano": {
-        "base": [23, 4.66],
+        "base": [11.06, 2.17],
         "proporcoes": {
-          "dano_fisico_bonus": 0.209,
-          "poder_magico": 0.107,
+          "dano_fisico_bonus": 0.10659,
+          "poder_magico": 0.05457,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
           "vida_maxima_propria_pct": 0.0
@@ -1832,7 +1858,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "misto",
       "alvo": "unico",
       "dano": {
-        "base": [26, 5.42],
+        "base": [24.5, 4.96],
         "proporcoes": {
           "dano_fisico_bonus": 0.242,
           "poder_magico": 0.125,
@@ -1897,7 +1923,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [300, 20],
-    "regeneracao_5s": [7, 0.5]
+    "regeneracao_5s": [18, 1.2]
   },
   "atributos": {
     "vida": [678, 92.05],
@@ -1909,9 +1935,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 340
   },
   "passiva": {
-    "nome": "Medida de vazão",
-    "descricao": "Vardilha prepara a disputa de monstros quando chega antes.",
-    "efeito": "Entrar voluntariamente num raio de 325 de Hydra ou Cérbero e permanecer 2 s concede visão própria da entrada mais próxima por 2 s, num raio de 120. Uma vez por monstro a cada 60 s. Não revela campeões fora da área nem causa dano."
+    "nome": "Primeira estaca",
+    "descricao": "Quem chega antes à disputa com Vardilha tem aviso e proteção para segurar a entrada.",
+    "efeito": "Após 2 s a até 325 de Hydra ou Cérbero, revela a entrada mais próxima num raio de 120 por 2 s e arma a estaca por 7 s. A estaca dá a Vardilha um escudo de 6% da própria vida máxima por 2 s antes do próximo dano de campeão naquela entrada, num raio de 175. Intervalo de 40 s compartilhado pelos dois monstros. Nada ativa ao causar dano a um objetivo."
   },
   "habilidades": [
     {
@@ -1944,9 +1970,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "area",
       "dano": {
-        "base": [20, 0.63],
+        "base": [18.2, 0.57],
         "proporcoes": {
-          "dano_fisico_bonus": 0.107,
+          "dano_fisico_bonus": 0.09737,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
@@ -1955,7 +1981,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       },
       "custo": 23,
       "recarga": 6.5,
-      "efeitos": ["Alcance 370, raio 125", "Lentidão de 20% por 1,5 s"],
+      "efeitos": ["Alcance 370, raio 125", "Lentidão de 15% por 1,3 s"],
       "tags": ["controle", "zona"]
     },
     {
@@ -2032,7 +2058,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [300, 20],
-    "regeneracao_5s": [7, 0.5]
+    "regeneracao_5s": [18, 1.2]
   },
   "atributos": {
     "vida": [595, 118.59],
@@ -2044,9 +2070,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 330
   },
   "passiva": {
-    "nome": "Broto de ferro",
-    "descricao": "Duelos repetidos melhoram a capacidade de Eirafim voltar para a rota.",
-    "efeito": "Ao participar de uma luta com um campeão e ficar vivo por 6 s, ganha 1 broto, no máximo um a cada 45 s e até 5. Cada broto acrescenta 1 ponto percentual à parcela de roubo de vida da habilidade Espiral de Poda, sem conceder atributo permanente."
+    "nome": "Enxerto de duelo",
+    "descricao": "Eirafim ganha fôlego para a próxima troca ao sobreviver a duelos de verdade.",
+    "efeito": "Causar e receber dano de campeão no mesmo combate e sobreviver por 6 s concede um broto, com teto de 5 e intervalo de 45 s. O terceiro ataque básico no mesmo campeão em 5 s cura de uma vez 2% da vida máxima de Eirafim, mais 0,65 ponto percentual por broto, até 5,25%. Intervalo de 13 s. Cura afetada por anticura e sem acúmulo."
   },
   "habilidades": [
     {
@@ -2079,9 +2105,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "si_mesmo",
       "dano": {
-        "base": [7, 3.25],
+        "base": [6.65, 3.09],
         "proporcoes": {
-          "dano_fisico_bonus": 0.132,
+          "dano_fisico_bonus": 0.1254,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
@@ -2091,8 +2117,8 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "custo": 24,
       "recarga": 6.5,
       "efeitos": [
-        "Em 3 s, o próximo ataque em campeão aplica o dano extra e cura 15% do dano extra efetivamente causado, até 20% com brotos",
-        "O bônus de habilidade não é crítico. O ataque normal mantém seu cálculo"
+        "Em 3 s, o próximo ataque em campeão aplica o dano extra e cura 8% do dano extra efetivamente causado",
+        "A parcela bônus não é crítica. O ataque normal mantém seu cálculo"
       ],
       "tags": ["roubo_vida", "acumulo_limitado"]
     },
@@ -2169,7 +2195,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [420, 28],
-    "regeneracao_5s": [8, 0.6]
+    "regeneracao_5s": [25, 1.7]
   },
   "atributos": {
     "vida": [515, 107.56],
@@ -2182,22 +2208,22 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   },
   "passiva": {
     "nome": "Arquivo de rajadas",
-    "descricao": "Acertos repetidos ajudam Velúria a furar a névoa mais de longe.",
-    "efeito": "A cada 2 acertos de Escrito ao Vento em campeões, ganha 1 ficha. Intervalo de 18 s entre fichas, até 5. Cada ficha dá +18 de alcance apenas a Escrito ao Vento, até 950. Sem aumento no alcance de ataques básicos ou no dano."
+    "descricao": "A arquivista reúne acertos até poder liberar um eco cortante no começo da próxima troca.",
+    "efeito": "Dois acertos de Escrito ao Vento contra campeões concedem uma ficha, com intervalo de 12 s e teto de 3. Ao chegar a 3, o próximo Escrito que acertar campeão consome as fichas e causa dano extra. O lançamento que consome as fichas não gera outra. A recarga do eco é de 16 s. O efeito causa 9,28 + 3,37 por nível além do primeiro + 17,6% do PM de dano mágico. Não ativa efeitos de item e não causa dano a minions, monstros ou estruturas."
   },
   "habilidades": [
     {
       "posicao": 1,
       "nome": "Escrito ao vento",
-      "descricao": "Solta uma ficha veloz que estoura no primeiro rival.",
+      "descricao": "Solta uma ficha veloz. O arquivo cheio responde com um segundo impacto.",
       "narracao": "{campeao} lança um escrito ao vento contra {alvo}!",
       "tipo_dano": "magico",
       "alvo": "linha",
       "dano": {
-        "base": [29, 10.52],
+        "base": [19.72, 7.15],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
-          "poder_magico": 0.55,
+          "poder_magico": 0.374,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
           "vida_maxima_propria_pct": 0.0
@@ -2206,8 +2232,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "custo": 36,
       "recarga": 6.5,
       "efeitos": [
-        "Alcance 860 antes das fichas, largura 66",
-        "Para no primeiro campeão ou monstro épico. Minions recebem 50% do dano e não interrompem"
+        "Alcance fixo 885, largura 66",
+        "Para no primeiro campeão ou monstro épico. Minions recebem 50% do dano e não interrompem",
+        "Se o Arquivo estiver cheio, só o primeiro campeão atingido recebe o eco"
       ],
       "tags": [
         "desgaste",
@@ -2310,7 +2337,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [420, 28],
-    "regeneracao_5s": [8, 0.6]
+    "regeneracao_5s": [25, 1.7]
   },
   "atributos": {
     "vida": [594, 83.28],
@@ -2322,9 +2349,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 330
   },
   "passiva": {
-    "nome": "Interdição pronta",
-    "descricao": "Cintarro fecha melhor um corredor que já conhece.",
-    "efeito": "Ficar 2 s a até 475 do rio ou da entrada de um objetivo sem sofrer dano de campeão prepara uma inspeção. O próximo Cordão de Forno preparado tem 0,10 s a menos de aviso. Intervalo de 18 s após o uso; não altera dano nem área."
+    "nome": "Piso interditado",
+    "descricao": "Cintarro cerca a entrada e cobra caro de quem insiste em atravessá-la.",
+    "efeito": "Poeira de Escória demarca a área do cone por 2 s. O primeiro campeão que entrar na área a partir de fora, ou ficar nela por 0,8 s após o lançamento, provoca uma erupção sob os pés. Um alvo por demarcação. Recarga de 15 s, contada no disparo da erupção. O efeito causa 26,32 + 1,67 por nível além do primeiro + 8,45% do PM de dano mágico. Não ativa efeitos de item e não causa dano a minions, monstros ou estruturas."
   },
   "habilidades": [
     {
@@ -2335,10 +2362,10 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "cone",
       "dano": {
-        "base": [85, 8.97],
+        "base": [74.9, 4.77],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
-          "poder_magico": 0.325,
+          "poder_magico": 0.2405,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
           "vida_maxima_propria_pct": 0.0
@@ -2357,7 +2384,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "si_mesmo",
       "dano": {
-        "base": [0, 0.0],
+        "base": [0.0, 0.0],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
           "poder_magico": 0.0,
@@ -2368,7 +2395,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       },
       "custo": 38,
       "recarga": 8,
-      "efeitos": ["Escudo em si de 4% da própria vida máxima por 2,5 s"],
+      "efeitos": ["Escudo em si de 3% da própria vida máxima por 2 s"],
       "tags": ["escudo"]
     },
     {
@@ -2380,7 +2407,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "area",
       "dano": {
-        "base": [67, 7.04],
+        "base": [79.78, 5.06],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
           "poder_magico": 0.255,
@@ -2393,8 +2420,8 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "recarga": 70,
       "efeitos": [
         "Alcance 600, retângulo 310 × 155",
-        "Aviso padrão de 0,7 s",
-        "Atordoa por 0,9 s",
+        "Aviso de 0,7 s",
+        "Atordoa por 0,85 s",
         "Disponível a partir do nível 6."
       ],
       "tags": [
@@ -2461,9 +2488,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 325
   },
   "passiva": {
-    "nome": "Pote retornável",
-    "descricao": "Depois de pagar com vida, Perlívia pode recuperar parte do gasto.",
-    "efeito": "Acertar um campeão inimigo com duas habilidades diferentes em até 4 s recupera 3,5% da própria vida máxima. Uma vez por 10 s. Cura própria sujeita a anticura; minions e monstros não contam."
+    "nome": "Rachadura devolvida",
+    "descricao": "Perlívia recupera o fôlego ao acertar duas magias diferentes no mesmo rival.",
+    "efeito": "Acertar um campeão inimigo com duas habilidades diferentes em até 4 s recupera 6% da própria vida máxima ao longo de 2 s. Recarga de 14 s, compartilhada entre alvos. A cura sofre anticura e não se acumula. Minions e monstros não contam."
   },
   "habilidades": [
     {
@@ -2474,7 +2501,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "linha",
       "dano": {
-        "base": [49, 8.09],
+        "base": [50.18, 7.88],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
           "poder_magico": 0.37,
@@ -2500,7 +2527,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "area",
       "dano": {
-        "base": [31, 5.18],
+        "base": [31.74, 5.05],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
           "poder_magico": 0.237,
@@ -2527,7 +2554,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "area",
       "dano": {
-        "base": [45, 7.46],
+        "base": [46.08, 7.27],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
           "poder_magico": 0.341,
@@ -2541,7 +2568,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "efeitos": [
         "Custa 4,0% da vida máxima própria",
         "Alcance 575, raio 180 e aviso de 0,65 s",
-        "Perlívia cura 2% da própria vida máxima se acertar ao menos um campeão. Uma cura por lançamento",
+        "Atinge cada alvo uma vez",
         "Disponível a partir do nível 6."
       ],
       "tags": ["custo_vida", "cura"]
@@ -2592,7 +2619,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [420, 28],
-    "regeneracao_5s": [8, 0.6]
+    "regeneracao_5s": [25, 1.7]
   },
   "atributos": {
     "vida": [515, 107.56],
@@ -2604,15 +2631,15 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 325
   },
   "passiva": {
-    "nome": "Nitidez de ofício",
-    "descricao": "Prismora premia quem prepara a mira com antecedência.",
-    "efeito": "Após 1 s sem se mover, Projeção de Prova tem +90 de alcance. O benefício é consumido no lançamento e exige ficar parada de novo antes de rearmar. Sem alteração de dano."
+    "nome": "Sobreposição de lentes",
+    "descricao": "Acertar o mesmo alvo de dois ângulos faz a imagem convergir num clarão.",
+    "efeito": "Se Íris Fechada acertar um campeão atingido por Projeção de Prova nos últimos 3 s, o primeiro alvo que cumprir a condição recebe um clarão extra. Recarga de 13 s, compartilhada entre alvos. O efeito causa 4,8 + 3,54 por nível além do primeiro + 7,64% do PM de dano mágico. Não ativa efeitos de item e não causa dano a minions, monstros ou estruturas."
   },
   "habilidades": [
     {
       "posicao": 1,
       "nome": "Projeção de prova",
-      "descricao": "Projeta um feixe estreito, mais longo quando a lente está firme.",
+      "descricao": "Projeta um feixe estreito para preparar a convergência de luz no próximo disparo.",
       "narracao": "{campeao} calibra a lente e projeta um feixe em {alvo}!",
       "tipo_dano": "magico",
       "alvo": "linha",
@@ -2629,10 +2656,14 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "custo": 35,
       "recarga": 7,
       "efeitos": [
-        "Alcance de 815 ou 905 com a passiva, largura 57",
-        "Atinge só o primeiro campeão. Minions também são acertados e não interrompem"
+        "Alcance fixo 850 e largura 57",
+        "Atinge só o primeiro campeão. Minions recebem dano e não interrompem"
       ],
-      "tags": ["longo_alcance", "precisao"]
+      "tags": [
+        "longo_alcance",
+        "precisao",
+        "marca"
+      ]
     },
     {
       "posicao": 2,
@@ -2642,10 +2673,10 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "area",
       "dano": {
-        "base": [12, 8.85],
+        "base": [7.2, 5.31],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
-          "poder_magico": 0.191,
+          "poder_magico": 0.1146,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
           "vida_maxima_propria_pct": 0.0
@@ -2729,7 +2760,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [420, 28],
-    "regeneracao_5s": [8, 0.6]
+    "regeneracao_5s": [25, 1.7]
   },
   "atributos": {
     "vida": [554, 95.24],
@@ -2741,9 +2772,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 330
   },
   "passiva": {
-    "nome": "Sinal de partida",
-    "descricao": "Fulgavéu presta mais atenção à primeira travessia revelada.",
-    "efeito": "O primeiro campeão inimigo visto pela Vigia de Travessia no segundo inicial mantém uma indicação de última posição por 1 s depois de sair da área. A indicação é estática e não atualiza movimento nem revela névoa adicional."
+    "nome": "Passagem sinalizada",
+    "descricao": "O aviso de Fulgavéu dá tempo real para o time ocupar uma entrada revelada.",
+    "efeito": "Ao revelar um campeão inimigo com Vigia de Travessia, até dois aliados mais próximos da torre de visão usada a até 700 dela ganham escudo de 5% da vida máxima por 2 s. Aplica só na primeira revelação de cada especial. Fulgavéu pode receber um dos escudos se estiver na área."
   },
   "habilidades": [
     {
@@ -2754,10 +2785,10 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "linha",
       "dano": {
-        "base": [62, 10.79],
+        "base": [54.56, 9.5],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
-          "poder_magico": 0.509,
+          "poder_magico": 0.44792,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
           "vida_maxima_propria_pct": 0.0
@@ -2776,10 +2807,10 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "area",
       "dano": {
-        "base": [45, 7.82],
+        "base": [40.5, 7.04],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
-          "poder_magico": 0.368,
+          "poder_magico": 0.3312,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
           "vida_maxima_propria_pct": 0.0
@@ -2794,8 +2825,8 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "posicao": 3,
       "especial": true,
       "nome": "Vigia de travessia",
-      "descricao": "Abre uma vigia distante para o time decidir se pode cruzar.",
-      "narracao": "{campeao} abre uma vigia na travessia!",
+      "descricao": "Amplia de qualquer ponto do mapa a visão de uma torre aliada para preparar a travessia.",
+      "narracao": "{campeao} amplia uma torre aliada e ilumina a travessia!",
       "tipo_dano": "magico",
       "alvo": "area",
       "dano": {
@@ -2809,14 +2840,20 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
         }
       },
       "custo": 54,
-      "recarga": 92,
+      "recarga": 110,
       "efeitos": [
-        "Alcance 2600, raio 245 e duração de 3 s",
-        "Aviso visual ao adversário antes de revelar",
-        "Revela apenas campeões e monstros dentro da área. Não causa dano, não substitui as torres de visão",
+        "Alcance global, com uma torre de visão aliada ativa como ponto de ancoragem",
+        "Aviso de 0,65 s. Amplia a visão existente para raio de pelo menos 240 ao redor da torre por 2,5 s",
+        "A torre precisa estar ativa durante todo o efeito. Se for destruída ou expirar, a ampliação acaba",
+        "Revela apenas campeões e monstros na área. Sem dano, visão verdadeira ou revelação de outras torres de visão",
         "Disponível a partir do nível 6."
       ],
-      "tags": ["mapa", "visao"]
+      "tags": [
+        "global",
+        "mapa",
+        "visao",
+        "escudo"
+      ]
     }
   ],
   "build_recomendada": [
@@ -2864,7 +2901,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [400, 25],
-    "regeneracao_5s": [9, 0.6]
+    "regeneracao_5s": [24, 1.5]
   },
   "atributos": {
     "vida": [609, 83.49],
@@ -2876,9 +2913,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 330
   },
   "passiva": {
-    "nome": "Primeiro socorro",
-    "descricao": "A primeira ajuda de Sutéria chega mais depressa em quem acabou de ser ferido.",
-    "efeito": "Se Ponte de Linha for usada em aliado que recebeu dano de campeão nos últimos 1,2 s, a preparação cai de 0,35 s para 0,15 s. Não muda a cura."
+    "nome": "Ponto de urgência",
+    "descricao": "Sutéria completa o curativo quando um aliado precisa enfrentar uma segunda pancada.",
+    "efeito": "Ao curar com uma habilidade um aliado que estava abaixo de 40% da vida máxima antes da cura, prepara um curativo por 2 s. O próximo dano de campeão nesse aliado ativa, após o dano, uma cura de 4,5% da vida máxima dele se ele continuar vivo. A passiva só prepara um curativo a cada 18 s, compartilhados entre aliados. Sofre anticura."
   },
   "habilidades": [
     {
@@ -2889,10 +2926,10 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "unico",
       "dano": {
-        "base": [46, 6.95],
+        "base": [44.16, 6.67],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
-          "poder_magico": 0.306,
+          "poder_magico": 0.29376,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
           "vida_maxima_propria_pct": 0.0
@@ -2922,7 +2959,10 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       },
       "custo": 35,
       "recarga": 9,
-      "efeitos": ["Alcance 630", "Cura 4,5% da vida máxima do aliado + 12% PM, limitada a 7% da vida dele"],
+      "efeitos": [
+        "Alcance 630 e preparação de 0,35 s",
+        "Cura 3,5% da vida máxima do aliado + 12% PM, limitada a 6% da vida dele"
+      ],
       "tags": ["cura", "aliado"]
     },
     {
@@ -2947,7 +2987,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "recarga": 66,
       "efeitos": [
         "Alcance 600",
-        "Cura em dois pulsos separados por 1,1 s. O total é 7% da vida máxima do aliado + 15% PM, limitado a 10% da vida máxima dele",
+        "Cura em dois pulsos separados por 1,1 s. O total é 6% da vida máxima do aliado + 15% PM, limitado a 9% da vida máxima dele",
         "O segundo pulso só ocorre até 700 da posição atual de Sutéria",
         "Disponível a partir do nível 6."
       ],
@@ -2999,7 +3039,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [400, 25],
-    "regeneracao_5s": [9, 0.6]
+    "regeneracao_5s": [24, 1.5]
   },
   "atributos": {
     "vida": [539, 107.3],
@@ -3011,9 +3051,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 325
   },
   "passiva": {
-    "nome": "Emenda medida",
-    "descricao": "Alvenora melhora o reforço único com a experiência de proteger aliados.",
-    "efeito": "Quando uma Placa de Travessa absorver ao menos 45 de dano de campeão, ganha uma emenda. Máximo de 5, com intervalo de 40 s. Cada emenda acrescenta 0,35 ponto percentual da vida do alvo ao escudo, até +1,75 ponto. O limite do escudo continua valendo."
+    "nome": "Emenda partilhada",
+    "descricao": "As travessas que resistem a um ataque ensinam Alvenora a armar uma segunda linha.",
+    "efeito": "Quando Placa de Travessa absorve ao menos 45 de dano de campeão, concede 1 emenda, com intervalo de 40 s e teto de 5. A partir de 3 emendas, lançar Placa de Travessa protege também um segundo aliado a até 250 do primeiro com escudo de 2,5% da vida máxima dele por 2 s. Cada emenda acima de 3 acrescenta 0,75 ponto percentual, até 4%. Uma proteção secundária por 18 s, escolhendo quem estiver com menor porcentagem de vida."
   },
   "habilidades": [
     {
@@ -3024,10 +3064,10 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "linha",
       "dano": {
-        "base": [17, 10.09],
+        "base": [16.49, 9.79],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
-          "poder_magico": 0.292,
+          "poder_magico": 0.28324,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
           "vida_maxima_propria_pct": 0.0
@@ -3059,8 +3099,8 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "recarga": 8,
       "efeitos": [
         "Alcance 620",
-        "Escudo de 4% da vida máxima do aliado + 18% PM por 2,8 s, limitado a 8% da vida do alvo",
-        "As emendas afetam apenas a base percentual"
+        "Escudo de 3,5% da vida máxima do alvo + 18% PM por 2,5 s, até 7% da vida máxima dele",
+        "O escudo secundário não gera emendas"
       ],
       "tags": [
         "escudo",
@@ -3090,8 +3130,8 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "recarga": 82,
       "efeitos": [
         "Alcance 680",
-        "Escudo de 7% da vida máxima do aliado + 18% PM por 2,8 s, limitado a 10% da vida máxima do alvo",
-        "Se o alvo já tem Placa de Travessa, vale apenas o maior escudo restante entre os dois",
+        "Escudo de 7% da vida máxima do alvo + 16% PM por 2,5 s, limitado a 9% da vida máxima dele",
+        "Se o alvo já tem escudo de Placa de Travessa, vale o maior escudo restante",
         "Disponível a partir do nível 6."
       ],
       "tags": ["escudo", "aliado"]
@@ -3142,7 +3182,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [400, 25],
-    "regeneracao_5s": [9, 0.6]
+    "regeneracao_5s": [24, 1.5]
   },
   "atributos": {
     "vida": [568, 95.47],
@@ -3154,9 +3194,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 325
   },
   "passiva": {
-    "nome": "Endereço conhecido",
-    "descricao": "Um aliado que ficou perto dela recebe o sinal à distância mais depressa.",
-    "efeito": "Se o aliado escolhido para Sinal de Socorro esteve a até 380 de Luminela nos últimos 8 s, a preparação da especial passa de 0,7 s a 0,55 s. Essa janela não altera a cura."
+    "nome": "Linha de retransmissão",
+    "descricao": "Luminela transforma a cura à distância em uma janela de guarda para cruzar o mapa.",
+    "efeito": "Ao curar com Sinal de Socorro um aliado que estava abaixo de 40% da vida máxima, deixa sobre ele um escudo pessoal de 4% da vida máxima por 2 s. Se Foco de Revezamento já proteger o alvo, ou for lançado nele enquanto a retransmissão estiver ativa, vale o maior escudo restante. Uma retransmissão por especial. A cura inicial continua sujeita a anticura."
   },
   "habilidades": [
     {
@@ -3206,7 +3246,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "recarga": 9,
       "efeitos": [
         "Alcance 650",
-        "Escudo de 4% da vida máxima do aliado + 16% PM por 2 s, limitado a 7% da vida do alvo"
+        "Escudo de 3,5% da vida máxima do aliado + 13% PM por 2 s, limitado a 6% da vida do alvo"
       ],
       "tags": ["escudo", "aliado"]
     },
@@ -3233,7 +3273,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "efeitos": [
         "Alcance global, apenas um campeão aliado vivo, exclui Luminela",
         "Preparação de 0,7 s. Não cura se o alvo morrer antes de receber o facho",
-        "Cura 5% da vida máxima do aliado + 12% PM, limitada a 7% da vida máxima do alvo",
+        "Cura 4,5% da vida máxima do aliado + 12% PM, limitada a 6% da vida máxima do alvo",
         "Disponível a partir do nível 6."
       ],
       "tags": [
@@ -3288,7 +3328,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [400, 25],
-    "regeneracao_5s": [9, 0.6]
+    "regeneracao_5s": [24, 1.5]
   },
   "atributos": {
     "vida": [621, 83.07],
@@ -3300,9 +3340,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 335
   },
   "passiva": {
-    "nome": "Chave emprestada",
-    "descricao": "O primeiro aliado que acompanha o engaje recebe um curto impulso.",
-    "efeito": "O primeiro campeão aliado que entra no arco de Fecho de Travessia até 2 s após o acerto da especial recebe 10% de movimento por 1,1 s. Um beneficiado por especial e sem acúmulo."
+    "nome": "Chave de escolta",
+    "descricao": "Quando Clavento bloqueia a entrada, o primeiro aliado a acompanhá-lo recebe proteção para atravessar.",
+    "efeito": "Ao aplicar a lentidão de Dente de Fechadura ou o controle de Fecho de Travessia em um campeão, o aliado mais próximo num raio de 280 recebe escudo de 5% da vida máxima do aliado por 1,8 s. Recarga compartilhada de 16 s. Clavento não pode receber esse escudo. Um beneficiado por controle, mesmo se atingir vários rivais."
   },
   "habilidades": [
     {
@@ -3313,7 +3353,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "cone",
       "dano": {
-        "base": [25, 5.24],
+        "base": [37.8, 3.36],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
           "poder_magico": 0.122,
@@ -3335,7 +3375,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "si_mesmo",
       "dano": {
-        "base": [0, 0.0],
+        "base": [0.0, 0.0],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
           "poder_magico": 0.0,
@@ -3358,10 +3398,10 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "magico",
       "alvo": "area",
       "dano": {
-        "base": [16, 3.35],
+        "base": [23.23, 2.05],
         "proporcoes": {
           "dano_fisico_bonus": 0.0,
-          "poder_magico": 0.078,
+          "poder_magico": 0.07488,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
           "vida_maxima_propria_pct": 0.0
@@ -3371,7 +3411,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "recarga": 68,
       "efeitos": [
         "Alcance 420, arco com largura 185, aviso de 0,65 s",
-        "Atordoamento em área de 0,75 s",
+        "Atordoamento em área de 0,65 s",
         "Disponível a partir do nível 6."
       ],
       "tags": [
@@ -3426,7 +3466,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [400, 25],
-    "regeneracao_5s": [9, 0.6]
+    "regeneracao_5s": [24, 1.5]
   },
   "atributos": {
     "vida": [580, 95.0],
@@ -3438,9 +3478,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 330
   },
   "passiva": {
-    "nome": "Retícula fiel",
-    "descricao": "Ocravia consegue guiar o escudo melhor se tiver acabado de observar a entrada.",
-    "efeito": "Se o alvo aliado da Guarda de Retícula estiver dentro de Baliza de Cal, o escudo dura 0,6 s a mais. Só afeta a duração e não renova o efeito."
+    "nome": "Retícula de guarda",
+    "descricao": "Quem já tem o terreno mapeado recebe uma proteção reforçada quando é pego na entrada.",
+    "efeito": "Quando Guarda de Retícula atingir um aliado dentro da Baliza de Cal, acrescente 3 pontos percentuais da vida máxima dele ao escudo, até 9% ao todo. Recarga de 17 s, compartilhada entre aliados. A proteção extra faz parte do mesmo escudo."
   },
   "habilidades": [
     {
@@ -3486,7 +3526,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "recarga": 9,
       "efeitos": [
         "Alcance 600",
-        "Escudo de 4,5% da vida máxima do alvo + 17% PM por 2,4 s, limitado a 8% da vida do aliado"
+        "Escudo de 4% da vida máxima do alvo + 17% PM por 2,4 s, limitado a 7% da vida do aliado sem a passiva"
       ],
       "tags": ["escudo", "aliado"]
     },
@@ -3513,7 +3553,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "efeitos": [
         "Alcance 1400, raio 225 por 3 s",
         "Avisa a área após 0,5 s e revela o conteúdo enquanto estiver ativa",
-        "Um aliado dentro da baliza por lançamento recebe um escudo de 4% da vida máxima por 2 s. Escolhe o de menor % de vida, sem somar a Guarda de Retícula",
+        "Dentro da baliza, Retícula de Guarda pode reforçar o escudo de Guarda de Retícula",
         "Disponível a partir do nível 6."
       ],
       "tags": [
@@ -3568,7 +3608,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [320, 22],
-    "regeneracao_5s": [7, 0.5]
+    "regeneracao_5s": [19, 1.3]
   },
   "atributos": {
     "vida": [515, 107.56],
@@ -3580,9 +3620,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 325
   },
   "passiva": {
-    "nome": "Visor desdobrado",
-    "descricao": "Terralume encontra o primeiro disparo de longe se teve tempo de parar.",
-    "efeito": "Depois de permanecer 1,1 s sem mover-se, o primeiro ataque contra campeão tem +9 pontos percentuais de chance crítica, respeitando 100%. Intervalo de 8 s e consumo no disparo. A chance extra não se aplica a habilidades."
+    "nome": "Clarão de amostra",
+    "descricao": "Terralume converte uma mira preparada em um disparo extra que aproveita a chance crítica.",
+    "efeito": "Após ficar parado por 1,1 s, Impacto de Amostra arma um clarão no primeiro campeão atingido por 2,2 s. O próximo ataque básico de Terralume contra esse alvo acrescenta um disparo físico. O disparo extra consome a marca e recebe até +12% do próprio dano, proporcional à chance crítica (12% com 100% de chance). Intervalo de 12 s para armar uma nova marca. O efeito causa 4,62 + 1,93 por nível além do primeiro + 17,052% do DF bônus de dano físico. Não ativa efeitos de item e não causa dano a minions, monstros ou estruturas."
   },
   "habilidades": [
     {
@@ -3593,9 +3633,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "linha",
       "dano": {
-        "base": [11, 4.6],
+        "base": [6.38, 2.67],
         "proporcoes": {
-          "dano_fisico_bonus": 0.406,
+          "dano_fisico_bonus": 0.23548,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
@@ -3644,9 +3684,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "linha",
       "dano": {
-        "base": [10, 4.24],
+        "base": [9.7, 4.11],
         "proporcoes": {
-          "dano_fisico_bonus": 0.375,
+          "dano_fisico_bonus": 0.36375,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
@@ -3712,7 +3752,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [320, 22],
-    "regeneracao_5s": [7, 0.5]
+    "regeneracao_5s": [19, 1.3]
   },
   "atributos": {
     "vida": [538, 95.95],
@@ -3724,9 +3764,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 330
   },
   "passiva": {
-    "nome": "Molde repetido",
-    "descricao": "Os ataques ficam mais rápidos se Zarcavil permanece no mesmo alvo.",
-    "efeito": "Dois ataques básicos no mesmo campeão em até 2,5 s concedem +7% de velocidade de ataque por 2 s. Trocar de alvo desfaz o efeito. Não acumula e a velocidade final respeita o teto de 2,5 ataques/s."
+    "nome": "Pressão de roldana",
+    "descricao": "Zarcavil ameaça a linha de frente quando consegue apertar o mesmo alvo sem desviar a mira.",
+    "efeito": "Cada ataque básico em um campeão gera uma pressão, até 3, com janela de 3 s. Trocar de alvo limpa as pressões. Atingir a terceira pressão dá 14% de velocidade de ataque por 2 s. Recarga de 10 s desde a ativação. Não acumula com o próprio bônus e respeita o teto do jogo."
   },
   "habilidades": [
     {
@@ -3741,7 +3781,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
         "proporcoes": {
           "dano_fisico_bonus": 0.225,
           "poder_magico": 0.0,
-          "vida_maxima_alvo_pct": 0.023,
+          "vida_maxima_alvo_pct": 0.02,
           "vida_perdida_alvo_pct": 0,
           "vida_maxima_propria_pct": 0.0
         }
@@ -3786,9 +3826,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "unico",
       "dano": {
-        "base": [10, 1.67],
+        "base": [9.4, 1.57],
         "proporcoes": {
-          "dano_fisico_bonus": 0.141,
+          "dano_fisico_bonus": 0.13254,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
@@ -3799,7 +3839,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "recarga": 70,
       "efeitos": [
         "Alcance 590",
-        "Causa dano uma vez. Este acerto não é um ataque básico nem aciona efeitos ao acertar",
+        "Causa dano uma vez. Não conta como ataque básico, não gera pressão e não aciona efeitos ao acertar",
         "Disponível a partir do nível 6."
       ],
       "tags": ["antitanque", "precisao"]
@@ -3850,7 +3890,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [320, 22],
-    "regeneracao_5s": [7, 0.5]
+    "regeneracao_5s": [19, 1.3]
   },
   "atributos": {
     "vida": [515, 107.56],
@@ -3863,8 +3903,8 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   },
   "passiva": {
     "nome": "Camadas de verniz",
-    "descricao": "Quanto mais confrontos diferentes ela atravessa, mais fácil enlata o próximo disparo.",
-    "efeito": "A cada três ataques básicos no mesmo campeão ao longo de até 4 s, ganha uma camada. Uma a cada 35 s, até 5. Cada camada acrescenta 16 de alcance, até +80, a Tiro de Mistura. Camadas permanentes na partida, sem aumento de dano ou alcance básico."
+    "descricao": "Riscavela aprende a fixar as duas tintas sob pressão e deixa uma descarga mágica no terceiro ataque.",
+    "efeito": "Três ataques básicos consecutivos em um campeão em até 4 s dão 1 camada permanente, com intervalo de 35 s e teto de 5. A partir de 2 camadas, a mesma sequência causa dano mágico no terceiro disparo, com recarga de 13 s. Nas camadas 3, 4 e 5, acrescente respectivamente 10%, 20% e 30% ao dano dessa descarga. O limite de camadas não aumenta o alcance. O efeito causa 2,65 + 2,06 por nível além do primeiro + 8,957% do DF bônus + 6,678% do PM de dano mágico. Não ativa efeitos de item e não causa dano a minions, monstros ou estruturas."
   },
   "habilidades": [
     {
@@ -3875,7 +3915,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "misto",
       "alvo": "linha",
       "dano": {
-        "base": [6, 5.16],
+        "base": [2, 5.16],
         "proporcoes": {
           "dano_fisico_bonus": 0.223,
           "poder_magico": 0.167,
@@ -3887,7 +3927,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "custo": 28,
       "recarga": 7.5,
       "efeitos": [
-        "Alcance 610 antes das camadas, largura 65",
+        "Alcance fixo 640 e largura 65",
         "Primeiro campeão na linha. Não ativa efeitos de ataque básico",
         "Divisão do dano final bruto: 58% físico e 42% mágico, com mitigação separada."
       ],
@@ -3919,15 +3959,15 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "posicao": 3,
       "especial": true,
       "nome": "Verniz poroso",
-      "descricao": "Pressiona o alvo marcado com uma descarga curta de duas cores.",
+      "descricao": "Pressiona o último alvo que feriu com uma descarga curta de duas cores.",
       "narracao": "{campeao} solta o verniz poroso sobre {alvo}!",
       "tipo_dano": "misto",
       "alvo": "unico",
       "dano": {
-        "base": [5, 3.89],
+        "base": [2.35, 1.83],
         "proporcoes": {
-          "dano_fisico_bonus": 0.169,
-          "poder_magico": 0.126,
+          "dano_fisico_bonus": 0.07943,
+          "poder_magico": 0.05922,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
           "vida_maxima_propria_pct": 0.0
@@ -4002,9 +4042,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 335
   },
   "passiva": {
-    "nome": "Mola em espera",
-    "descricao": "Fulcrim mantém o ritmo com ataques enquanto os disparos especiais recarregam.",
-    "efeito": "Enquanto as duas habilidades básicas estiverem em recarga, acertar dois ataques normais em campeões dentro de 2,5 s dá 8 unidades de movimento por 1,6 s. Intervalo de 8 s, sem acúmulo."
+    "nome": "Câmara seca",
+    "descricao": "Fulcrim ganha a troca curta quando mantém os disparos mesmo com o repetidor recarregando.",
+    "efeito": "Com uma habilidade básica em recarga, acertar dois ataques básicos no mesmo campeão em até 2,5 s faz o segundo causar um disparo físico extra. Intervalo de 11 s contado no disparo. O efeito causa 6,56 + 1,08 por nível além do primeiro + 5,104% do DF bônus de dano físico. Não ativa efeitos de item e não causa dano a minions, monstros ou estruturas."
   },
   "habilidades": [
     {
@@ -4015,7 +4055,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "unico",
       "dano": {
-        "base": [14, 5.5],
+        "base": [26.38, 4.11],
         "proporcoes": {
           "dano_fisico_bonus": 0.195,
           "poder_magico": 0.0,
@@ -4037,7 +4077,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "linha",
       "dano": {
-        "base": [6, 2.38],
+        "base": [11.31, 1.78],
         "proporcoes": {
           "dano_fisico_bonus": 0.084,
           "poder_magico": 0.0,
@@ -4055,14 +4095,14 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "posicao": 3,
       "especial": true,
       "nome": "Trava do repetidor",
-      "descricao": "Solta a mola já regulada num disparo único.",
+      "descricao": "Solta a mola num disparo curto que lhe dá tempo para reposicionar.",
       "narracao": "{campeao} solta a trava do repetidor contra {alvo}!",
       "tipo_dano": "fisico",
       "alvo": "unico",
       "dano": {
-        "base": [6, 2.49],
+        "base": [4.75, 0.78],
         "proporcoes": {
-          "dano_fisico_bonus": 0.088,
+          "dano_fisico_bonus": 0.03696,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
@@ -4073,7 +4113,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "recarga": 80.5,
       "efeitos": [
         "Alcance 570",
-        "Após acertar, Fulcrim ganha 6% de movimento por 1,5 s. Se o bônus da passiva estiver ativo, usa só o maior",
+        "Após acertar, Fulcrim ganha 4% de movimento por 1,2 s",
         "Disponível a partir do nível 6."
       ],
       "tags": ["pressao"]
@@ -4124,7 +4164,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "recurso": {
     "tipo": "mana",
     "maximo": [320, 22],
-    "regeneracao_5s": [7, 0.5]
+    "regeneracao_5s": [19, 1.3]
   },
   "atributos": {
     "vida": [538, 95.95],
@@ -4136,9 +4176,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
     "velocidade_movimento": 335
   },
   "passiva": {
-    "nome": "Risco persistente",
-    "descricao": "Treválio prepara um único disparo verdadeiro com um acerto anterior.",
-    "efeito": "Corte de Giz marca o primeiro campeão atingido por 4 s. Só um alvo marcado por vez. Ponto Perfurante exige a marca e a consome ao acertar. A passiva não causa dano."
+    "nome": "Risco de esquadro",
+    "descricao": "Treválio ganha uma janela de sobrevivência se conseguir perfurar o alvo marcado.",
+    "efeito": "Corte de Giz marca o primeiro campeão atingido por 4 s. Ponto Perfurante exige e consome a marca. Se acertar o alvo marcado, Treválio ganha um escudo pessoal de 6% da própria vida máxima por 1,7 s. Uma vez a cada 15 s. Há apenas um alvo marcado; o escudo não muda o dano verdadeiro."
   },
   "habilidades": [
     {
@@ -4149,9 +4189,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "linha",
       "dano": {
-        "base": [8, 6.09],
+        "base": [16.3, 4.0],
         "proporcoes": {
-          "dano_fisico_bonus": 0.193,
+          "dano_fisico_bonus": 0.32,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
@@ -4171,7 +4211,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "verdadeiro",
       "alvo": "linha",
       "dano": {
-        "base": [2, 1.74],
+        "base": [4.2, 1.18],
         "proporcoes": {
           "dano_fisico_bonus": 0.055,
           "poder_magico": 0.0,
@@ -4198,9 +4238,9 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "tipo_dano": "fisico",
       "alvo": "linha",
       "dano": {
-        "base": [6, 4.59],
+        "base": [12.6, 3.1],
         "proporcoes": {
-          "dano_fisico_bonus": 0.146,
+          "dano_fisico_bonus": 0.265,
           "poder_magico": 0.0,
           "vida_maxima_alvo_pct": 0,
           "vida_perdida_alvo_pct": 0,
@@ -4211,7 +4251,7 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
       "recarga": 68,
       "efeitos": [
         "Alcance 800, largura 72, aviso de 0,55 s",
-        "Lentidão de 20% por 1,5 s no primeiro campeão",
+        "Lentidão de 15% por 1,2 s no primeiro campeão",
         "Disponível a partir do nível 6."
       ],
       "tags": ["controle", "precisao"]
@@ -4220,8 +4260,8 @@ Foram conferidos 300 valores de atributos base e crescimento, as 91 substituiç�
   "build_recomendada": [
     "Botas da Fúria",
     "Lâmina Cristalina",
-    "Arco do Juízo Final",
     "Asas do Vento Veloz",
+    "Arco do Juízo Final",
     "Escudo do Guardião"
   ],
   "itens_alternativos": [
