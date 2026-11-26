@@ -1,13 +1,18 @@
 extends PanelContainer
 
 signal inspecionar(id: String)
+signal filtrar_rota(posicao: String)
 
 const Tema = preload("res://ui/temas/tema_draft.gd")
+const POSICOES: Dictionary = {
+	"topo": "Topo", "selva": "Selva", "meio": "Meio", "atirador": "Atirador", "suporte": "Suporte",
+}
 
 var _coluna: VBoxContainer
 var _nome: Label
 var _grupo_picks: BoxContainer
 var _grupo_bans: HBoxContainer
+var _rotas: HFlowContainer
 var _picks: Label
 var _bans: Label
 var _aliado: bool
@@ -15,6 +20,7 @@ var _lado: String
 var _compacto: bool
 var _catalogo: Dictionary
 var _slots: Dictionary = {}
+var _botoes_rotas: Dictionary = {}
 
 
 func montar(lado: String, compacto: bool, aliado: bool, dados_catalogo: Dictionary, bandeira: Texture2D) -> void:
@@ -40,9 +46,12 @@ func montar(lado: String, compacto: bool, aliado: bool, dados_catalogo: Dictiona
 	_nome.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_nome.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	identidade.add_child(_nome)
+	if _aliado:
+		_rotas = HFlowContainer.new()
+		_coluna.add_child(_rotas)
 	_picks = Tema.texto("", 14, Tema.SUAVE)
 	_coluna.add_child(_picks)
-	_grupo_picks = HBoxContainer.new() if compacto else VBoxContainer.new()
+	_grupo_picks = HBoxContainer.new() if compacto or aliado else VBoxContainer.new()
 	_grupo_picks.add_theme_constant_override("separation", 4)
 	_coluna.add_child(_grupo_picks)
 	_bans = Tema.texto("", 14, Tema.SUAVE)
@@ -52,7 +61,7 @@ func montar(lado: String, compacto: bool, aliado: bool, dados_catalogo: Dictiona
 	_coluna.add_child(_grupo_bans)
 
 
-func atualizar(time: Dictionary, vez: Dictionary, teto_picks: int, teto_bans: int) -> void:
+func atualizar(time: Dictionary, vez: Dictionary, teto_picks: int, teto_bans: int, filtro: String) -> void:
 	var escolhas: Array = time.get("picks", [])
 	var bans: Array = time.get("bans", [])
 	var ativo: bool = vez.get("time") == _lado
@@ -62,9 +71,35 @@ func atualizar(time: Dictionary, vez: Dictionary, teto_picks: int, teto_bans: in
 	_nome.tooltip_text = "%s · %s" % [_nome.text, "Sua equipe" if _aliado else "Adversário"]
 	_picks.text = "Escolhas   %d/%d" % [escolhas.size(), teto_picks]
 	_bans.text = "Banimentos   %d/%d" % [bans.size(), teto_bans]
+	if _aliado:
+		_atualizar_rotas(time.get("jogadores", {}), filtro)
 	_slots.clear()
 	_atualizar_slots(_grupo_picks, escolhas, teto_picks, cor, true, ativo and vez.get("acao") == "pick")
 	_atualizar_slots(_grupo_bans, bans, teto_bans, cor, false, ativo and vez.get("acao") == "ban")
+
+
+func _atualizar_rotas(jogadores: Dictionary, filtro: String) -> void:
+	for posicao: String in POSICOES:
+		if _botoes_rotas.has(posicao):
+			_botoes_rotas[posicao].set_pressed_no_signal(filtro == posicao)
+			continue
+		var apelido: String = str(jogadores.get(posicao, {}).get("apelido", ""))
+		var nome: String = "%s · %s" % [POSICOES[posicao], apelido]
+		var botao: Button = Tema.botao(nome, func() -> void: filtrar_rota.emit(posicao))
+		botao.toggle_mode = true
+		botao.set_pressed_no_signal(filtro == posicao)
+		botao.custom_minimum_size.y = 29 if _compacto else 37
+		botao.add_theme_font_size_override("font_size", 12 if _compacto else 15)
+		botao.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		botao.tooltip_text = nome
+		botao.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_rotas.add_child(botao)
+		_botoes_rotas[posicao] = botao
+
+
+func destacar_rota(filtro: String) -> void:
+	for posicao: String in _botoes_rotas:
+		_botoes_rotas[posicao].set_pressed_no_signal(filtro == posicao)
 
 
 func _atualizar_slots(grupo: BoxContainer, ids: Array, teto: int, cor: Color, picks: bool, ativo: bool) -> void:
@@ -75,16 +110,15 @@ func _atualizar_slots(grupo: BoxContainer, ids: Array, teto: int, cor: Color, pi
 		var id: String = str(ids[i]) if i < ids.size() else ""
 		var nome: String = str(_catalogo.get(id, {}).get("nome", id))
 		var proximo: bool = id.is_empty() and ativo and i == ids.size()
-		var texto: String = nome if picks and not _compacto else nome.left(2).to_upper()
+		var slot_largo: bool = picks and not _compacto and not _aliado
+		var texto: String = nome if slot_largo else nome.left(2).to_upper()
 		if id.is_empty():
-			texto = "Escolha %d" % (i + 1) if picks and not _compacto else "·"
-		elif not picks:
-			texto = "×"
+			texto = "Escolha %d" % (i + 1) if slot_largo else "·"
 		var item: Button = Tema.botao(texto, func() -> void: inspecionar.emit(id))
 		item.flat = false
 		item.disabled = id.is_empty()
-		item.custom_minimum_size.y = 43 if picks and not _compacto else 26
-		item.add_theme_font_size_override("font_size", 15 if picks and not _compacto else 13)
+		item.custom_minimum_size.y = 43 if slot_largo else 26
+		item.add_theme_font_size_override("font_size", 15 if slot_largo else 13)
 		item.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		item.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		item.add_theme_stylebox_override("disabled", Tema.caixa(Tema.FUNDO, cor if proximo else Tema.BORDA, 2))

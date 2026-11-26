@@ -10,14 +10,21 @@ const POSICOES: Dictionary = {
 	"topo": "Topo", "selva": "Selva", "meio": "Meio", "atirador": "Atirador", "suporte": "Suporte",
 }
 const LADOS: Array[String] = ["azul", "vermelho"]
+const AJUDA_AUTO: String = "Marque uma rota livre para o titular escolher com o apoio do técnico. Sem rota marcada ou num banimento, a decisão é da equipe. A escolha pode ser diferente da sua."
 
 var _base: Control
 var _pagina: VBoxContainer
 var _titulo: Label
+var _proxima_acao: Label
+var _sequencia: HBoxContainer
+var _ajuda_auto: Button
 var _aviso: Label
 var _auto: Button
 var _busca: LineEdit
 var _grade: GridContainer
+var _painel_catalogo: PanelContainer
+var _contexto_rota: Label
+var _botoes_filtro: Dictionary = {}
 var _cartoes: Dictionary = {}
 var _lados: Dictionary = {}
 var _catalogo: Dictionary = {}
@@ -118,14 +125,24 @@ func _montar() -> void:
 	_titulo = Tema.texto("", 33)
 	_titulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	fase.add_child(_titulo)
+	_sequencia = HBoxContainer.new()
+	fase.add_child(_sequencia)
+	_proxima_acao = Tema.texto("", 14, Tema.SUAVE)
+	_proxima_acao.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_proxima_acao.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_sequencia.add_child(_proxima_acao)
+	var ordem: Button = Tema.botao("Ordem do draft", _mostrar_ordem)
+	ordem.custom_minimum_size.y = 29.0
+	ordem.add_theme_font_size_override("font_size", 14)
+	_sequencia.add_child(ordem)
 	_auto = Tema.botao("Automático", _delegar)
 	_auto.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	acoes.add_child(_auto)
-	var ajuda: Button = Tema.botao("?", _mostrar_ajuda)
-	ajuda.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	ajuda.accessibility_name = "Como funciona o Automático?"
-	ajuda.tooltip_text = "O técnico decide a ação atual. Sem técnico, a escolha automática é menos precisa."
-	acoes.add_child(ajuda)
+	_ajuda_auto = Tema.botao("?", _mostrar_ajuda)
+	_ajuda_auto.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_ajuda_auto.accessibility_name = "Como funciona o Automático?"
+	_ajuda_auto.tooltip_text = AJUDA_AUTO
+	acoes.add_child(_ajuda_auto)
 	_aviso = Tema.texto("", 15, Tema.CORAL)
 	_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_pagina.add_child(_aviso)
@@ -187,6 +204,7 @@ func _montar_tabuleiro() -> void:
 		pai.add_child(equipe)
 		equipe.montar(lado, _compacto, lado == meu_lado, _catalogo, _bandeira if lado == meu_lado else null)
 		equipe.inspecionar.connect(_inspecionar.bind(lado))
+		equipe.filtrar_rota.connect(_alternar_rota)
 	if _compacto:
 		_montar_catalogo()
 	_formacao = VBoxContainer.new()
@@ -195,13 +213,13 @@ func _montar_tabuleiro() -> void:
 
 
 func _montar_catalogo() -> void:
-	var painel: PanelContainer = PanelContainer.new()
-	painel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	painel.add_theme_stylebox_override("panel", Tema.caixa(Tema.PAINEL, Tema.BORDA, 10))
-	_tabuleiro.add_child(painel)
+	_painel_catalogo = PanelContainer.new()
+	_painel_catalogo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_painel_catalogo.add_theme_stylebox_override("panel", Tema.caixa(Tema.PAINEL, Tema.BORDA, 10))
+	_tabuleiro.add_child(_painel_catalogo)
 	var corpo: VBoxContainer = VBoxContainer.new()
 	corpo.add_theme_constant_override("separation", 9)
-	painel.add_child(corpo)
+	_painel_catalogo.add_child(corpo)
 	var cabecalho: HBoxContainer = HBoxContainer.new()
 	corpo.add_child(cabecalho)
 	var titulo: Label = Tema.texto("Campeões", 22)
@@ -214,13 +232,20 @@ func _montar_catalogo() -> void:
 	_busca.text = _consulta
 	_busca.text_changed.connect(_buscar)
 	cabecalho.add_child(_busca)
-	var posicoes: OptionButton = OptionButton.new()
-	posicoes.add_item("Todas as posições")
-	for posicao: String in POSICOES:
-		posicoes.add_item(POSICOES[posicao])
-	posicoes.select(0 if _filtro.is_empty() else POSICOES.keys().find(_filtro) + 1)
-	posicoes.item_selected.connect(_filtrar)
-	corpo.add_child(posicoes)
+	var filtros: HFlowContainer = HFlowContainer.new()
+	corpo.add_child(filtros)
+	_botoes_filtro.clear()
+	var nomes_filtros: Dictionary = {"": "Todas"}
+	nomes_filtros.merge(POSICOES)
+	for posicao: String in nomes_filtros:
+		var botao: Button = Tema.botao(nomes_filtros[posicao], _filtrar.bind(posicao))
+		botao.toggle_mode = true
+		botao.custom_minimum_size.y = 30.0
+		botao.add_theme_font_size_override("font_size", 14)
+		filtros.add_child(botao)
+		_botoes_filtro[posicao] = botao
+	_contexto_rota = Tema.texto("", 14, Tema.CIANO)
+	corpo.add_child(_contexto_rota)
 	_grade = GridContainer.new()
 	_grade.columns = 4 if _compacto else 6
 	_grade.add_theme_constant_override("h_separation", 6)
@@ -241,12 +266,34 @@ func _buscar(texto: String) -> void:
 	_filtrar_catalogo()
 
 
-func _filtrar(indice: int) -> void:
-	_filtro = "" if indice == 0 else str(POSICOES.keys()[indice - 1])
+func _alternar_rota(posicao: String) -> void:
+	_filtrar("" if _filtro == posicao else posicao)
+
+
+func _filtrar(posicao: String) -> void:
+	_filtro = posicao
+	_aviso.hide()
 	_filtrar_catalogo()
+	_atualizar_cartoes()
+	if _ficha.visible and is_instance_valid(_origem):
+		var lado: String = ""
+		for candidato: String in LADOS:
+			if _lados[candidato].is_ancestor_of(_origem):
+				lado = candidato
+				break
+		_inspecionar(_inspecionado, lado)
 
 
 func _filtrar_catalogo() -> void:
+	var lado: String = str(_estado["lado_jogador"])
+	for posicao: String in _botoes_filtro:
+		_botoes_filtro[posicao].set_pressed_no_signal(posicao == _filtro)
+	if _lados.has(lado):
+		_lados[lado].destacar_rota(_filtro)
+	_contexto_rota.visible = not _filtro.is_empty()
+	if _contexto_rota.visible:
+		var titular: Dictionary = _estado["times"][lado]["jogadores"].get(_filtro, {})
+		_contexto_rota.text = "Conhecimento de %s · %s" % [titular.get("apelido", ""), POSICOES[_filtro]]
 	var consulta: String = _sem_acentos(_consulta.strip_edges())
 	for id: String in _cartoes:
 		var item: Dictionary = _catalogo[id]
@@ -273,7 +320,7 @@ func _receber_estado(estado: Dictionary) -> void:
 	_atualizar_tela()
 
 
-func _atualizar_tela() -> void:
+func _atualizar_tela(animar_cartoes: bool = false, manter_grade: bool = false) -> void:
 	var vez: Dictionary = _estado.get("vez", {})
 	var terminou: bool = bool(_estado.get("concluido", false))
 	if terminou:
@@ -283,18 +330,11 @@ func _atualizar_tela() -> void:
 	else:
 		_titulo.text = "Sua vez de banir" if vez.get("acao") == "ban" else "Sua vez de escolher"
 	_auto.visible = not terminou
+	_ajuda_auto.visible = not terminou
+	_sequencia.visible = not terminou
 	_auto.disabled = _ocupado or not bool(vez.get("do_jogador", false))
-	_formacao.visible = terminou
-	_tabuleiro.visible = not terminou
-	if terminou:
-		_montar_formacao()
-		return
-	for lado: String in LADOS:
-		var contagem: Dictionary = {"pick": 0, "ban": 0}
-		for passo: Dictionary in _estado.get("passos", []):
-			if passo.get("time") == lado:
-				contagem[passo["acao"]] += 1
-		_lados[lado].atualizar(_estado["times"][lado], vez, contagem["pick"], contagem["ban"])
+	_formacao.visible = terminou and not manter_grade
+	_tabuleiro.visible = not _formacao.visible
 	_campeoes_draft.clear()
 	for ficha: Dictionary in _estado.get("campeoes", []):
 		var id: String = str(ficha["id"])
@@ -302,12 +342,76 @@ func _atualizar_tela() -> void:
 			ficha = ficha.duplicate()
 			ficha.erase("favorito_do_rival")
 		_campeoes_draft[id] = ficha
-	_atualizar_cartoes()
+	if _formacao.visible:
+		_montar_formacao()
+		return
+	_atualizar_proxima_acao(vez)
+	for lado: String in LADOS:
+		var contagem: Dictionary = {"pick": 0, "ban": 0}
+		for passo: Dictionary in _estado.get("passos", []):
+			if passo.get("time") == lado:
+				contagem[passo["acao"]] += 1
+		_lados[lado].atualizar(_estado["times"][lado], vez, contagem["pick"], contagem["ban"], _filtro)
+	_atualizar_cartoes(animar_cartoes)
 
 
-func _atualizar_cartoes() -> void:
+func _atualizar_cartoes(animar_cartoes: bool = false) -> void:
 	for id: String in _cartoes:
-		_cartoes[id].configurar(_catalogo[id], _campeoes_draft.get(id, {}), id == _inspecionado, _animar)
+		_cartoes[id].configurar(_catalogo[id], _campeoes_draft.get(id, {}), id == _inspecionado, _filtro,
+			animar_cartoes and _animar and _cartao_em_tela(id))
+
+
+func _cartao_em_tela(id: String) -> bool:
+	var cartao: Control = _cartoes.get(id)
+	return is_instance_valid(cartao) and cartao.is_visible_in_tree() and cartao.get_global_rect().intersects(_rolagem.get_global_rect())
+
+
+func _atualizar_proxima_acao(vez: Dictionary) -> void:
+	var passos: Array = _estado.get("passos", [])
+	var indice: int = int(vez.get("numero", passos.size()))
+	if indice >= passos.size():
+		_proxima_acao.text = "Depois · Formações"
+		return
+	var proximo: Dictionary = passos[indice]
+	var quantidade: int = 1
+	for i: int in range(indice + 1, passos.size()):
+		if passos[i]["time"] != proximo["time"] or passos[i]["acao"] != proximo["acao"]:
+			break
+		quantidade += 1
+	var equipe: String = "Sua equipe" if proximo["time"] == _estado["lado_jogador"] else "Rival"
+	var acao: String = "bane" if proximo["acao"] == "ban" else "escolhe"
+	_proxima_acao.text = "Depois · %s %s%s" % [equipe, acao, " %d" % quantidade if quantidade > 1 else ""]
+
+
+func _mostrar_ordem() -> void:
+	var janela: AcceptDialog = AcceptDialog.new()
+	janela.title = "Ordem do draft"
+	janela.ok_button_text = "Fechar"
+	janela.confirmed.connect(janela.queue_free)
+	janela.canceled.connect(janela.queue_free)
+	add_child(janela)
+	var lista: ScrollContainer = ScrollContainer.new()
+	lista.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	janela.add_child(lista)
+	var coluna: VBoxContainer = VBoxContainer.new()
+	coluna.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lista.add_child(coluna)
+	var passos: Array = _estado.get("passos", [])
+	var atual: int = int(_estado.get("vez", {}).get("numero", -1))
+	var ultimos: String = ""
+	for i: int in range(passos.size()):
+		var passo: Dictionary = passos[i]
+		var escolha: bool = passo["acao"] == "pick"
+		if passo["acao"] != ultimos:
+			coluna.add_child(Tema.texto("Escolhas" if escolha else "Banimentos", 16))
+			ultimos = passo["acao"]
+		var nome: String = str(_catalogo.get(passo.get("campeao", ""), {}).get("nome", "Escolhe" if escolha else "Bane"))
+		var equipe: String = "Sua equipe" if passo["time"] == _estado["lado_jogador"] else "Rival"
+		var linha: Label = Tema.texto("%02d   %s · %s%s" % [i + 1, equipe, nome, " · Agora" if i + 1 == atual else ""],
+			14, Tema.cor_lado(passo["time"]))
+		coluna.add_child(linha)
+	var limite: Vector2 = get_viewport_rect().size
+	janela.popup_centered(Vector2i(minf(450.0, limite.x - 28.0), minf(610.0, limite.y - 28.0)))
 
 
 func _montar_ficha() -> void:
@@ -363,7 +467,7 @@ func _inspecionar(id: String, lado: String) -> void:
 	_ficha_corpo.add_child(resumo)
 	_ficha_corpo.add_child(HSeparator.new())
 	_ficha_corpo.add_child(Tema.texto("Conhecimento do campeão", 17))
-	_barras_conhecimento(ficha.get("dominio", {}))
+	_barras_conhecimento(ficha.get("dominio", {}), campeao.get("posicoes", []))
 	_principais_do_rival(ficha.get("favorito_do_rival", []))
 	var situacao: String = str(ficha.get("estado", ""))
 	var vez: Dictionary = _estado.get("vez", {})
@@ -382,7 +486,7 @@ func _inspecionar(id: String, lado: String) -> void:
 	_posicionar_ficha.call_deferred()
 
 
-func _barras_conhecimento(dominio: Dictionary) -> void:
+func _barras_conhecimento(dominio: Dictionary, posicoes_campeao: Array) -> void:
 	var lado: String = str(_estado["lado_jogador"])
 	var titulares: Dictionary = _estado["times"][lado]["jogadores"]
 	for posicao: String in POSICOES:
@@ -393,10 +497,12 @@ func _barras_conhecimento(dominio: Dictionary) -> void:
 		rotulo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		rotulo.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		linha.add_child(rotulo)
-		var publicado: Variant = dominio.get(posicao, {}).get("conhecimento")
+		var perfil: Dictionary = dominio.get(posicao, {})
+		var publicado: Variant = perfil.get("conhecimento")
 		var disponivel: bool = (publicado is int or publicado is float) and float(publicado) >= 0.0 and float(publicado) <= 100.0
 		var pontos: int = roundi(float(publicado)) if disponivel else 0
-		linha.add_child(Tema.texto("%d%%" % pontos if disponivel else "—", 15, Tema.CIANO))
+		var valor: String = "%d · %s" % [pontos, perfil.get("nivel_nome", "")] if disponivel else "—"
+		linha.add_child(Tema.texto(valor, 15, _cor_conhecimento(pontos)))
 		var barra: ProgressBar = ProgressBar.new()
 		barra.max_value = 100
 		barra.value = pontos
@@ -404,8 +510,10 @@ func _barras_conhecimento(dominio: Dictionary) -> void:
 		barra.custom_minimum_size.y = 5
 		barra.add_theme_stylebox_override("background", Tema.caixa(Color("#283b5a"), Color.TRANSPARENT, 0))
 		barra.add_theme_stylebox_override("fill", Tema.caixa(_cor_conhecimento(pontos), Color.TRANSPARENT, 0))
-		barra.accessibility_name = "%s · %s" % [nome, "%d%%" % pontos if disponivel else "Conhecimento indisponível"]
+		barra.accessibility_name = "%s · %s" % [nome, valor if disponivel else "Conhecimento indisponível"]
 		_ficha_corpo.add_child(barra)
+		if not posicoes_campeao.has(posicao):
+			_ficha_corpo.add_child(Tema.texto("Fora da rota", 12, Tema.CORAL))
 
 
 func _cor_conhecimento(pontos: int) -> Color:
@@ -433,24 +541,27 @@ func _posicionar_ficha() -> void:
 	if not is_instance_valid(_ficha) or not _ficha.visible or not is_instance_valid(_origem):
 		return
 	var quadro: Vector2 = _base.size
-	var largura: float = minf(386.0, quadro.x - 24.0)
-	var curta: bool = quadro.y < 593.0
-	var inicio: Vector2 = _base.get_global_transform_with_canvas().affine_inverse() * _origem.get_global_rect().get_center()
-	var esquerda: bool = inicio.x > quadro.x * 0.5
+	var inversa: Transform2D = _base.get_global_transform_with_canvas().affine_inverse()
+	var catalogo: Rect2 = inversa * _painel_catalogo.get_global_rect()
+	var carta: Rect2 = inversa * _origem.get_global_rect()
+	var largura: float = minf(386.0, quadro.x - 24.0) if _compacto else minf(338.0, catalogo.size.x * 0.68)
+	var esquerda: bool = carta.get_center().x > catalogo.get_center().x
 	var altura: float = minf(500.0, quadro.y * (0.59 if _compacto else 0.72))
-	var x: float = (quadro.x - largura) * 0.5 if _compacto else (12.0 if esquerda else quadro.x - largura - 12.0)
-	var y: float = quadro.y - altura - 12.0 if _compacto or curta else clampf(inicio.y - 115.0, 117.0, maxf(117.0, quadro.y - altura - 12.0))
+	var x: float = (quadro.x - largura) * 0.5 if _compacto else (catalogo.position.x + 8.0 if esquerda else catalogo.end.x - largura - 8.0)
+	var y: float = maxf(12.0, quadro.y - altura - 12.0)
+	if not _compacto:
+		y = minf(y, maxf(112.0, catalogo.position.y + 76.0))
 	_ficha_rolagem.custom_minimum_size.y = maxf(30.0, minf(_ficha_corpo.get_combined_minimum_size().y + 2.0, altura - 103.0))
 	_ficha.position = Vector2(x, y)
 	_ficha.size = Vector2(largura, 0)
 	_linha.clear_points()
-	if _compacto or curta or inicio.y < 46.0 or inicio.y > quadro.y:
+	if _compacto or not _grade.is_ancestor_of(_origem):
 		return
-	var destino: Vector2 = _ficha.position + Vector2(largura if esquerda else 0.0, 40.0)
-	var direcao: float = signf(inicio.x - destino.x)
-	if absf(inicio.x - destino.x) > 12.0:
-		var curva: Vector2 = destino + Vector2(direcao * minf(absf(inicio.x - destino.x) * 0.5, 63.0), 0.0)
-		_linha.points = PackedVector2Array([inicio, Vector2(curva.x, inicio.y), destino])
+	var inicio: Vector2 = Vector2(carta.position.x if esquerda else carta.end.x, carta.get_center().y)
+	var destino: Vector2 = Vector2(x + largura if esquerda else x, clampf(inicio.y + 9.0, y + 10.0, y + maxf(10.0, _ficha.size.y - 10.0)))
+	var distancia: float = inicio.x - destino.x if esquerda else destino.x - inicio.x
+	if distancia >= 3.0 and distancia <= 28.0 and absf(inicio.y - destino.y) <= 25.0:
+		_linha.points = PackedVector2Array([inicio, Vector2(lerpf(inicio.x, destino.x, 0.5), inicio.y), destino])
 
 
 func _fechar_ficha(restaurar: bool = false) -> void:
@@ -495,8 +606,13 @@ func _montar_formacao() -> void:
 			var id: String = str(time["posicoes"][posicao])
 			var texto: String = "%s · %s\n%s" % [POSICOES[posicao], titular["apelido"], _catalogo[id]["nome"]]
 			if lado == meu_lado:
+				var perfil: Dictionary = _campeoes_draft.get(id, {}).get("dominio", {}).get(posicao, {})
+				if perfil.has("conhecimento"):
+					texto += "\n%s %d" % [perfil.get("nivel_nome", ""), perfil["conhecimento"]]
+				if not _catalogo[id].get("posicoes", []).has(posicao):
+					texto += " · Fora da rota"
 				var botao: Button = Tema.botao(texto, _trocar.bind(posicao), posicao == _troca)
-				botao.custom_minimum_size.y = 71
+				botao.custom_minimum_size.y = 78
 				botao.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 				botao.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 				grade.add_child(botao)
@@ -508,6 +624,9 @@ func _montar_formacao() -> void:
 				rotulo.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 				rotulo.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 				grade.add_child(rotulo)
+	var dica: Label = Tema.texto("Clique em duas posições da sua equipe para trocar os campeões.", 15, Tema.SUAVE)
+	dica.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_formacao.add_child(dica)
 	var voltar: Button = Tema.botao("Voltar à sede", _voltar)
 	voltar.size_flags_horizontal = Control.SIZE_SHRINK_END
 	_formacao.add_child(voltar)
@@ -552,7 +671,7 @@ func _acao_manual() -> void:
 
 
 func _delegar() -> void:
-	_executar(Jogo.delegar_vez_ao_tecnico)
+	_executar(Jogo.escolher_automatico_no_draft.bind(_filtro))
 
 
 func _executar(acao: Callable) -> void:
@@ -568,12 +687,27 @@ func _executar(acao: Callable) -> void:
 		return
 	_fechar_ficha()
 	_estado = resultado["estado"]
-	_atualizar_tela()
-	if _animar and not bool(_estado.get("concluido", false)):
+	var terminou: bool = bool(_estado.get("concluido", false))
+	var manter_grade: bool = _animar and terminou and _tabuleiro.visible and _tem_nova_escolha_visivel(anteriores)
+	_atualizar_tela(true, manter_grade)
+	if manter_grade:
+		await get_tree().create_timer(Cartao.DURACAO_ESCOLHA).timeout
+		if _saindo:
+			return
+		_atualizar_tela()
+	elif _animar and not terminou:
 		await get_tree().process_frame
 		_animar_escolhas(anteriores)
 	_ocupado = false
 	_auto.disabled = not bool(_estado.get("vez", {}).get("do_jogador", false))
+
+
+func _tem_nova_escolha_visivel(anteriores: Dictionary) -> bool:
+	for ficha: Dictionary in _estado.get("campeoes", []):
+		var id: String = str(ficha["id"])
+		if ficha.get("estado") == "escolhido" and anteriores.get(id, {}).get("estado") == "livre" and _cartao_em_tela(id):
+			return true
+	return false
 
 
 func _animar_escolhas(anteriores: Dictionary) -> void:
@@ -617,7 +751,7 @@ func _mostrar_erros(resultado: Dictionary) -> void:
 
 
 func _mostrar_ajuda() -> void:
-	_aviso.text = "O técnico decide a ação atual. Sem técnico, a escolha automática é menos precisa."
+	_aviso.text = AJUDA_AUTO
 	_aviso.visible = not _aviso.visible
 
 
