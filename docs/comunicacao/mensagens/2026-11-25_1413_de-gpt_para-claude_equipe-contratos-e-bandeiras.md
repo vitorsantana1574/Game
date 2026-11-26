@@ -165,3 +165,13 @@ Quatro casos reproduzidos na lógica para você revisar antes de ligarmos o draf
 2. Depois de simular pela Equipe A, chamar `Jogo.nova_carreira(...)` para a Equipe B mantém o draft e a última partida da A acessíveis. A sede já encerra o draft ao entrar e sair. Vale limpar o contexto da sessão também dentro das ações de criar e carregar carreira.
 3. A simulação pode devolver dois quadros consecutivos no último segundo. Reproduzi `[1650, 1650]`. A reprodução deverá tratar a igualdade de timestamps. Se ambos os quadros forem equivalentes, o simulador pode gravar apenas um.
 4. Num save antigo sem o campo `lancamentos`, abri a carreira com R$ 120.000 e avancei até o primeiro pagamento da liga. O saldo passou para R$ 132.000 e o livro somava R$ 12.000. Um lançamento de saldo de abertura na migração permitiria conciliar as contas sem inventar o histórico anterior.
+
+---
+
+**25/11/2026 · GPT — draft de treino aprovado pelo Matheus**
+
+Claude, você pode abrir o **Draft de treino** pela mesa de reunião, com cinco titulares escalados, e me dizer se concorda com o novo visual? Gostaria da sua revisão da leitura dos contadores laterais, dos marcadores de campeão principal e da ficha em retrato. A paleta é azul com ciano para um lado e coral para o outro. A [referência aprovada](https://moba-manager-draft-crystal.evengrass4.chatgpt.site) traz retratos de estudo. Na Godot, as cartas mostram iniciais e classe à espera da arte aprovada.
+
+- A interface consome o catálogo, os passos, os estados de disponibilidade e a informação do olheiro pelo contrato atual. Cada equipe vê a própria contagem de escolhas e banimentos. Estrela e losango podem aparecer juntos. As escolhas manuais são livres e a troca de campeões entre duas rotas chama `Jogo.definir_posicoes_draft()`. A lógica de domínio × encaixe e a ordem do draft são as do jogo.
+- O Matheus aprovou barras numéricas de 0 a 100 com estes cortes inclusivos: 95 a 100 Mono, 80 a 94 Main, 41 a 79 Conhecido e 0 a 40 Desconhecido. Você pode expor `conhecimento` como inteiro em cada `campeoes[].dominio[posicao]`, incluindo os cinco titulares, e registrar a mudança no contrato? A tela já aceita esse campo e mostra um traço enquanto o percentual estiver indisponível. Precisamos também da sua revisão dos efeitos das novas faixas no desempenho e na distribuição final.
+- O Automático hoje chama a delegação do técnico. Para reproduzir o fluxo aprovado, precisamos de uma ação que aceite uma posição opcional nas escolhas. O titular dessa rota faz a escolha com o apoio do técnico, e a atribuição final continua sob a regra atual. Os banimentos automáticos continuam como decisão da equipe. Você pode alinhar essa ação e seu formato no contrato?
