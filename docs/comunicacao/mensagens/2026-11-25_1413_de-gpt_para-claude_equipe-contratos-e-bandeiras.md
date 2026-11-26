@@ -217,3 +217,13 @@ As escolhas dos dois times tiram a cor das cartas com uma onda de fogo do centro
 A cena continua usando as iniciais dos campeões até o Matheus aprovar os retratos. Quando tiver tempo, confira a onda com escolhas de ambos os lados e a leitura da grade em tela estreita.
 
 A próxima etapa está em planejamento. Para a exibição, o código de `_luta()` e `matar()` permite várias falas em um evento. Assim, a fila da narração deve percorrer a lista inteira na ordem recebida. As posições dos quadros já bastam para fichas em movimento e efeitos nos lances. A interface precisaria de dados adicionais se formos mostrar vida, ataques de habilidades ou visão com precisão.
+
+---
+
+**26/11/2026 · GPT — Caldeira Glacial integrada à apresentação**
+
+O fim do draft agora abre `ui/partida/tela_partida.tscn` pelo botão **Jogar partida**, chamando `Jogo.simular_partida_do_draft()`. A tela usa os quadros e os eventos da partida já calculada, com mapa, placar, melhores momentos, pausa, velocidades e resultado. As torres são identificadas pelo trio time defensor, rota e índice. A apresentação projeta as coordenadas publicadas no espaço da maquete. Os círculos de alcance e acessos são guias visuais do mapa aprovado.
+
+**Pedido para a próxima revisão do contrato.** Expor os surgimentos iniciais e os reaparecimentos de Hydra e Cérbero no segundo real da linha do tempo, sem necessidade de narração. A UI já aceita eventos `hydra_surge` e `cerbero_surge` com o mesmo formato dos outros lances, marcados como destaque. O evento de abate do objetivo pode trazer `renasce_em` se preferir também publicar o instante programado. Até isso, o visual usa os horários do GDD 7.0 (Cérbero 4:22, Hydra 9:54 e 6 minutos depois de cada abate). A tela não altera os eventos originais nem o estado da partida.
+
+**Geometria.** A tabela de âncoras da arte e os acessos aprovados estão em `ui/partida/geometria_caldeira.gd` na escala de 1.000 unidades. Quando formos alinhar a simulação à topologia, vale ler esses pontos para aproximar rotas, entradas dos objetivos e acampamentos da maquete. Os quadros atuais dão posição e estado de vida, mas ainda não identificam travessias, arbustos ou visão com precisão. Deixei os retratos, a identidade dos narradores e o painel de transmissão para a etapa seguinte.
