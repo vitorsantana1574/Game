@@ -7,6 +7,7 @@ const BandeiraNaSede = preload("res://ui/componentes/bandeira_na_sede.gd")
 const TexturasWebp = preload("res://ui/componentes/texturas_webp.gd")
 const ARTE: String = "res://assets/sprites/sede/aurora.webp"
 const MENU: String = "res://ui/telas/tela_inicial.tscn"
+const DRAFT: String = "res://ui/telas/tela_draft.tscn"
 const ICONE_ESTACAO: Texture2D = preload("res://assets/sprites/icones/sede_estacao.svg")
 const ICONES: Dictionary = {
 	"equipe": preload("res://assets/sprites/icones/sede_equipe.svg"),
@@ -418,6 +419,8 @@ func _avancar(ate_evento: bool = false) -> void:
 	if not bool(resultado.get("ok", false)):
 		_erro(resultado)
 		return
+	if not Jogo.estado_draft().is_empty():
+		Jogo.encerrar_draft()
 	_atualizar_apos_avanco()
 	if not _fim and _ficha.visible and _alvo == "calendario":
 		var acao: Control = _ficha.corpo.get_child(-1 if ate_evento else -2)
@@ -805,34 +808,61 @@ func _revisar_renovacao(id: String, salario: int, meses: int, titular: bool) -> 
 
 
 func _tecnico() -> void:
-	var categoria: String = "Mesa de reunião"
 	var atual: Dictionary = Jogo.tecnico_atual()
 	if not atual.is_empty():
-		_ficha_tecnico(_ficha.atualizar(categoria, atual["nome"], false), atual)
+		_ficha_tecnico(_mesa_corpo(atual["nome"]), atual)
 		return
 	var candidatos: Array[Dictionary] = Jogo.listar_candidatos_tecnico()
 	if _detalhe == "candidato":
 		for candidato: Dictionary in candidatos:
 			if candidato["id"] == _id_pessoa:
-				var corpo: VBoxContainer = _ficha.atualizar(categoria, candidato["nome"], true)
+				var corpo: VBoxContainer = _ficha.atualizar("Mesa de reunião", candidato["nome"], true)
 				_ficha_tecnico(corpo, candidato)
 				var duracao: OptionButton = _duracoes(corpo)
 				_botao(corpo, "Confirmar contratação", _contratar_tecnico.bind(candidato["id"], duracao), true)
 				return
 		_detalhe = ""
 	if not candidatos.is_empty():
-		var lista: VBoxContainer = _ficha.atualizar(categoria, "Candidatos a técnico", false)
+		var lista: VBoxContainer = _mesa_corpo("Candidatos a técnico")
 		for candidato: Dictionary in candidatos:
 			_botao(lista, "%s  ·  %s/mês" % [candidato["nome"], _reais(int(candidato["salario_pedido"]))], _navegar.bind("candidato", candidato["id"]))
 		return
 	var anuncio: Dictionary = Jogo.estado_anuncio()
 	if not anuncio.is_empty():
-		_linha(_ficha.atualizar(categoria, "Anúncio em andamento", false), "Chegada dos candidatos", "Em %d dias" % anuncio["dias_restantes"])
+		_linha(_mesa_corpo("Anúncio em andamento"), "Chegada dos candidatos", "Em %d dias" % anuncio["dias_restantes"])
 		return
 	if _detalhe == "anuncio":
-		_formulario_anuncio(_ficha.atualizar(categoria, "Anúncio de vaga", true))
+		_formulario_anuncio(_ficha.atualizar("Mesa de reunião", "Anúncio de vaga", true))
 		return
-	_botao(_ficha.atualizar(categoria, "Vaga de técnico", false), "Publicar anúncio", _navegar.bind("anuncio"), true)
+	_botao(_mesa_corpo("Vaga de técnico"), "Publicar anúncio", _navegar.bind("anuncio"))
+
+
+func _mesa_corpo(titulo: String) -> VBoxContainer:
+	var corpo: VBoxContainer = _ficha.atualizar("Mesa de reunião", titulo, false)
+	_botao(corpo, "Draft de treino", _abrir_draft, true)
+	return corpo
+
+
+func _abrir_draft() -> void:
+	if _saindo or _fim:
+		return
+	var draft: Dictionary = Jogo.estado_draft()
+	if not draft.is_empty():
+		var lado: String = str(draft["lado_jogador"])
+		var jogadores: Dictionary = draft["times"][lado]["jogadores"]
+		for posicao: String in POSICOES:
+			if jogadores[posicao]["id"] == _titulares.get(posicao, ""):
+				continue
+			Jogo.encerrar_draft()
+			draft = {}
+			break
+	if draft.is_empty():
+		var resultado: Dictionary = Jogo.iniciar_draft()
+		if not bool(resultado.get("ok", false)):
+			_erro(resultado)
+			return
+	_saindo = true
+	get_tree().change_scene_to_file.call_deferred(DRAFT)
 
 
 func _ficha_tecnico(corpo: VBoxContainer, pessoa: Dictionary) -> void:
