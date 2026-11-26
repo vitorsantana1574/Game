@@ -3,6 +3,7 @@ extends RefCounted
 
 const Mapa = preload("res://ui/partida/mapa_caldeira.gd")
 const Geometria = preload("res://ui/partida/geometria_caldeira.gd")
+const Animacao = preload("res://ui/partida/animacao_atlas.gd")
 # Horários de apresentação publicados no GDD 7.0. O contrato 2.7 só envia
 # os abates hoje. Eventos de surgimento podem substituir essa trilha auxiliar.
 const PRIMEIRA_APARICAO: Dictionary = {"cerbero": 262, "hydra": 594}
@@ -23,6 +24,9 @@ var _mapa: Mapa
 var _quadro_indice: int
 var _lance_indice: int
 var _destaque_indice: int
+## Surgimentos de Hydra e Cérbero: a animação começa antes do horário oficial, para o monstro
+## terminar de surgir no segundo em que pode ser atacado. [{"id", "t", "iniciada"}]
+var _aparicoes: Array[Dictionary] = []
 
 
 func preparar(partida: Dictionary, mapa: Mapa) -> void:
@@ -44,10 +48,18 @@ func preparar(partida: Dictionary, mapa: Mapa) -> void:
 	_programar_epicos()
 	_eventos.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return int(a["t"]) < int(b["t"]) if a["t"] != b["t"] else int(a.get("indice", -1)) < int(b.get("indice", -1)))
+	_aparicoes.clear()
 	for lancamento: Dictionary in _eventos:
 		var t: float = float(lancamento["t"])
+		var tipo: String = lancamento["tipo"]
+		if tipo.ends_with("_surge"):
+			var id: String = tipo.trim_suffix("_surge")
+			_aparicoes.append({"id": id, "t": int(lancamento["t"]), "iniciada": false})
+			# Nos melhores momentos o trecho começa junto com a animação (ritmo 1x) e vai até o surgimento.
+			_destaques.append(maxf(0.0, t - Animacao.duracao_de(id)))
 		if lancamento.get("destaque", false) and (_destaques.is_empty() or _destaques[-1] != t):
 			_destaques.append(t)
+	_destaques.sort()
 
 
 func avancar(delta: float, velocidade: float, melhores: bool) -> Array[Dictionary]:
@@ -70,6 +82,30 @@ func avancar(delta: float, velocidade: float, melhores: bool) -> Array[Dictionar
 		lances.append(_eventos[_lance_indice])
 		_lance_indice += 1
 	return lances
+
+
+## Monstros cuja animação deve começar agora. velocidade = segundos de partida por segundo real.
+func surgimentos_a_iniciar(velocidade: float) -> Array[String]:
+	var ids: Array[String] = []
+	for aparicao: Dictionary in _aparicoes:
+		if aparicao["iniciada"]:
+			continue
+		var inicio: float = float(aparicao["t"]) - Animacao.duracao_de(aparicao["id"]) * velocidade
+		if segundo >= inicio:
+			aparicao["iniciada"] = true
+			ids.append(aparicao["id"])
+	return ids
+
+
+## Marca o surgimento oficial; devolve true se a animação ainda não tinha começado.
+func iniciar_no_horario(lance: Dictionary) -> bool:
+	var id: String = String(lance["tipo"]).trim_suffix("_surge")
+	for aparicao: Dictionary in _aparicoes:
+		if aparicao["id"] == id and aparicao["t"] == int(lance["t"]):
+			var faltava: bool = not aparicao["iniciada"]
+			aparicao["iniciada"] = true
+			return faltava
+	return true
 
 
 func fichas_no_mapa() -> Array[Dictionary]:

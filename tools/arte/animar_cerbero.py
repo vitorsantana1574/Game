@@ -21,7 +21,8 @@ ORIGEM = (598, 546)       # canto da célula no tabuleiro (unidades), igual ao a
 TAMANHO = (206, 198)      # tamanho exibido (unidades)
 ESCALA = 2                # renderiza em 2x e reduz no fim
 FPS = 30
-DURACAO = 5.0
+LENTO = 1.3               # coreografia 30% mais lenta (pedido do dono, 26/11); partículas seguem o tempo real
+DURACAO = 5.0 * LENTO
 
 # Pose de descanso (pixels da arte recortada, 299 x 287).
 CORPO = {"costas": (160, 52), "quadril": (205, 72), "ombro": (128, 92), "centro": (155, 115),
@@ -314,7 +315,9 @@ def gerar(previa=False):
     passos_feitos = set()
     dt = 1.0 / FPS
     for i in range(n_quadros):
-        t = i / FPS
+        tr = i / FPS              # tempo real (física das partículas)
+        t = tr / LENTO            # tempo da coreografia
+        dtc = dt / LENTO
         rq = np.random.default_rng(1000 + i)
         # --- tempo das peças -------------------------------------------------------------
         abertura = ac.sair(ac.faixa(t, 0.86, 1.18), 2.4) * (1 - ac.mais_suave(ac.faixa(t, 3.55, 4.4)))
@@ -386,7 +389,7 @@ def gerar(previa=False):
         # --- partículas -------------------------------------------------------------------
         if t >= 0.9 and not pedras_soltas:
             pedras_soltas = True
-            soltar_poeira(BURACO[0], BURACO[1], 26, 40, 13, 0.55, t, vida=1.6, sobe=10)
+            soltar_poeira(BURACO[0], BURACO[1], 26, 40, 13, 0.55, tr, vida=1.6, sobe=10)
         if pedras_soltas:
             for p in pedras:
                 p.avancar(dt)
@@ -397,50 +400,50 @@ def gerar(previa=False):
                 passos_feitos.add(k)
                 nome = "pata_esq" if k % 2 == 0 else "pata_dir"
                 j = nomes.index(nome)
-                soltar_poeira(alcas[j][0], alcas[j][1], 7, 9, 7, 0.45, t, vida=0.9, sobe=6)
-        if 3.2 <= t < 3.2 + dt:
+                soltar_poeira(alcas[j][0], alcas[j][1], 7, 9, 7, 0.45, tr, vida=0.9, sobe=6)
+        if 3.2 <= t < 3.2 + dtc:
             for nome in ("pata_esq", "pata_dir"):
                 j = nomes.index(nome)
-                soltar_poeira(alcas[j][0], alcas[j][1], 10, 14, 9, 0.5, t, vida=1.1, sobe=8)
-        if 3.95 <= t < 3.95 + dt:
-            soltar_poeira(CORPO["centro"][0], CORPO["centro"][1] + 30, 16, 60, 12, 0.35, t, vida=1.3, sobe=4)
+                soltar_poeira(alcas[j][0], alcas[j][1], 10, 14, 9, 0.5, tr, vida=1.1, sobe=8)
+        if 3.95 <= t < 3.95 + dtc:
+            soltar_poeira(CORPO["centro"][0], CORPO["centro"][1] + 30, 16, 60, 12, 0.35, tr, vida=1.3, sobe=4)
         # Brasas: saem das rachaduras e do buraco; jorro das bocas no rugido.
-        taxa = 3 * calor + 10 * ac.pulso(t, 1.0, 0.3) + 14 * ac.pulso(t, 3.35, 0.35)
+        taxa = (3 * calor + 10 * ac.pulso(t, 1.0, 0.3) + 14 * ac.pulso(t, 3.35, 0.35)) / LENTO
         for _ in range(rq.poisson(taxa)):
             if t > 3.15 and rq.uniform() < 0.7:
                 j = nomes.index(rq.choice(bocas))
                 bx, by = alcas[j]
                 ang = rq.uniform(-2.6, -0.5)
                 vel = rq.uniform(30, 90)
-                brasas.append([bx * ESCALA, by * ESCALA, t, rq.uniform(0.5, 1.1), math.cos(ang) * vel * ESCALA, math.sin(ang) * vel * ESCALA, rq.uniform(0.8, 1.6) * ESCALA])
+                brasas.append([bx * ESCALA, by * ESCALA, tr, rq.uniform(0.5, 1.1), math.cos(ang) * vel * ESCALA, math.sin(ang) * vel * ESCALA, rq.uniform(0.8, 1.6) * ESCALA])
             else:
                 a = rq.uniform(0, 2 * math.pi)
                 r = rq.uniform(0, 1)
                 bx = BURACO[0] + math.cos(a) * RAIOS_BURACO[0] * r * max(abertura, 0.6)
                 by = BURACO[1] + math.sin(a) * RAIOS_BURACO[1] * r * max(abertura, 0.6)
-                brasas.append([bx * ESCALA, by * ESCALA, t, rq.uniform(0.7, 1.5), rq.uniform(-8, 8) * ESCALA, rq.uniform(-45, -20) * ESCALA, rq.uniform(0.7, 1.4) * ESCALA])
+                brasas.append([bx * ESCALA, by * ESCALA, tr, rq.uniform(0.7, 1.5), rq.uniform(-8, 8) * ESCALA, rq.uniform(-45, -20) * ESCALA, rq.uniform(0.7, 1.4) * ESCALA])
         vivas = []
         for b in brasas:
-            idade = (t - b[2]) / b[3]
+            idade = (tr - b[2]) / b[3]
             if idade >= 1:
                 continue
             vivas.append(b)
-            x = b[0] + b[4] * (t - b[2])
-            y = b[1] + b[5] * (t - b[2]) + 30 * ESCALA * (t - b[2]) ** 2 * 0.3
-            cintila = 0.6 + 0.4 * math.sin(t * 40 + b[0])
+            x = b[0] + b[4] * (tr - b[2])
+            y = b[1] + b[5] * (tr - b[2]) + 30 * ESCALA * (tr - b[2]) ** 2 * 0.3
+            cintila = 0.6 + 0.4 * math.sin(tr * 40 + b[0])
             ac.mancha(cena, x, y, b[6] * 1.6, (1.0, 0.55, 0.15), (1 - idade) * cintila * 0.9, nitidez=2.0, aditiva=True)
             ac.mancha(cena, x, y, b[6] * 0.6, (1.0, 0.9, 0.6), (1 - idade) * cintila, nitidez=2.5, aditiva=True)
         brasas = vivas
         vivas = []
         for p in poeira:
-            idade = (t - p[2]) / p[3]
+            idade = (tr - p[2]) / p[3]
             if idade < 0 or idade >= 1:
                 if idade < 1:
                     vivas.append(p)
                 continue
             vivas.append(p)
-            x = p[0] + p[7] * (t - p[2]) * (1 - idade * 0.5)
-            y = p[1] + p[8] * (t - p[2]) * (1 - idade * 0.5)
+            x = p[0] + p[7] * (tr - p[2]) * (1 - idade * 0.5)
+            y = p[1] + p[8] * (tr - p[2]) * (1 - idade * 0.5)
             r = p[4] + (p[5] - p[4]) * ac.sair(idade, 2)
             a = p[6] * (1 - idade) ** 1.6 * min(1, idade * 6)
             ac.mancha(cena, x, y, r, (0.62, 0.50, 0.42), a, nitidez=1.1)
@@ -471,16 +474,14 @@ def gerar(previa=False):
             cena = cena * (1 - mistura_final) + final * mistura_final
         cena = np.clip(cena, 0, 1)
         cena[..., 3] = 1.0
-        cena = ac.com_alfa(cena, oval)
-        quadro = ac.para_imagem(cena).resize((w0, h0), Image.LANCZOS)
+        quadro = ac.para_imagem(cena).convert("RGB").resize((w0, h0), Image.LANCZOS)
         quadros.append(quadro)
         if i % 15 == 0:
             print(f"  quadro {i}/{n_quadros}", flush=True)
-    # Último quadro exatamente igual à arte do mapa recortada no oval.
-    ultimo = ac.para_float(final_img)
-    ultimo = ac.com_alfa(ultimo, np.asarray(vazio_img)[..., 3].astype(np.float32) / 255)
-    quadros.append(ac.para_imagem(ultimo))
-    return quadros
+    # Último quadro exatamente igual à arte do mapa (o recorte vem da máscara).
+    quadros.append(final_img.convert("RGB"))
+    mascara_saida = np.asarray(vazio_img)[..., 3].astype(np.float32) / 255
+    return quadros, mascara_saida
 
 
 def deslocar_alfa(a, dx, dy):
@@ -489,12 +490,15 @@ def deslocar_alfa(a, dx, dy):
 
 if __name__ == "__main__":
     previa = "--previa" in sys.argv
-    quadros = gerar(previa)
+    quadros, mascara_saida = gerar(previa)
     if previa:
-        ac.salvar_gif(quadros, "/tmp/anim/cerbero_novo.gif", FPS)
-        ac.folha_de_contato(quadros, "/tmp/anim/cerbero_novo_folha.png", colunas=8, passo=4)
-        for i, q in enumerate(quadros):
+        m = Image.fromarray((mascara_saida * 255).astype(np.uint8))
+        vistos = [Image.merge("RGBA", (*q.split(), m)) for q in quadros]
+        ac.salvar_gif(vistos, "/tmp/anim/cerbero_novo.gif", FPS)
+        ac.folha_de_contato(vistos, "/tmp/anim/cerbero_novo_folha.png", colunas=8, passo=4)
+        for i, q in enumerate(vistos):
             q.save(f"/tmp/anim/cerbero_novo_{i:03d}.png")
     if "--salvar" in sys.argv:
         print(ac.empacotar(quadros, quadros[0].size, 6, 78, "assets/animacoes/caldeira/cerbero"))
+        ac.salvar_mascara(mascara_saida, "assets/animacoes/caldeira/cerbero_mascara.webp")
     print(len(quadros), "quadros", quadros[0].size)

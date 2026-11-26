@@ -249,7 +249,7 @@ def poligono_mascara(forma, pontos):
 
 # --- Atlas ----------------------------------------------------------------------------
 
-def empacotar(quadros, celula, colunas, por_pagina, prefixo, qualidade=88):
+def empacotar(quadros, celula, colunas, por_pagina, prefixo, qualidade=65, qualidade_alfa=75):
     """Salva os quadros em páginas no formato lido por animacao_atlas.gd.
 
     Cada célula fica em (coluna * (L + 4) + 2, linha * (A + 4) + 2), com a borda repetida
@@ -260,25 +260,38 @@ def empacotar(quadros, celula, colunas, por_pagina, prefixo, qualidade=88):
     for inicio in range(0, len(quadros), por_pagina):
         lote = quadros[inicio:inicio + por_pagina]
         linhas = math.ceil(len(lote) / colunas)
-        pagina = np.zeros((linhas * (altura + 4), colunas * (largura + 4), 4), np.uint8)
+        opaco = lote[0].mode == "RGB"
+        canais = 3 if opaco else 4
+        pagina = np.zeros((linhas * (altura + 4), colunas * (largura + 4), canais), np.uint8)
         for i, quadro in enumerate(lote):
-            arr = np.asarray(quadro.convert("RGBA"))
+            arr = np.asarray(quadro.convert("RGB" if opaco else "RGBA"))
             com_margem = np.pad(arr, ((2, 2), (2, 2), (0, 0)), mode="edge")
-            # A margem repete a cor, mas sem opacidade, para não criar contorno.
-            com_margem[:2, :, 3] = 0
-            com_margem[-2:, :, 3] = 0
-            com_margem[:, :2, 3] = 0
-            com_margem[:, -2:, 3] = 0
+            if not opaco:
+                # A margem repete a cor, mas sem opacidade, para não criar contorno.
+                com_margem[:2, :, 3] = 0
+                com_margem[-2:, :, 3] = 0
+                com_margem[:, :2, 3] = 0
+                com_margem[:, -2:, 3] = 0
             c, l = i % colunas, i // colunas
             pagina[l * (altura + 4):(l + 1) * (altura + 4), c * (largura + 4):(c + 1) * (largura + 4)] = com_margem
         caminho = os.path.join(RAIZ, f"{prefixo}_{len(paginas)}.webp")
-        Image.fromarray(pagina, "RGBA").save(caminho, "WEBP", quality=qualidade, method=6, alpha_quality=90)
+        if opaco:
+            # Sem alfa: o recorte da arena vem de uma máscara única (bem mais leve que alfa em todo quadro).
+            Image.fromarray(pagina, "RGB").save(caminho, "WEBP", quality=qualidade, method=6)
+        else:
+            Image.fromarray(pagina, "RGBA").save(caminho, "WEBP", quality=qualidade, method=6, alpha_quality=qualidade_alfa)
         paginas.append(caminho)
     return paginas
 
 
+def salvar_mascara(mascara: np.ndarray, caminho):
+    """Máscara de recorte (cinza) para animações opacas."""
+    Image.fromarray((np.clip(mascara, 0, 1) * 255 + 0.5).astype(np.uint8), "L").convert("RGB").save(
+        os.path.join(RAIZ, caminho), "WEBP", quality=90, method=6)
+
+
 def folha_de_contato(quadros, caminho, colunas=8, passo=1, fundo=(28, 40, 52, 255)):
-    sel = quadros[::passo]
+    sel = [q.convert("RGBA") for q in quadros[::passo]]
     w, h = sel[0].size
     linhas = math.ceil(len(sel) / colunas)
     folha = Image.new("RGBA", (colunas * w, linhas * h), fundo)
@@ -290,6 +303,7 @@ def folha_de_contato(quadros, caminho, colunas=8, passo=1, fundo=(28, 40, 52, 25
 def salvar_gif(quadros, caminho, fps, fundo=(28, 40, 52)):
     lista = []
     for q in quadros:
+        q = q.convert("RGBA")
         base = Image.new("RGB", q.size, fundo)
         base.paste(q, (0, 0), q)
         lista.append(base)

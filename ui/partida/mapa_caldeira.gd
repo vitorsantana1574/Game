@@ -35,6 +35,7 @@ var _epicos: Dictionary = {}
 var _guardioes: Array[bool] = [true, true]
 var _placas_torre: Dictionary = {}
 var _atlas: Dictionary = {}
+var _mascaras: Dictionary = {}
 var _efeitos: Dictionary = {}
 var _luta: Dictionary = {}
 var _camera: Dictionary = {}
@@ -148,7 +149,11 @@ func espera_epico(id: String, ate: float) -> void:
 	_epicos[id]["placa"].show()
 
 
+## Começa a animação de surgimento (a tela chama alguns segundos antes do horário oficial,
+## para o monstro terminar de surgir no instante em que pode ser atacado).
 func surgir(id: String) -> void:
+	if _efeitos.has(id):
+		return
 	_epicos[id]["disponivel_em"] = -1.0
 	_epicos[id]["placa"].hide()
 	if animar and not _atlas.is_empty():
@@ -209,6 +214,12 @@ func _carregar_atlas() -> void:
 				return
 			paginas.append(textura)
 		_atlas[tipo] = paginas
+		if tipo in Animacao.COM_MASCARA:
+			var mascara: Texture2D = Texturas.carregar(EFEITOS + "%s_mascara.webp" % tipo)
+			if mascara == null:
+				_atlas.clear()
+				return
+			_mascaras[tipo] = mascara
 
 
 func _iniciar(id: String, tipo: String, origem: Vector2) -> void:
@@ -217,7 +228,7 @@ func _iniciar(id: String, tipo: String, origem: Vector2) -> void:
 	var efeito: Animacao = Animacao.new()
 	_tabuleiro.add_child(efeito)
 	efeito.z_index = 1
-	efeito.configurar(tipo, _atlas[tipo], origem)
+	efeito.configurar(tipo, _atlas[tipo], origem, _mascaras.get(tipo, null))
 	_efeitos[id] = {"no": efeito, "tempo": 0.0}
 
 

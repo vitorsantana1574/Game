@@ -283,21 +283,22 @@ def gerar():
             cena = cena * (1 - mistura_final) + final * mistura_final
         cena = np.clip(cena, 0, 1)
         cena[..., 3] = 1.0
-        cena = ac.com_alfa(cena, oval)
-        quadros.append(ac.para_imagem(cena).resize((w0, h0), Image.LANCZOS))
+        quadros.append(ac.para_imagem(cena).convert("RGB").resize((w0, h0), Image.LANCZOS))
         if i % 15 == 0:
             print(f"  quadro {i}/{n}", flush=True)
-    ultimo = ac.com_alfa(ac.para_float(final_img), np.asarray(vazio_img)[..., 3].astype(np.float32) / 255)
-    quadros.append(ac.para_imagem(ultimo))
-    return quadros
+    quadros.append(final_img.convert("RGB"))
+    return quadros, np.asarray(vazio_img)[..., 3].astype(np.float32) / 255
 
 
 if __name__ == "__main__":
-    quadros = gerar()
+    quadros, mascara_saida = gerar()
     if "--previa" in sys.argv:
-        ac.salvar_gif(quadros, "/tmp/anim/hydra_nova.gif", FPS)
-        for i, q in enumerate(quadros):
+        m = Image.fromarray((mascara_saida * 255).astype(np.uint8))
+        vistos = [Image.merge("RGBA", (*q.split(), m)) for q in quadros]
+        ac.salvar_gif(vistos, "/tmp/anim/hydra_nova.gif", FPS)
+        for i, q in enumerate(vistos):
             q.save(f"/tmp/anim/hydra_nova_{i:03d}.png")
     if "--salvar" in sys.argv:
         print(ac.empacotar(quadros, quadros[0].size, 5, 55, "assets/animacoes/caldeira/hydra"))
+        ac.salvar_mascara(mascara_saida, "assets/animacoes/caldeira/hydra_mascara.webp")
     print(len(quadros), "quadros", quadros[0].size)

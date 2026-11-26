@@ -21,7 +21,7 @@ const ROTAS: Array[String] = ["topo", "meio", "baixo"]
 const ROTA_DE: Dictionary = {"topo": "topo", "meio": "meio", "atirador": "baixo", "suporte": "baixo", "selva": ""}
 const LADOS: Array[String] = ["azul", "vermelho"]
 ## Tipos de lance que sempre entram nos melhores momentos; os demais decidem caso a caso ("destaque").
-const SEMPRE_DESTAQUE: Array[String] = ["inicio", "hydra", "cerbero", "guardiao", "guardiao_renasce", "vitoria"]
+const SEMPRE_DESTAQUE: Array[String] = ["inicio", "hydra", "cerbero", "hydra_surge", "cerbero_surge", "guardiao", "guardiao_renasce", "vitoria"]
 
 
 class Participante:
@@ -79,6 +79,8 @@ var bonus_hydra: Array[float] = [0.0, 0.0]
 var bonus_cerbero: Array[float] = [0.0, 0.0]
 var hydra_disponivel_em: float = 0.0
 var cerbero_disponivel_em: float = 0.0
+var _em_campo: Dictionary = {"hydra": false, "cerbero": false}   # já anunciado como disponível
+var _surgimentos: Dictionary = {"hydra": 0, "cerbero": 0}
 var xp_onda: float
 var ouro_onda: float
 var _xp_acumulada: Array[float] = []   # XP total para chegar a cada nível (índice = nível)
@@ -757,6 +759,22 @@ func _converter_vantagem(venc: int) -> void:
 
 
 ## modo: "pos_luta" (depois de vencer uma luta), "sem_luta" (ninguém contestou) ou "roubo".
+## Lance "<monstro>_surge" no segundo exato em que o monstro passa a poder ser atacado.
+## A tela começa a animação alguns segundos antes, para ela terminar nesse instante.
+func _anunciar_surgimentos() -> void:
+	for id: String in ["cerbero", "hydra"]:
+		var disponivel: float = cerbero_disponivel_em if id == "cerbero" else hydra_disponivel_em
+		if _em_campo[id] or t < disponivel:
+			continue
+		_em_campo[id] = true
+		var instante: int = ceili(disponivel)
+		var ponto: Vector2 = _ponto_objetivo(id)
+		var variante: String = "narrador_volta" if _surgimentos[id] > 0 else ""
+		_surgimentos[id] += 1
+		_registrar(id + "_surge", {"t": instante, "minuto": _relogio(instante), "time": -1,
+			"x": ponto.x, "y": ponto.y, "narracao": narracao.narrar(id + "_surge", {}, variante)})
+
+
 func _pegar_objetivo(tipo: String, time: int, modo: String, ladrao: Participante = null) -> void:
 	var epicos: Dictionary = cfg["monstros_epicos"]
 	if tipo == "hydra":
@@ -777,7 +795,9 @@ func _pegar_objetivo(tipo: String, time: int, modo: String, ladrao: Participante
 		falas = narracao.narrar("roubo_objetivo", valores)
 	else:
 		falas = narracao.narrar(tipo, valores, "narrador_sem_luta" if modo == "sem_luta" else "", modo)
-	_registrar(tipo, {"time": time, "x": ponto.x, "y": ponto.y, "roubado": modo == "roubo",
+	_em_campo[tipo] = false
+	var renasce: float = hydra_disponivel_em if tipo == "hydra" else cerbero_disponivel_em
+	_registrar(tipo, {"time": time, "x": ponto.x, "y": ponto.y, "roubado": modo == "roubo", "renasce_em": ceili(renasce),
 		"jogador": ladrao.jogador_id if ladrao else "", "narracao": falas})
 
 
@@ -856,6 +876,7 @@ func _jogar() -> void:
 	_quadro()
 	while t < limite and vencedor == -1:
 		t += passo
+		_anunciar_surgimentos()
 		_renda()
 		_guardioes_renascem()
 		if t < fim_rotas:

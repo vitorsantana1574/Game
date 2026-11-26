@@ -258,6 +258,40 @@
 				"O Guardião é a última barreira. E ele bate forte, não dá pra entrar de qualquer jeito."
 			]
 		},
+		"cerbero_surge": {
+			"narrador": [
+				"O chão da Caldeira se abriu... e lá vem o Cérbero! Está em campo.",
+				"Treme tudo perto do rio: o Cérbero acordou.",
+				"Olha ele saindo da lava, se arrastando! O Cérbero está disponível."
+			],
+			"narrador_volta": [
+				"O Cérbero está de volta! A lava abriu de novo.",
+				"Voltou o Cérbero. Mais um bônus de torre em jogo.",
+				"Ele renasceu: o Cérbero está de pé outra vez."
+			],
+			"comentarista": [
+				"Objetivo de torre no mapa. Quem tiver prioridade nas rotas chega primeiro.",
+				"Agora é visão no rio e paciência. Ninguém quer entregar o Cérbero de graça.",
+				"Esse bônus derruba torre muito rápido. Vale brigar por ele."
+			]
+		},
+		"hydra_surge": {
+			"narrador": [
+				"A água começou a ferver... e a Hydra subiu! Está em campo.",
+				"Olha a Hydra saindo do lago! O maior objetivo do mapa está disponível.",
+				"Lá vem ela, escorrendo água: a Hydra apareceu."
+			],
+			"narrador_volta": [
+				"A Hydra voltou! O lago está ocupado de novo.",
+				"Renasceu a Hydra. Prepara que vem briga.",
+				"Ela está de volta: a Hydra subiu outra vez."
+			],
+			"comentarista": [
+				"Começa a briga de visão em volta do lago. Quem limpar as wards primeiro dita o ritmo.",
+				"Hydra no mapa muda tudo: quem pegar entra nas próximas lutas muito mais forte.",
+				"Nenhum time quer começar essa Hydra sem saber onde está o caçador rival."
+			]
+		},
 		"cerbero": {
 			"narrador": [
 				"O Cérbero é de {time}! Bônus garantido pra pressionar torres.",

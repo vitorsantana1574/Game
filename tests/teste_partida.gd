@@ -269,3 +269,24 @@ func teste_um_quadro_por_segundo() -> void:
 		for i: int in range(1, r["quadros"].size()):
 			repetido = repetido or int(r["quadros"][i]["t"]) <= int(r["quadros"][i - 1]["t"])
 	executor.verificar(not repetido, "quadros com tempos estritamente crescentes")
+
+
+func teste_surgimentos_dos_monstros() -> void:
+	var ok: bool = true
+	var detalhes: String = ""
+	for semente: int in range(6):
+		var r: Dictionary = SimuladorPartida.simular(_entrada(50, 50, 700 + semente))
+		for id: String in ["cerbero", "hydra"]:
+			var em_campo: bool = false
+			var esperado: int = -1
+			for e: Dictionary in r["eventos"]:
+				if e["tipo"] == id + "_surge":
+					ok = ok and not em_campo and (esperado == -1 or int(e["t"]) == esperado) and e["destaque"] and not e["narracao"].is_empty()
+					em_campo = true
+				elif e["tipo"] == id:
+					if not em_campo:
+						detalhes = "%s abatido sem ter surgido (semente %d)" % [id, 700 + semente]
+					ok = ok and em_campo and e.has("renasce_em") and int(e["renasce_em"]) > int(e["t"])
+					em_campo = false
+					esperado = int(e["renasce_em"])
+	executor.verificar(ok, "cada abate de Hydra e Cérbero vem depois do surgimento, e o próximo surge em renasce_em %s" % detalhes)

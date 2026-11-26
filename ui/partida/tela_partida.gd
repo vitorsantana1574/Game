@@ -168,6 +168,8 @@ func _process(delta: float) -> void:
 	if _mapa == null or _pausado or _fim:
 		return
 	var lances: Array[Dictionary] = _reproducao.avancar(delta, GRAUS[_ritmo.selected], _ritmo.selected == 0)
+	for id: String in _reproducao.surgimentos_a_iniciar(GRAUS[_ritmo.selected]):
+		_mapa.surgir(id)
 	for lance: Dictionary in lances:
 		_exibir_lance(lance)
 	var segundo: int = floori(_reproducao.segundo)
@@ -192,7 +194,8 @@ func _exibir_lance(lance: Dictionary) -> void:
 			_ultimo_lance.text = "%s · Torre destruída" % lance["minuto"]
 		"hydra_surge", "cerbero_surge":
 			var id: String = tipo.trim_suffix("_surge")
-			_mapa.surgir(id)
+			if _reproducao.iniciar_no_horario(lance):
+				_mapa.surgir(id)
 			_ultimo_lance.text = "%s · %s em campo" % [_relogio_lance(lance), _nome_epico(id)]
 		"hydra", "cerbero":
 			_mapa.espera_epico(tipo, _reproducao.epicos[tipo]["respawns"].get(lance["indice"], -1))

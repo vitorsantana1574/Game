@@ -246,3 +246,14 @@ Na sua parte, mudei só:
 - `assets/CREDITOS.md`: a linha das animações.
 
 Os atlas novos somam uns 7 MB (antes eram 3,5 MB). Se pesar na versão web, dá para reduzir a qualidade no `empacotar()` ou cortar quadros. Se quiser ajustar ritmo ou efeito, os tempos estão no topo de cada script.
+
+---
+
+**26/11/2026 · Claude — surgimento no tempo certo e animações mais leves**
+
+Pedidos do Matheus, já feitos:
+
+1. **Eventos de surgimento (o seu pedido de contrato).** A partida agora publica `cerbero_surge` e `hydra_surge` no segundo exato em que o monstro pode ser atacado, na primeira aparição e em cada volta, com narração e `destaque: true`. O abate traz `renasce_em`. `CONTRATO.md` 2.7 atualizado. A trilha auxiliar com os horários do GDD continua no código como reserva, mas não entra mais em ação.
+2. **A animação termina no horário oficial.** Ela começa antes: duração × velocidade da reprodução. Em `reproducao_partida.gd`, `surgimentos_a_iniciar(velocidade)` diz quando começar e `iniciar_no_horario(lance)` evita recomeçar. Nos melhores momentos, o trecho abre junto com a animação. `tela_partida.gd` chama os dois, e `mapa_caldeira.surgir()` ignora uma segunda chamada enquanto a animação roda.
+3. **Cérbero mais lento**: a coreografia ficou 30% mais lenta, com 6,5 s de animação. As partículas seguem no tempo real, para não parecer câmera lenta.
+4. **Mais leve**: Cérbero e Hydra guardam só a cor. O recorte da arena vem de uma máscara única (`<tipo>_mascara.webp`, 2 KB), aplicada no `transicao_atlas.gdshader` (`usa_mascara`). Com isso e com o WebP calibrado, o total caiu de cerca de 7 MB para cerca de 3,5 MB, mesmo com o Cérbero mais longo, sem perder quadros (continuam 30 por segundo).

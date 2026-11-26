@@ -4,9 +4,10 @@ extends TextureRect
 const TRANSICAO = preload("res://ui/partida/transicao_atlas.gdshader")
 ## [origem, tamanho exibido, célula no atlas, quadros, colunas, quadros por página, duração em segundos].
 ## Quadros gerados por tools/arte/animar_*.py (30 por segundo; o último é igual à arte do mapa).
+## Cérbero e Hydra são opacos (só cor) e recortados por <tipo>_mascara.webp; as torres têm alfa.
 const DADOS: Dictionary = {
 	"hydra": [Vector2(186, 194), Vector2(245, 212), Vector2i(355, 308), 139, 5, 55, 4.63],
-	"cerbero": [Vector2(598, 546), Vector2(206, 198), Vector2i(299, 287), 151, 6, 78, 5.03],
+	"cerbero": [Vector2(598, 546), Vector2(206, 198), Vector2i(299, 287), 196, 6, 78, 6.53],
 	"torre_azul": [Vector2(-90, -105), Vector2(180, 160), Vector2i(360, 320), 79, 5, 60, 2.63],
 	"torre_coral": [Vector2(-90, -105), Vector2(180, 160), Vector2i(360, 320), 79, 5, 60, 2.63],
 }
@@ -18,7 +19,15 @@ var _shader: ShaderMaterial
 var _anterior: int = -1
 
 
-func configurar(tipo: String, paginas: Array[Texture2D], origem: Vector2) -> void:
+const COM_MASCARA: Array[String] = ["hydra", "cerbero"]
+
+
+## Segundos de animação: quanto antes do surgimento oficial ela precisa começar.
+static func duracao_de(tipo: String) -> float:
+	return float(DADOS[tipo][6])
+
+
+func configurar(tipo: String, paginas: Array[Texture2D], origem: Vector2, mascara: Texture2D = null) -> void:
 	_dados = DADOS[tipo]
 	_paginas = paginas
 	duracao = _dados[6]
@@ -29,6 +38,9 @@ func configurar(tipo: String, paginas: Array[Texture2D], origem: Vector2) -> voi
 	_shader = ShaderMaterial.new()
 	_shader.shader = TRANSICAO
 	material = _shader
+	_shader.set_shader_parameter(&"usa_mascara", mascara != null)
+	if mascara != null:
+		_shader.set_shader_parameter(&"mascara", mascara)
 	quadro(0.0)
 
 

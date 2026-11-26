@@ -542,6 +542,8 @@ Cada partida leva menos de 0,1 s para simular.
 - O comentarista **só afirma o que a partida sustenta**: frases como "atropelo, esteve na frente do começo ao fim" ou "que virada" só aparecem quando aconteceu; comentários de conforto/desconforto só aparecem quando o domínio do jogador naquele campeão é mesmo Main ou Mono / Desconhecido.
 - A mesma frase não se repete enquanto houver outra opção para aquele tipo de lance.
 
+**Surgimento de Hydra e Cérbero (decidido em 26/11):** a animação de surgimento começa alguns segundos antes do horário oficial, para o monstro terminar de surgir exatamente no segundo em que pode ser atacado e atacar. A partida publica esse segundo (`cerbero_surge` / `hydra_surge`); o Cérbero sai da fenda mais devagar (cerca de 6,5 s de animação).
+
 **Mapa** (`data/config/mapa.json`): coordenadas de 0 a 1, azul embaixo à esquerda, vermelho em cima à direita, rota do meio numa diagonal e rio na outra (Hydra do lado azul do rio, Cérbero do lado vermelho). A arte segue essa geometria ou pede ajuste.
 
 **Decidido em 25/11:** partida oficial gasta o **dobro de energia** de uma partida interna (ver 6.1) e **conta no histórico de campeões**; partida de treino gasta como uma interna e não conta.

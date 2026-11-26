@@ -598,7 +598,8 @@ Campos de todo lance:
 | `gank_falhou` | `jogador` (o caçador), `alvo` |
 | `luta` | `objetivo` (`""`, `"hydra"`, `"cerbero"`), `abates` ([azul, vermelho] na luta), `lances` (índices dos abates dessa luta, que vêm logo depois, no mesmo segundo) |
 | `torre` | `rota` (`"topo"`, `"meio"`, `"baixo"`), `torre` (0 = externa, 1 = interna, 2 = da base), `jogador` (pode ser vazio) |
-| `cerbero` / `hydra` | `roubado` (bool), `jogador` (quem roubou, quando roubado) |
+| `cerbero` / `hydra` | `roubado` (bool), `jogador` (quem roubou, quando roubado), `renasce_em` (segundo em que volta a surgir) |
+| `cerbero_surge` / `hydra_surge` | O monstro passa a poder ser atacado **neste segundo** (primeira aparição e cada volta). Sempre destaque, com narração. `x`, `y` = covil. A tela começa a animação de surgimento antes (duração × velocidade da reprodução), para ela terminar exatamente aqui |
 | `guardiao` | `time` = quem derrubou o Guardião do outro |
 | `guardiao_renasce` | `time` = dono do Guardião |
 | `item` | `jogador`, `campeao`, `item` (id). Sem narração; serve para o painel de itens |
