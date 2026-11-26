@@ -13,17 +13,17 @@
 		{"acao": "pick", "time": "azul"}, {"acao": "pick", "time": "vermelho"}
 	],
 	"dominio": {
-		"_comentario": "Maestria de 0 a 100 por campeão. Os níveis saem dos limites abaixo. 'rendimento' multiplica o desempenho do jogador com o campeão na partida.",
+		"_comentario": "Maestria de 0 a 100 por campeão. Faixas aprovadas pelo dono (25/11): 95-100 Mono, 80-94 Main, 41-79 Conhecido, 0-40 Desconhecido. O rendimento (multiplicador do Micro na partida; o Farm sente metade) cresce dentro da faixa, de 'rendimento' no mínimo a 'rendimento_no_topo' no máximo, e dá um salto ao subir de faixa.",
 		"niveis": [
-			{"id": "favorito", "nome": "Favorito", "minimo": 80, "rendimento": 1.05},
-			{"id": "conhece_bem", "nome": "Conhece bem", "minimo": 55, "rendimento": 1.0},
-			{"id": "ja_jogou", "nome": "Já jogou", "minimo": 25, "rendimento": 0.92},
-			{"id": "nao_conhece", "nome": "Não conhece", "minimo": 0, "rendimento": 0.8}
+			{"id": "mono", "nome": "Mono", "minimo": 95, "rendimento": 1.06, "rendimento_no_topo": 1.07},
+			{"id": "main", "nome": "Main", "minimo": 80, "rendimento": 1.02, "rendimento_no_topo": 1.04},
+			{"id": "conhecido", "nome": "Conhecido", "minimo": 41, "rendimento": 0.92, "rendimento_no_topo": 1.0},
+			{"id": "desconhecido", "nome": "Desconhecido", "minimo": 0, "rendimento": 0.8, "rendimento_no_topo": 0.86}
 		],
 		"campeoes_conhecidos_especialista": 4,
 		"campeoes_conhecidos_versatil": 11,
-		"maestria_topo_especialista": 94,
-		"maestria_topo_versatil": 82,
+		"maestria_topo_especialista": 95,
+		"maestria_topo_versatil": 84,
 		"queda_por_campeao_especialista": 11,
 		"queda_por_campeao_versatil": 4.5,
 		"ruido": 5,

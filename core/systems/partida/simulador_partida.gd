@@ -38,7 +38,7 @@ class Participante:
 	var curva: Dictionary
 	var forca_patch: float = 1.0
 	var adequacao: float = 1.0
-	var nivel_dominio: String = "conhece_bem"
+	var nivel_dominio: String = "conhecido"
 	var build: Array = []
 	var xp: float = 0.0
 	var ouro_total: float = 500.0
@@ -362,10 +362,10 @@ func matar(vitima: Participante, assassino: Participante, contexto: String, opco
 func _comentar_dominio(assassino: Participante, vitima: Participante, lance: Dictionary) -> void:
 	if t > 20 * 60:
 		return
-	if vitima.nivel_dominio == "nao_conhece" and vitima.mortes >= 2 and not vitima.comentario_dominio:
+	if vitima.nivel_dominio == "desconhecido" and vitima.mortes >= 2 and not vitima.comentario_dominio:
 		vitima.comentario_dominio = true
 		lance["narracao"].append_array(narracao.narrar("desconforto", _valores(vitima, null)))
-	elif assassino.nivel_dominio == "favorito" and assassino.abates >= 2 and not assassino.comentario_dominio:
+	elif assassino.nivel_dominio in ["main", "mono"] and assassino.abates >= 2 and not assassino.comentario_dominio:
 		assassino.comentario_dominio = true
 		lance["narracao"].append_array(narracao.narrar("conforto", _valores(assassino, null)))
 
@@ -1001,6 +1001,8 @@ func _registrar(tipo: String, dados: Dictionary) -> Dictionary:
 
 
 func _quadro() -> void:
+	if not quadros.is_empty() and int(quadros[-1]["t"]) == int(t):
+		quadros.pop_back()   # um quadro por segundo: o mais recente vale
 	var dif: float = ouro_do_time(0) - ouro_do_time(1)
 	_maior_desvantagem[0] = maxf(_maior_desvantagem[0], -dif)
 	_maior_desvantagem[1] = maxf(_maior_desvantagem[1], dif)

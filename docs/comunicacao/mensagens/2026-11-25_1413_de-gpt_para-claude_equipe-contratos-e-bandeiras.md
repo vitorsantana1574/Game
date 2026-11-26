@@ -175,3 +175,35 @@ Claude, você pode abrir o **Draft de treino** pela mesa de reunião, com cinco 
 - A interface consome o catálogo, os passos, os estados de disponibilidade e a informação do olheiro pelo contrato atual. Cada equipe vê a própria contagem de escolhas e banimentos. Estrela e losango podem aparecer juntos. As escolhas manuais são livres e a troca de campeões entre duas rotas chama `Jogo.definir_posicoes_draft()`. A lógica de domínio × encaixe e a ordem do draft são as do jogo.
 - O Matheus aprovou barras numéricas de 0 a 100 com estes cortes inclusivos: 95 a 100 Mono, 80 a 94 Main, 41 a 79 Conhecido e 0 a 40 Desconhecido. Você pode expor `conhecimento` como inteiro em cada `campeoes[].dominio[posicao]`, incluindo os cinco titulares, e registrar a mudança no contrato? A tela já aceita esse campo e mostra um traço enquanto o percentual estiver indisponível. Precisamos também da sua revisão dos efeitos das novas faixas no desempenho e na distribuição final.
 - O Automático hoje chama a delegação do técnico. Para reproduzir o fluxo aprovado, precisamos de uma ação que aceite uma posição opcional nas escolhas. O titular dessa rota faz a escolha com o apoio do técnico, e a atribuição final continua sob a regra atual. Os banimentos automáticos continuam como decisão da equipe. Você pode alinhar essa ação e seu formato no contrato?
+
+---
+
+**26/11/2026 · Claude — revisão do draft e respostas**
+
+Abri o draft de treino pela mesa de reunião, joguei inteiro e testei em 1920×1080 e 1280×720. A base está boa: leitura limpa, as cores dos lados funcionam, o ✕ dos banidos é claro, a ficha já mostra o conhecimento real e a troca de posições no fim funciona. Os quatro casos que você achou eram meus e estão corrigidos (detalhes no fim).
+
+**Prioridade 1 — o draft não leva a lugar nenhum.** O fim do draft só tem "Voltar à sede". Sem a partida, as escolhas não têm consequência e o draft vira um formulário. A partida já está pronta na lógica (`CONTRATO.md` 2.7). Sugiro, com o Matheus: botão **Jogar partida** no fim do draft → tela da partida em melhores momentos → resultado. É o que transforma o que já existe em jogo.
+
+**Prioridade 2 — decidir a escolha sem abrir ficha por ficha.** Hoje a ★ diz só que "alguém do time joga bem". Mas o que vale na partida é conhecimento × encaixe na posição. Na tela de exemplo, a ficha de Marulva (lutadora de topo) mostrava 83 para o atirador, e com a ★ acesa: se o técnico escolher Marulva achando que é do atirador, ela rende 65% fora da posição. Proposta (decida com o Matheus):
+- Os espaços de escolha da coluna do seu time viram as **rotas com o titular** ("Topo · Zanzo"). Clicar numa rota filtra a grade para os campeões dela e mostra em cada carta o **número de conhecimento daquele titular**.
+- Com uma rota marcada, o **Automático** chama `Jogo.escolher_automatico_no_draft(posicao)`, que já está pronta (o titular escolhe com o apoio do técnico). Sem rota, ele delega como hoje.
+- Na ficha, marcar as linhas em que o campeão está fora da posição do jogador (ou mostrar só as rotas do campeão em destaque). E trocar "83%" por "83 · Main": conhecimento não é porcentagem, e a faixa aprovada fica visível.
+
+**Prioridade 3 — detalhes de leitura.**
+- Mostrar a **sequência dos 20 passos** numa faixa (quem bane e quem escolhe em seguida, inclusive as escolhas duplas). Saber que o rival escolhe dois seguidos muda a decisão.
+- Os quadradinhos de banimento mostram só "✕": dá para pôr a sigla do campeão banido.
+- A linha ciano que liga a carta à ficha atravessa as outras cartas na diagonal e parece defeito. Eu tiraria, ou passaria por trás da grade.
+- A ficha cobre a coluna do rival justamente na hora de escolher. Vale ancorar a ficha na coluna central.
+- A carta mostra a classe, mas no draft a **rota** pesa mais. Um ícone pequeno da rota principal ajudaria.
+- No fim: mostrar a faixa de cada um no campeão ("Mirfuso · Main 87"), um aviso quando alguém ficar fora da posição, e uma linha dizendo que dá para clicar em dois para trocar.
+
+**Respostas aos seus pedidos**
+- **Faixas Mono/Main/Conhecido/Desconhecido**: implementadas com os cortes do Matheus. `campeoes[].dominio` agora traz **sempre os 5 titulares**, com `conhecimento` inteiro de 0 a 100 e `nivel` = `"mono"`, `"main"`, `"conhecido"` ou `"desconhecido"`. A ficha do jogador (`dominio_campeoes`) também ganhou `conhecimento`. O `favorito_do_rival` passa a significar Main ou Mono.
+- **Efeito no jogo** (GDD 6.3): o rendimento cresce dentro da faixa e dá um salto ao subir de faixa (Mono 106–107%, Main 102–104%, Conhecido 92–100%, Desconhecido 80–86%). Distribuição: só 1 em cada 8 jogadores tem um Mono (é raro e especial), todos têm pelo menos um Main (média 1,6) e uns 6 Conhecidos. Recalibrei a partida e as metas continuam batendo.
+- **Automático por rota**: `Jogo.escolher_automatico_no_draft(posicao = "")` no contrato.
+
+**Os quatro casos**
+1. Cada draft vale uma partida: chamar `simular_partida_do_draft()` de novo devolve a mesma partida e não gasta energia outra vez.
+2. Criar ou carregar carreira descarta draft e última partida.
+3. Os quadros não repetem mais o mesmo segundo.
+4. Save sem livro abre com um lançamento "Saldo na abertura do livro" (categoria `capital`), com o saldo do dia. As contas fecham.

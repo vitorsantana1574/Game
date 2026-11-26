@@ -130,4 +130,8 @@ static func de_dicionario(dados: Dictionary) -> Carreira:
 	for item: Dictionary in dados.get("lancamentos", []):
 		carreira.lancamentos.append({"dia": int(item["dia"]), "descricao": str(item["descricao"]),
 			"valor": int(item["valor"]), "categoria": str(item["categoria"])})
+	if not dados.has("lancamentos"):
+		# Save de antes do livro: abre com o saldo do dia, sem inventar o histórico anterior.
+		carreira.lancamentos.append({"dia": carreira.dia, "descricao": "Saldo na abertura do livro",
+			"valor": carreira.organizacao.dinheiro, "categoria": "capital"})
 	return carreira

@@ -124,6 +124,7 @@ func nova_carreira(escolhas: Dictionary) -> Dictionary:
 	if not saves.salvar(slot, nova):
 		return _erro("slot", ERRO_FALHA_GRAVACAO, "Não foi possível gravar o save.")
 
+	_limpar_sessao()
 	carreira = nova
 	slot_atual = slot
 	var resumo: Dictionary = resumo_carreira()
@@ -140,6 +141,7 @@ func carregar(slot: int) -> Dictionary:
 	var carregada: Carreira = saves.carregar(slot)
 	if carregada == null:
 		return _erro("slot", ERRO_SLOT_VAZIO, "Este espaço está vazio.")
+	_limpar_sessao()
 	carreira = carregada
 	slot_atual = slot
 	saves.marcar_ultimo(slot)
@@ -150,6 +152,12 @@ func carregar(slot: int) -> Dictionary:
 
 
 ## Carrega o último save jogado (botão Continuar).
+## Draft e partida pertencem à carreira aberta: trocar de carreira descarta os dois.
+func _limpar_sessao() -> void:
+	draft_atual = null
+	ultima_partida = {}
+
+
 func continuar() -> Dictionary:
 	var slot: int = saves.ultimo_slot()
 	if slot == -1:
@@ -286,15 +294,16 @@ func estado_draft() -> Dictionary:
 		var dominio: Dictionary = {}
 		for posicao: String in Draft.POSICOES:
 			var jogador: Jogador = d.times[meu]["jogadores"][posicao]
-			var nivel: Dictionary = DominioCampeoes.nivel(int(jogador.dominio_campeoes.get(id, 0)))
-			if nivel["id"] != "nao_conhece":
-				dominio[posicao] = {"jogador_id": jogador.id, "apelido": jogador.apelido, "nivel": nivel["id"], "nivel_nome": nivel["nome"]}
+			var maestria: int = int(jogador.dominio_campeoes.get(id, 0))
+			var nivel: Dictionary = DominioCampeoes.nivel(maestria)
+			dominio[posicao] = {"jogador_id": jogador.id, "apelido": jogador.apelido, "nivel": nivel["id"],
+				"nivel_nome": nivel["nome"], "conhecimento": maestria}
 		var item_campeao: Dictionary = {"id": id, "estado": estado_campeao, "por": uso.get("por", ""), "dominio": dominio}
 		if revela:
 			var favoritos: Array[String] = []
 			for posicao: String in Draft.POSICOES:
 				var adversario: Jogador = d.times[rival]["jogadores"][posicao]
-				if DominioCampeoes.nivel(int(adversario.dominio_campeoes.get(id, 0)))["id"] == "favorito":
+				if DominioCampeoes.e_principal(int(adversario.dominio_campeoes.get(id, 0))):
 					favoritos.append(posicao)
 			item_campeao["favorito_do_rival"] = favoritos
 		campeoes.append(item_campeao)
@@ -335,6 +344,23 @@ func delegar_vez_ao_tecnico() -> Dictionary:
 	return _acao_draft(draft_atual.decidir_ia(), str(draft_atual.vez()["acao"]))
 
 
+## Botão "Automático". Na escolha, posicao (opcional) diz de qual rota é a escolha: o titular dela
+## escolhe com o apoio do técnico (o campeão que ele melhor joga ali, pesando o meta conforme o técnico).
+## Sem posição, ou no banimento, a decisão é da equipe, como em delegar_vez_ao_tecnico().
+## A atribuição final das posições continua automática e pode ser trocada no fim.
+func escolher_automatico_no_draft(posicao: String = "") -> Dictionary:
+	if draft_atual == null or draft_atual.concluido():
+		return _erro("draft", Draft.ERRO_CONCLUIDO, "Não há vez para jogar.")
+	var atual: Dictionary = draft_atual.vez()
+	if posicao.is_empty() or atual["acao"] != "pick":
+		return delegar_vez_ao_tecnico()
+	if atual["time"] != _lado_jogador:
+		return _erro("draft", Draft.ERRO_NAO_E_SUA_VEZ, "Aguarde a vez do seu time.")
+	if not draft_atual.posicoes_abertas(_lado_jogador).has(posicao):
+		return _erro("posicao", "posicao_preenchida", "Essa rota já tem campeão.")
+	return _acao_draft(draft_atual.decidir_ia(posicao), "pick")
+
+
 ## Troca a posição final dos seus campeões depois do draft. mapa: {posicao: id do campeão} com os 5 escolhidos.
 func definir_posicoes_draft(mapa: Dictionary) -> Dictionary:
 	if draft_atual == null:
@@ -366,6 +392,9 @@ func simular_partida_do_draft(opcoes: Dictionary = {}) -> Dictionary:
 		return _erro("draft", "sem_draft", "Não há draft para jogar.")
 	if not draft_atual.concluido():
 		return _erro("draft", "draft_em_andamento", "Termine o draft antes da partida.")
+	if draft_atual.partida_jogada and not opcoes.has("semente"):
+		# Cada draft vale uma partida: chamar de novo devolve a mesma, sem gastar energia outra vez.
+		return {"ok": true, "partida": ultima_partida}
 	var times: Array[Dictionary] = []
 	for lado: String in Draft.LADOS:
 		var time: Dictionary = draft_atual.times[lado]
@@ -379,7 +408,9 @@ func simular_partida_do_draft(opcoes: Dictionary = {}) -> Dictionary:
 	partida["lado_jogador"] = _lado_jogador
 	partida["venceu"] = Draft.LADOS[int(partida["vencedor"])] == _lado_jogador
 	partida["treino"] = draft_atual.times[Draft.outro(_lado_jogador)].get("id", "") == "treino"
-	_aplicar_partida_ao_elenco(draft_atual.times[_lado_jogador]["jogadores"], draft_atual.posicoes[_lado_jogador], not partida["treino"])
+	if not draft_atual.partida_jogada:
+		_aplicar_partida_ao_elenco(draft_atual.times[_lado_jogador]["jogadores"], draft_atual.posicoes[_lado_jogador], not partida["treino"])
+		draft_atual.partida_jogada = true
 	ultima_partida = partida
 	Eventos.partida_simulada.emit(partida)
 	return {"ok": true, "partida": partida}

@@ -2,9 +2,10 @@ class_name DominioCampeoes
 extends RefCounted
 ## Domínio de campeões de cada jogador (GDD 6.3).
 ##
-## A lógica guarda uma maestria de 0 a 100 por campeão. A interface vê só o nível:
-## Favorito, Conhece bem, Já jogou, Não conhece. Os limites e o rendimento de cada nível
-## ficam em data/config/draft.json ("dominio").
+## A lógica guarda uma maestria de 0 a 100 por campeão; a interface mostra o número e a faixa
+## (aprovadas pelo dono em 25/11): 95-100 Mono, 80-94 Main, 41-79 Conhecido, 0-40 Desconhecido.
+## O rendimento cresce dentro da faixa e salta ao mudar de faixa. Limites e valores em
+## data/config/draft.json ("dominio").
 ##
 ## Especialista (versatilidade baixa): lista pequena, maestria alta nos primeiros.
 ## Versátil (versatilidade alta): lista grande, maestria razoável em todos, sem pico.
@@ -51,24 +52,36 @@ static func gerar(jogador: Jogador, semente: int) -> Dictionary:
 				break
 		restantes.erase(escolhido)
 		var valor: float = topo - queda * ordem + rng.randf_range(-float(r["ruido"]), float(r["ruido"]))
-		maestria[escolhido] = clampi(roundi(valor), 26, 99)
+		# Campeão da lista do jogador é pelo menos Conhecido.
+		maestria[escolhido] = clampi(roundi(valor), int(regras()["niveis"][-2]["minimo"]), 100)
 	for id: String in restantes:
 		maestria[id] = rng.randi_range(0, int(r["maestria_desconhecido_maxima"]))
 	return maestria
 
 
-## Nível de uma maestria: {"id", "nome", "rendimento"}.
+## Faixa de uma maestria: {"id", "nome", "rendimento"}. O rendimento já considera o ponto dentro da faixa.
 static func nivel(maestria: int) -> Dictionary:
-	for item: Dictionary in regras()["niveis"]:
-		if maestria >= int(item["minimo"]):
-			return {"id": item["id"], "nome": item["nome"], "rendimento": float(item["rendimento"])}
-	var ultimo: Dictionary = regras()["niveis"][-1]
+	var niveis: Array = regras()["niveis"]
+	var teto: int = 100
+	for item: Dictionary in niveis:
+		var minimo: int = int(item["minimo"])
+		if maestria >= minimo:
+			var progresso: float = clampf(float(maestria - minimo) / maxf(1.0, float(teto - minimo)), 0.0, 1.0)
+			var valor: float = lerpf(float(item["rendimento"]), float(item.get("rendimento_no_topo", item["rendimento"])), progresso)
+			return {"id": item["id"], "nome": item["nome"], "rendimento": valor}
+		teto = minimo - 1
+	var ultimo: Dictionary = niveis[-1]
 	return {"id": ultimo["id"], "nome": ultimo["nome"], "rendimento": float(ultimo["rendimento"])}
 
 
 ## Rendimento (multiplicador de desempenho) de um jogador com um campeão.
 static func rendimento(jogador: Jogador, campeao_id: String) -> float:
 	return float(nivel(int(jogador.dominio_campeoes.get(campeao_id, 0)))["rendimento"])
+
+
+## Campeão principal: Main ou Mono (80 ou mais).
+static func e_principal(maestria: int) -> bool:
+	return nivel(maestria)["id"] in ["main", "mono"]
 
 
 ## Rendimento de um campeão numa posição (principal, secundária ou fora das posições dele).
@@ -85,8 +98,8 @@ static func adequacao(campeao_id: String, posicao: String) -> float:
 	return float(regra["fora"])
 
 
-## Lista pública: campeões que o jogador conhece (Já jogou ou mais), do mais para o menos dominado.
-## [{"id", "nivel", "nivel_nome"}]. A maestria numérica não sai.
+## Lista pública: campeões que o jogador conhece (Conhecido ou mais), do mais para o menos dominado.
+## [{"id", "nivel", "nivel_nome", "conhecimento"}].
 static func lista_publica(jogador: Jogador) -> Array[Dictionary]:
 	var ids: Array = jogador.dominio_campeoes.keys()
 	ids.sort_custom(func(a: String, b: String) -> bool:
@@ -95,8 +108,9 @@ static func lista_publica(jogador: Jogador) -> Array[Dictionary]:
 		return ma > mb or (ma == mb and a < b))
 	var saida: Array[Dictionary] = []
 	for id: String in ids:
-		var n: Dictionary = nivel(int(jogador.dominio_campeoes[id]))
-		if n["id"] == "nao_conhece":
+		var maestria: int = int(jogador.dominio_campeoes[id])
+		var n: Dictionary = nivel(maestria)
+		if n["id"] == "desconhecido":
 			continue
-		saida.append({"id": id, "nivel": n["id"], "nivel_nome": n["nome"]})
+		saida.append({"id": id, "nivel": n["id"], "nivel_nome": n["nome"], "conhecimento": maestria})
 	return saida

@@ -474,15 +474,15 @@ Os sinais de cada dia são emitidos normalmente, então os avisos da sede contin
 `detalhe_jogador`, `listar_elenco` e `listar_mercado` trazem:
 
 ```gdscript
-"dominio_campeoes": [   # só os que o jogador conhece, do mais para o menos dominado
-    {"id": "veluria", "nivel": "favorito", "nivel_nome": "Favorito"},
-    {"id": "prismora", "nivel": "conhece_bem", "nivel_nome": "Conhece bem"},
-    {"id": "cintarro", "nivel": "ja_jogou", "nivel_nome": "Já jogou"},
+"dominio_campeoes": [   # só os que o jogador conhece (Conhecido ou mais), do mais para o menos dominado
+    {"id": "veluria", "nivel": "mono", "nivel_nome": "Mono", "conhecimento": 97},
+    {"id": "prismora", "nivel": "main", "nivel_nome": "Main", "conhecimento": 84},
+    {"id": "cintarro", "nivel": "conhecido", "nivel_nome": "Conhecido", "conhecimento": 62},
 ]
-# nivel: "favorito" | "conhece_bem" | "ja_jogou". Campeão fora da lista = "Não conhece".
+# nivel: "mono" (95-100) | "main" (80-94) | "conhecido" (41-79). Fora da lista = "desconhecido" (0-40).
 ```
 
-A maestria numérica não sai. Especialistas têm lista curta e favoritos fortes; versáteis, lista longa sem pico. Bom lugar para mostrar: a aba **Campeões** da ficha, ao lado do histórico.
+`conhecimento` é inteiro de 0 a 100 (faixas aprovadas pelo Matheus em 25/11). Especialistas têm lista curta e conhecimento alto; versáteis, lista longa sem pico. Bom lugar para mostrar: a aba **Campeões** da ficha, ao lado do histórico.
 
 ### Patch
 
@@ -500,6 +500,7 @@ O draft fica só na memória (não entra no save). Enquanto a liga não existe, 
 | `Jogo.estado_draft()` | Estado completo (abaixo). `{}` sem draft |
 | `Jogo.banir_no_draft(id)` / `Jogo.escolher_no_draft(id)` | Sua vez. Depois, o rival joga sozinho até a sua próxima vez |
 | `Jogo.delegar_vez_ao_tecnico()` | O técnico faz a sua vez atual. Técnico melhor (Macro + Conhecimento) escolhe melhor; sem técnico, escolhe mal |
+| `Jogo.escolher_automatico_no_draft(posicao = "")` | Botão **Automático**. Na escolha, com `posicao`, o titular dessa rota escolhe com o apoio do técnico (o campeão que ele melhor joga ali, pesando o meta conforme o técnico). Sem posição, ou no banimento, é igual a `delegar_vez_ao_tecnico()`. Erro `"posicao"` se a rota já tem campeão. A atribuição final das posições continua automática |
 | `Jogo.definir_posicoes_draft({posicao: id})` | Depois do fim, troca quem joga com qual campeão (os 5 escolhidos, um por posição). A lógica já entrega a melhor distribuição |
 | `Jogo.encerrar_draft()` | Descarta |
 
@@ -522,8 +523,8 @@ Todas as ações devolvem `{"ok": true, "estado": {...}}` ou `{"ok": false, "err
     },
     "campeoes": [
         {"id": "veluria", "estado": "livre", "por": "",      # estado: "livre" | "banido" | "escolhido" | "indisponivel"
-         "dominio": {"meio": {"jogador_id", "apelido", "nivel", "nivel_nome"}},   # seus jogadores que conhecem o campeão
-         "favorito_do_rival": ["meio"]},                     # só com favoritos_do_rival_revelados = true
+         "dominio": {"meio": {"jogador_id", "apelido", "nivel", "nivel_nome", "conhecimento"}},   # os 5 titulares, sempre (conhecimento 0 a 100)
+         "favorito_do_rival": ["meio"]},                     # rotas do rival em que o campeão é Main ou Mono; só com favoritos_do_rival_revelados = true
     ],
     "favoritos_do_rival_revelados": false,   # true com olheiro do técnico a partir de 60 (GDD 8.7)
 }
@@ -539,6 +540,7 @@ A partida é **simulada inteira de uma vez** (regras + semente, sem IA de lingua
 |---|---|
 | `Jogo.simular_partida_do_draft(opcoes = {})` | Simula a partida do draft concluído. `opcoes`: `"semente"` (repete uma partida). Devolve `{"ok": true, "partida": {...}}` ou erro em `"draft"` (sem draft / draft em andamento) |
 | `Jogo.ultima_partida` | A última partida simulada (só na memória) |
+| | **Cada draft vale uma partida:** chamar de novo devolve a mesma partida, sem gastar energia outra vez. Criar ou carregar outra carreira descarta draft e partida |
 | `Jogo.mapa_partida()` | Geometria do mapa (abaixo) |
 
 **Sinal:** `Eventos.partida_simulada(partida)`.
@@ -562,7 +564,7 @@ Enquanto a agenda não existe, **cada dia avançado recupera energia** de todo o
     "jogadores": [   # estatística final, 10 entradas (5 de cada time, na ordem topo, selva, meio, atirador, suporte)
         {"jogador": "j000012", "apelido": "Kyxis", "time": 0, "posicao": "topo",
          "campeao": "eirafim", "campeao_nome": "Eirafim", "abates": 3, "mortes": 1, "assistencias": 6,
-         "cs": 238, "ouro": 12087, "nivel": 15, "itens": [ids na ordem de compra], "dominio": "conhece_bem"},
+         "cs": 238, "ouro": 12087, "nivel": 15, "itens": [ids na ordem de compra], "dominio": "main"},
     ],
     "eventos": [ ... ],   # lances, em ordem de tempo (abaixo)
     "quadros": [ ... ],   # posição de todos, a cada 5 s (abaixo)

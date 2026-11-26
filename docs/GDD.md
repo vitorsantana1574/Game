@@ -107,14 +107,14 @@ Conclusão: na liga o dobro não pesa (sobram 6 dias para recuperar); o custo ap
 
 ### 6.3 Domínio de campeões
 
-Cada jogador tem um nível de domínio para cada campeão:
+Cada jogador tem um **conhecimento de 0 a 100** em cada campeão, mostrado como número e como faixa (**decidido em 25/11**, cortes inclusivos):
 
-| Nível | Significado |
-|---|---|
-| **Favorito** | Os campeões com que ele joga melhor. |
-| **Conhece bem** | Joga com segurança. |
-| **Já jogou** | Conhece o básico, com desempenho reduzido. |
-| **Não conhece** | Penalidade forte de desempenho. |
+| Faixa | Conhecimento | Significado |
+|---|---|---|
+| **Mono** | 95 a 100 | O campeão da vida dele. Raro: só cerca de 1 em cada 8 jogadores tem um. |
+| **Main** | 80 a 94 | Campeão principal. Todo jogador tem pelo menos um (em média 1,6). |
+| **Conhecido** | 41 a 79 | Joga com segurança, mas sem brilho (em média 6 por jogador). |
+| **Desconhecido** | 0 a 40 | Penalidade forte de desempenho. |
 
 **Tamanho da lista × maestria:**
 
@@ -124,16 +124,16 @@ Cada jogador tem um nível de domínio para cada campeão:
 
 Isso dá peso ao **pick & ban** e ao **meta** de cada patch.
 
-**Implementado (25/11, valores provisórios em `data/config/draft.json`):**
-- A lógica guarda uma maestria de 0 a 100 por campeão. O jogador vê só o nível:
-  - **Favorito:** a partir de 80, rende 105%;
-  - **Conhece bem:** a partir de 55, rende 100%;
-  - **Já jogou:** a partir de 25, rende 92%;
-  - **Não conhece:** rende 80%.
-- Especialistas conhecem cerca de 4 campeões, com o favorito perto de 94. Versáteis conhecem cerca de 11, com o melhor perto de 82.
+**Implementado (valores provisórios em `data/config/draft.json`):**
+- Rendimento na partida, crescendo dentro da faixa e com um **salto ao subir de faixa** (assim o número importa e chegar a Main ou Mono é uma conquista):
+  - **Mono:** 106% a 107%;
+  - **Main:** 102% a 104%;
+  - **Conhecido:** 92% a 100%;
+  - **Desconhecido:** 80% a 86%.
+- Especialistas conhecem cerca de 4 campeões, com o melhor perto de 95. Versáteis conhecem cerca de 11, com o melhor perto de 84. Todo campeão da lista do jogador é pelo menos Conhecido.
 - Os campeões conhecidos combinam com as posições do jogador.
 - Um campeão fora das posições dele rende 65%; numa posição secundária, 90%.
-- **Na partida (decidido em 25/11):** o domínio pesa **forte no Micro** (os percentuais acima), **pela metade no Farm** (102,5% / 100% / 96% / 90%) e **nada no Macro**. Assim, alguém de habilidade alta num campeão que não conhece ainda leva uma **leve vantagem** sobre alguém fraco no campeão favorito, e o Macro do time pode engolir qualquer vantagem individual.
+- **Na partida (decidido em 25/11):** o domínio pesa **forte no Micro** (os percentuais acima), **pela metade no Farm** e **nada no Macro**. Assim, alguém de habilidade alta num campeão Desconhecido ainda leva uma **leve vantagem** sobre alguém fraco no seu Mono, e o Macro do time pode engolir qualquer vantagem individual.
 - Calibrado com a simulação de partidas (7.4).
 
 ### 6.4 Traços ocultos
@@ -539,7 +539,7 @@ Cada partida leva menos de 0,1 s para simular.
 
 **Narração** (`data/narracao/narracao.json`, `core/systems/narracao.gd`):
 - Mais de 230 frases, divididas por tipo de lance. O narrador sempre fala; o comentarista entra numa parte dos lances (sempre no início, no fim e em roubos).
-- O comentarista **só afirma o que a partida sustenta**: frases como "atropelo, esteve na frente do começo ao fim" ou "que virada" só aparecem quando aconteceu; comentários de conforto/desconforto só aparecem quando o domínio do jogador naquele campeão é mesmo Favorito / Não conhece.
+- O comentarista **só afirma o que a partida sustenta**: frases como "atropelo, esteve na frente do começo ao fim" ou "que virada" só aparecem quando aconteceu; comentários de conforto/desconforto só aparecem quando o domínio do jogador naquele campeão é mesmo Main ou Mono / Desconhecido.
 - A mesma frase não se repete enquanto houver outra opção para aquele tipo de lance.
 
 **Mapa** (`data/config/mapa.json`): coordenadas de 0 a 1, azul embaixo à esquerda, vermelho em cima à direita, rota do meio numa diagonal e rio na outra (Hydra do lado azul do rio, Cérbero do lado vermelho). A arte segue essa geometria ou pede ajuste.

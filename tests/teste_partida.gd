@@ -248,3 +248,24 @@ func teste_partida_gasta_energia_e_oficial_conta_historico() -> void:
 	var cansado: float = meio.energia
 	Jogo.avancar_dia()
 	executor.verificar(meio.energia > cansado, "um dia de descanso recupera energia")
+
+
+func teste_cada_draft_vale_uma_partida() -> void:
+	_concluir_draft()
+	var meio: Jogador = Jogo.draft_atual.times["azul"]["jogadores"]["meio"]
+	var a: Dictionary = Jogo.simular_partida_do_draft()["partida"]
+	var energia: float = meio.energia
+	var b: Dictionary = Jogo.simular_partida_do_draft()["partida"]
+	executor.igual(b["semente"], a["semente"], "chamar de novo devolve a mesma partida")
+	executor.igual(meio.energia, energia, "sem gastar energia duas vezes")
+	Jogo.nova_carreira({"nome": "Outra Org", "dificuldade": "facil"})
+	executor.verificar(Jogo.estado_draft().is_empty() and Jogo.ultima_partida.is_empty(), "nova carreira descarta draft e partida")
+
+
+func teste_um_quadro_por_segundo() -> void:
+	var repetido: bool = false
+	for semente: int in range(8):
+		var r: Dictionary = SimuladorPartida.simular(_entrada(50, 50, 500 + semente))
+		for i: int in range(1, r["quadros"].size()):
+			repetido = repetido or int(r["quadros"][i]["t"]) <= int(r["quadros"][i - 1]["t"])
+	executor.verificar(not repetido, "quadros com tempos estritamente crescentes")

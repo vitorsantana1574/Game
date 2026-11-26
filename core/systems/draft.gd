@@ -28,6 +28,8 @@ var indisponiveis: Dictionary = {"azul": [], "vermelho": []}
 var posicoes: Dictionary = {"azul": {}, "vermelho": {}}
 ## Força escondida do patch (id -> multiplicador). Só a IA usa, ponderada pela qualidade.
 var forcas: Dictionary = {}
+## Cada draft vale uma partida (Jogo.simular_partida_do_draft).
+var partida_jogada: bool = false
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 
@@ -110,13 +112,16 @@ func avancar_ia() -> void:
 
 
 ## Escolha automática para a vez atual, com a qualidade do time da vez (técnico).
-func decidir_ia() -> String:
+## Decisão da IA na vez atual. posicao (opcional, só na escolha): a escolha é para essa rota.
+func decidir_ia(posicao: String = "") -> String:
 	var atual: Dictionary = vez()
 	var lado: String = atual["time"]
 	var ia: Dictionary = Dados.draft()["ia"]
 	var q: float = float(times[lado].get("qualidade", ia["qualidade_sem_tecnico"]))
 	var ruido: float = lerpf(float(ia["ruido_qualidade_baixa"]), float(ia["ruido_qualidade_alta"]), q)
 	var abertas_meu: Array[String] = posicoes_abertas(lado)
+	if not posicao.is_empty() and atual["acao"] == "pick" and abertas_meu.has(posicao):
+		abertas_meu = [posicao]
 	var abertas_rival: Array[String] = posicoes_abertas(outro(lado))
 	var melhor: String = ""
 	var melhor_nota: float = -INF

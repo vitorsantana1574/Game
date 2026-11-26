@@ -73,14 +73,14 @@ func teste_especialista_x_versatil() -> void:
 		"especialista tem maestria maior no favorito (%.0f × %.0f)" % [media.call(topo_esp), media.call(topo_ver)])
 
 
-func teste_dominio_publico_sem_numeros() -> void:
+func teste_dominio_publico_com_faixas() -> void:
 	var jogador: Jogador = Jogo.carreira.mercado[0]
 	var lista: Array = Jogo.detalhe_jogador(jogador.id)["dominio_campeoes"]
 	executor.verificar(not lista.is_empty(), "ficha traz o domínio")
 	var ok: bool = true
 	for item: Dictionary in lista:
-		ok = ok and item.keys().size() == 3 and item["nivel"] != "nao_conhece"
-	executor.verificar(ok, "só id, nível e nome do nível; sem 'Não conhece' e sem maestria numérica")
+		ok = ok and item["nivel"] in ["mono", "main", "conhecido"] and int(item["conhecimento"]) == int(jogador.dominio_campeoes[item["id"]])
+	executor.verificar(ok, "lista só os campeões conhecidos, com faixa e conhecimento de 0 a 100")
 	executor.igual(lista[0]["nivel"], DominioCampeoes.nivel(int(jogador.dominio_campeoes.values().max()))["id"], "do mais para o menos dominado")
 
 
@@ -213,3 +213,48 @@ func teste_ia_com_tecnico_bom_escolhe_melhor() -> void:
 				total += DominioCampeoes.rendimento(time[posicao], id) * DominioCampeoes.adequacao(id, posicao)
 			soma["bom" if lado == "azul" else "fraco"] += total
 	executor.verificar(soma["bom"] > soma["fraco"], "técnico bom monta composição mais adequada (%.1f × %.1f)" % [soma["bom"], soma["fraco"]])
+
+
+func teste_faixas_de_dominio() -> void:
+	executor.igual([DominioCampeoes.nivel(100)["id"], DominioCampeoes.nivel(95)["id"], DominioCampeoes.nivel(94)["id"],
+		DominioCampeoes.nivel(80)["id"], DominioCampeoes.nivel(79)["id"], DominioCampeoes.nivel(41)["id"],
+		DominioCampeoes.nivel(40)["id"], DominioCampeoes.nivel(0)["id"]],
+		["mono", "mono", "main", "main", "conhecido", "conhecido", "desconhecido", "desconhecido"], "faixas com cortes inclusivos")
+	var cresce: bool = true
+	for m: int in range(1, 101):
+		cresce = cresce and DominioCampeoes.nivel(m)["rendimento"] >= DominioCampeoes.nivel(m - 1)["rendimento"]
+	executor.verificar(cresce, "rendimento nunca cai quando o conhecimento sobe")
+	executor.verificar(DominioCampeoes.nivel(80)["rendimento"] > DominioCampeoes.nivel(79)["rendimento"], "subir de faixa dá um salto")
+	executor.verificar(80.0 * DominioCampeoes.nivel(0)["rendimento"] > 55.0 * DominioCampeoes.nivel(100)["rendimento"],
+		"Micro 80 sem conhecer ainda supera Micro 55 no Mono (leve vantagem)")
+
+
+func teste_estado_do_draft_mostra_conhecimento_dos_cinco() -> void:
+	_montar_titulares()
+	Jogo.iniciar_draft()
+	var ok: bool = true
+	for item: Dictionary in Jogo.estado_draft()["campeoes"]:
+		ok = ok and item["dominio"].size() == 5
+		for posicao: String in item["dominio"]:
+			var c: Variant = item["dominio"][posicao]["conhecimento"]
+			ok = ok and c is int and int(c) >= 0 and int(c) <= 100
+	executor.verificar(ok, "cada campeão traz o conhecimento (0 a 100) dos cinco titulares")
+
+
+func teste_automatico_por_posicao() -> void:
+	_montar_titulares()
+	Jogo.iniciar_draft()
+	var guarda: int = 0
+	while Jogo.estado_draft()["vez"].get("acao") != "pick" and guarda < 20:
+		Jogo.escolher_automatico_no_draft("suporte")   # no banimento a posição é ignorada
+		guarda += 1
+	var antes: Array = Jogo.draft_atual.picks["azul"].duplicate()
+	var r: Dictionary = Jogo.escolher_automatico_no_draft("suporte")
+	executor.verificar(r["ok"], "escolha automática para a rota do suporte")
+	var novo: String = ""
+	for id: String in Jogo.draft_atual.picks["azul"]:
+		if not antes.has(id):
+			novo = id
+	executor.verificar(DominioCampeoes.adequacao(novo, "suporte") >= 0.9, "o campeão escolhido joga de suporte (%s)" % novo)
+	var erro: Dictionary = Jogo.escolher_automatico_no_draft("rota_que_nao_existe")
+	executor.verificar(not erro["ok"] or Jogo.estado_draft()["vez"].get("acao") != "pick", "posição inválida na escolha dá erro")

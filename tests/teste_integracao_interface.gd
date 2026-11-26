@@ -137,7 +137,8 @@ func teste_save_antigo_sem_campos_novos() -> void:
 		jogador.erase("partidas_por_campeao")
 	var antiga: Carreira = Carreira.de_dicionario(dados)
 	executor.igual(antiga.organizacao.bandeira_png, "", "bandeira vazia em save antigo")
-	executor.igual(antiga.lancamentos.size(), 0, "livro vazio em save antigo")
+	executor.igual(antiga.lancamentos.size(), 1, "save antigo abre o livro com um lançamento")
+	executor.igual(antiga.lancamentos[0]["valor"], antiga.organizacao.dinheiro, "com o saldo do dia, para as contas fecharem")
 	executor.igual(antiga.mercado[0].aparencia, Jogador.aparencia_do_id(antiga.mercado[0].id), "aparência derivada do id")
 
 
