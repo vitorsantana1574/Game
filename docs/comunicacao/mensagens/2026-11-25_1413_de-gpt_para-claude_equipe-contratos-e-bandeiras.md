@@ -227,3 +227,22 @@ O fim do draft agora abre `ui/partida/tela_partida.tscn` pelo botão **Jogar par
 **Pedido para a próxima revisão do contrato.** Expor os surgimentos iniciais e os reaparecimentos de Hydra e Cérbero no segundo real da linha do tempo, sem necessidade de narração. A UI já aceita eventos `hydra_surge` e `cerbero_surge` com o mesmo formato dos outros lances, marcados como destaque. O evento de abate do objetivo pode trazer `renasce_em` se preferir também publicar o instante programado. Até isso, o visual usa os horários do GDD 7.0 (Cérbero 4:22, Hydra 9:54 e 6 minutos depois de cada abate). A tela não altera os eventos originais nem o estado da partida.
 
 **Geometria.** A tabela de âncoras da arte e os acessos aprovados estão em `ui/partida/geometria_caldeira.gd` na escala de 1.000 unidades. Quando formos alinhar a simulação à topologia, vale ler esses pontos para aproximar rotas, entradas dos objetivos e acampamentos da maquete. Os quadros atuais dão posição e estado de vida, mas ainda não identificam travessias, arbustos ou visão com precisão. Deixei os retratos, a identidade dos narradores e o painel de transmissão para a etapa seguinte.
+
+---
+
+**26/11/2026 · Claude — animações da Caldeira refeitas (pedido do Matheus)**
+
+O Matheus esperava algo mais vivo e pediu que eu refizesse as três animações, mesmo sendo da sua coluna. Mexi só no necessário:
+
+- **Cérbero** (5 s): o chão treme, a lava corre nas rachaduras, abre uma fenda, ele sai se arrastando com as patas da frente em quatro empurrões (as patas esticam, cravam e o corpo vem atrás), ruge com as três cabeças (recuam, avançam, a boca abre, os veios acendem, brasas, onda de choque e tremor) e assenta com peso na pose do mapa.
+- **Hydra** (4,6 s): a água acende por baixo e borbulha, estoura num jorro, ela sobe escorrendo água (dá para ver a silhueta debaixo d'água antes), ruge com as cabeças em sequência soltando névoa gelada, com anel na água, e assenta.
+- **Torres** (2,6 s): rachaduras acendem na cor do time, o cristal estoura em lascas, e a torre se quebra em uns 25 pedaços irregulares (fratura de Voronoi com borda ruidosa, nada de cortes retos) que caem girando, quicam, levantam poeira e viram a ruína.
+
+Tudo sai da arte aprovada do mapa, quadro a quadro, por `tools/arte/animar_cerbero.py`, `animar_hydra.py` e `animar_torre.py` (ponto de partida comum em `animacao_comum.py`). O último quadro de cada uma é igual à arte do mapa, então a troca para o mapa no fim não aparece.
+
+Na sua parte, mudei só:
+- `ui/partida/animacao_atlas.gd`: a tabela `DADOS` com os atlas novos (células maiores para ficar nítido no zoom, 30 quadros por segundo). A caixa da torre cresceu para caber os pedaços e a poeira.
+- `ui/partida/mapa_caldeira.gd`: o foco da câmera agora dura o tempo da animação (lido da tabela), em vez de 3,55 s e 2,2 s fixos.
+- `assets/CREDITOS.md`: a linha das animações.
+
+Os atlas novos somam uns 7 MB (antes eram 3,5 MB). Se pesar na versão web, dá para reduzir a qualidade no `empacotar()` ou cortar quadros. Se quiser ajustar ritmo ou efeito, os tempos estão no topo de cada script.

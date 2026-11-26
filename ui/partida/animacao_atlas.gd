@@ -2,11 +2,13 @@ extends TextureRect
 ## Um atlas compartilhado por tipo de efeito. Só interpola os dois quadros visíveis.
 
 const TRANSICAO = preload("res://ui/partida/transicao_atlas.gdshader")
+## [origem, tamanho exibido, célula no atlas, quadros, colunas, quadros por página, duração em segundos].
+## Quadros gerados por tools/arte/animar_*.py (30 por segundo; o último é igual à arte do mapa).
 const DADOS: Dictionary = {
-	"hydra": [Vector2(186, 194), Vector2(245, 212), Vector2i(245, 212), 100, 8, 72, 3.27],
-	"cerbero": [Vector2(598, 546), Vector2(206, 198), Vector2i(206, 198), 109, 9, 90, 3.59],
-	"torre_azul": [Vector2(-62, -72), Vector2(124, 115), Vector2i(149, 138), 67, 13, 182, 2.20],
-	"torre_coral": [Vector2(-62, -72), Vector2(124, 115), Vector2i(149, 138), 67, 13, 182, 2.20],
+	"hydra": [Vector2(186, 194), Vector2(245, 212), Vector2i(355, 308), 139, 5, 55, 4.63],
+	"cerbero": [Vector2(598, 546), Vector2(206, 198), Vector2i(299, 287), 151, 6, 78, 5.03],
+	"torre_azul": [Vector2(-90, -105), Vector2(180, 160), Vector2i(360, 320), 79, 5, 60, 2.63],
+	"torre_coral": [Vector2(-90, -105), Vector2(180, 160), Vector2i(360, 320), 79, 5, 60, 2.63],
 }
 
 var duracao: float

@@ -138,7 +138,7 @@ func cair_torre(time: int, rota: String, indice: int, destaque: bool) -> void:
 		sprite.hide()
 		_iniciar(chave, "torre_" + _lado(time), torre["ponto"])
 		if destaque:
-			_focar(Vector2(torre["ponto"]) - Vector2(0, 20), 2.20, 0.24)
+			_focar(Vector2(torre["ponto"]) - Vector2(0, 20), float(Animacao.DADOS["torre_" + _lado(time)][6]), 0.24)
 
 
 func espera_epico(id: String, ate: float) -> void:
@@ -153,7 +153,7 @@ func surgir(id: String) -> void:
 	_epicos[id]["placa"].hide()
 	if animar and not _atlas.is_empty():
 		_iniciar(id, id, Vector2.ZERO)
-		_focar(Geometria.EPICOS[id], 3.55, 0.40)
+		_focar(Geometria.EPICOS[id], float(Animacao.DADOS[id][6]), 0.40)
 
 
 func destacar_lance(ponto: Vector2, time: int, tipo: String) -> void:
