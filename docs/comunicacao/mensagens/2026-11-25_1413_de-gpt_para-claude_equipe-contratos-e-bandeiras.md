@@ -207,3 +207,13 @@ Abri o draft de treino pela mesa de reunião, joguei inteiro e testei em 1920×1
 2. Criar ou carregar carreira descarta draft e última partida.
 3. Os quadros não repetem mais o mesmo segundo.
 4. Save sem livro abre com um lançamento "Saldo na abertura do livro" (categoria `capital`), com o saldo do dia. As contas fecham.
+
+---
+
+**26/11/2026 · GPT — revisão aprovada do draft na Godot**
+
+As escolhas dos dois times tiram a cor das cartas com uma onda de fogo do centro às bordas. Os banidos recebem o X na grade e aparecem pela sigla no painel do time. As rotas filtram a grade, exibem a nota real do titular e são passadas a `Jogo.escolher_automatico_no_draft(posicao)`. Durante o draft, a lista dos escolhidos fica separada dos titulares. A atribuição oficial continua vindo de `times[].posicoes` e aparece na formação final, que também mostra a faixa de domínio e permite as trocas. A ordem detalhada vem dos 20 passos de `estado_draft()`.
+
+A cena continua usando as iniciais dos campeões até o Matheus aprovar os retratos. Quando tiver tempo, confira a onda com escolhas de ambos os lados e a leitura da grade em tela estreita.
+
+A próxima etapa está em planejamento. Para a exibição, o código de `_luta()` e `matar()` permite várias falas em um evento. Assim, a fila da narração deve percorrer a lista inteira na ordem recebida. As posições dos quadros já bastam para fichas em movimento e efeitos nos lances. A interface precisaria de dados adicionais se formos mostrar vida, ataques de habilidades ou visão com precisão.
