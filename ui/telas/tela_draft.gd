@@ -5,6 +5,7 @@ const Cartao = preload("res://ui/componentes/cartao_campeao_draft.gd")
 const Lado = preload("res://ui/componentes/lado_draft.gd")
 const Texturas = preload("res://ui/componentes/texturas_webp.gd")
 const Bandeiras = preload("res://ui/componentes/bandeira_da_carreira.gd")
+const PARTIDA: String = "res://ui/partida/tela_partida.tscn"
 const SEDE: String = "res://ui/telas/sede_carreira.tscn"
 const POSICOES: Dictionary = {
 	"topo": "Topo", "selva": "Selva", "meio": "Meio", "atirador": "Atirador", "suporte": "Suporte",
@@ -627,9 +628,12 @@ func _montar_formacao() -> void:
 	var dica: Label = Tema.texto("Clique em duas posições da sua equipe para trocar os campeões.", 15, Tema.SUAVE)
 	dica.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_formacao.add_child(dica)
-	var voltar: Button = Tema.botao("Voltar à sede", _voltar)
-	voltar.size_flags_horizontal = Control.SIZE_SHRINK_END
-	_formacao.add_child(voltar)
+	var acoes: HFlowContainer = HFlowContainer.new()
+	acoes.alignment = FlowContainer.ALIGNMENT_END
+	acoes.add_theme_constant_override("h_separation", 10)
+	_formacao.add_child(acoes)
+	acoes.add_child(Tema.botao("Voltar à sede", _voltar))
+	acoes.add_child(Tema.botao("Jogar partida", _jogar_partida, true))
 
 
 func _trocar(posicao: String) -> void:
@@ -780,6 +784,19 @@ func _reiniciar() -> void:
 	_fechar_confirmacao()
 	_troca = ""
 	_executar(Jogo.iniciar_draft.bind({"primeira_escolha": _estado["lado_jogador"] == "azul"}))
+
+
+func _jogar_partida() -> void:
+	if _ocupado or _saindo:
+		return
+	_ocupado = true
+	var resultado: Dictionary = Jogo.simular_partida_do_draft()
+	if not resultado.get("ok", false):
+		_ocupado = false
+		_mostrar_erros(resultado)
+		return
+	_saindo = true
+	get_tree().change_scene_to_file.call_deferred(PARTIDA)
 
 
 func _voltar() -> void:
