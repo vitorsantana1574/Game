@@ -198,7 +198,8 @@ func _exibir_lance(lance: Dictionary) -> void:
 				_mapa.surgir(id)
 			_ultimo_lance.text = "%s · %s em campo" % [_relogio_lance(lance), _nome_epico(id)]
 		"hydra", "cerbero":
-			_mapa.espera_epico(tipo, _reproducao.epicos[tipo]["respawns"].get(lance["indice"], -1))
+			var renasce_em: float = _reproducao.epicos[tipo]["respawns"].get(lance["indice"], -1)
+			_mapa.abater_epico(tipo, renasce_em, lance.get("destaque", false))
 			var queda: String = "abatida" if tipo == "hydra" else "abatido"
 			var roubo: String = " · Roubo" if lance.get("roubado", false) else ""
 			_ultimo_lance.text = "%s · %s %s%s" % [lance["minuto"], _nome_epico(tipo), queda, roubo]

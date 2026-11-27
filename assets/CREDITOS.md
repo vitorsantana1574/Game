@@ -12,5 +12,6 @@
 | `sprites/mapa/caldeira_glacial.webp` e `sprites/mapa/arena_*.webp` | Ilustração original da Caldeira Glacial e bases de composição da Hydra e do Cérbero, geradas com IA pelo ChatGPT, editadas na maquete aprovada. | Uso no projeto conforme os [Termos de Uso da OpenAI](https://openai.com/policies/terms-of-use/). |
 | `sprites/mapa/torre_*.webp` | Torres de cristal originais em ciano e coral, geradas com IA pelo ChatGPT. Sombras, cortes para o desabamento e destroços compostos para o jogo. | Uso no projeto conforme os [Termos de Uso da OpenAI](https://openai.com/policies/terms-of-use/). |
 | `animacoes/caldeira/*.webp` | Sequências derivadas da arte original da Caldeira, geradas quadro a quadro por `tools/arte/animar_*.py` (deformação das criaturas, fratura das torres, partículas, luz e água). | Uso no projeto conforme os mesmos termos da arte de origem. |
+| `animacoes/caldeira/hydra_abate.png`, `hydra_terceira_cabeca.png` e `cerbero_abate.png` | Recortes da pintura original do mapa. A terceira cabeça da Hydra é uma montagem do mesmo desenho. | Uso no projeto conforme os mesmos termos da arte de origem. |
 
 Declare o uso de IA na arte da abertura, da sede, dos emblemas e da Caldeira Glacial na página do jogo no itch.io.

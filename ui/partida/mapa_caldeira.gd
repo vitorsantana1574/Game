@@ -3,6 +3,14 @@ extends Control
 const Geometria = preload("res://ui/partida/geometria_caldeira.gd")
 const Animacao = preload("res://ui/partida/animacao_atlas.gd")
 const Texturas = preload("res://ui/componentes/texturas_webp.gd")
+const QUEIMA_EPICO = preload("res://ui/partida/queima_epico.gdshader")
+const QUEIMA_DURACAO: float = 1.75
+const RECORTES_ABATE: Dictionary = {
+	"hydra": preload("res://assets/animacoes/caldeira/hydra_abate.png"),
+	"cerbero": preload("res://assets/animacoes/caldeira/cerbero_abate.png"),
+}
+const HYDRA_TERCEIRA_CABECA = preload("res://assets/animacoes/caldeira/hydra_terceira_cabeca.png")
+const CENTROS_QUEIMA: Dictionary = {"hydra": Vector2(0.51, 0.62), "cerbero": Vector2(0.50, 0.49)}
 const MAPA: String = "res://assets/sprites/mapa/"
 const EFEITOS: String = "res://assets/animacoes/caldeira/"
 const CORES: Array[Color] = [Color("#78e3ff"), Color("#ffa089")]
@@ -69,7 +77,22 @@ func _ready() -> void:
 				_torres[chave] = {"sprite": sprite, "ponto": ponto, "time": time}
 	for id: String in ARENAS:
 		var placa: TextureRect = _sprite(_tabuleiro, Texturas.carregar(MAPA + "arena_" + id + ".webp"), ARENAS[id])
-		_epicos[id] = {"placa": placa, "disponivel_em": -1.0}
+		var epico: Dictionary = {"placa": placa, "disponivel_em": -1.0}
+		if animar:
+			var queima: TextureRect = _sprite(_tabuleiro, RECORTES_ABATE[id], ARENAS[id])
+			var material_queima: ShaderMaterial = ShaderMaterial.new()
+			material_queima.shader = QUEIMA_EPICO
+			material_queima.set_shader_parameter(&"centro", CENTROS_QUEIMA[id])
+			material_queima.set_shader_parameter(&"proporcao", queima.size.x / queima.size.y)
+			if id == "hydra":
+				material_queima.set_shader_parameter(&"tem_terceira_cabeca", true)
+				material_queima.set_shader_parameter(&"terceira_cabeca", HYDRA_TERCEIRA_CABECA)
+			queima.material = material_queima
+			queima.z_index = 1
+			queima.hide()
+			epico["queima"] = queima
+			epico["tempo_queima"] = 0.0
+		_epicos[id] = epico
 	if animar:
 		_carregar_atlas()
 	_marcas = _camada(_desenhar_marcas)
@@ -94,7 +117,9 @@ func inicializar(mapa: Dictionary) -> void:
 		sprite.show()
 	for epico: Dictionary in _epicos.values():
 		epico["disponivel_em"] = -1.0
+		epico["restante"] = 0.0
 		epico["placa"].show()
+		_parar_queima(epico)
 	atualizar_marcas()
 	_dimensionar()
 
@@ -103,6 +128,14 @@ func atualizar(fichas: Array[Dictionary], segundo: float, delta: float) -> void:
 	_fichas = fichas
 	for epico: Dictionary in _epicos.values():
 		epico["restante"] = maxf(0.0, float(epico["disponivel_em"]) - segundo)
+		var queima: TextureRect = epico.get("queima")
+		if queima != null and queima.visible:
+			epico["tempo_queima"] += delta
+			var progresso: float = epico["tempo_queima"] / QUEIMA_DURACAO
+			if progresso >= 1.0:
+				queima.hide()
+			else:
+				(queima.material as ShaderMaterial).set_shader_parameter(&"progresso", progresso)
 	for id: String in _efeitos.keys():
 		var efeito: Dictionary = _efeitos[id]
 		var quadro: Animacao = efeito["no"]
@@ -145,8 +178,29 @@ func cair_torre(time: int, rota: String, indice: int, destaque: bool) -> void:
 func espera_epico(id: String, ate: float) -> void:
 	if _efeitos.has(id):
 		_finalizar(id)
-	_epicos[id]["disponivel_em"] = ate
-	_epicos[id]["placa"].show()
+	var epico: Dictionary = _epicos[id]
+	_parar_queima(epico)
+	epico["disponivel_em"] = ate
+	epico["placa"].show()
+
+
+func abater_epico(id: String, renasce_em: float, destaque: bool) -> void:
+	espera_epico(id, renasce_em)
+	var epico: Dictionary = _epicos[id]
+	var queima: TextureRect = epico.get("queima")
+	if not animar or queima == null:
+		return
+	(queima.material as ShaderMaterial).set_shader_parameter(&"progresso", 0.0)
+	queima.show()
+	if destaque:
+		_focar(Geometria.EPICOS[id], QUEIMA_DURACAO, 0.24)
+
+
+func _parar_queima(epico: Dictionary) -> void:
+	var queima: TextureRect = epico.get("queima")
+	if queima != null:
+		queima.hide()
+		epico["tempo_queima"] = 0.0
 
 
 ## Começa a animação de surgimento (a tela chama alguns segundos antes do horário oficial,
@@ -154,8 +208,10 @@ func espera_epico(id: String, ate: float) -> void:
 func surgir(id: String) -> void:
 	if _efeitos.has(id):
 		return
-	_epicos[id]["disponivel_em"] = -1.0
-	_epicos[id]["placa"].hide()
+	var epico: Dictionary = _epicos[id]
+	_parar_queima(epico)
+	epico["disponivel_em"] = -1.0
+	epico["placa"].hide()
 	if animar and not _atlas.is_empty():
 		_iniciar(id, id, Vector2.ZERO)
 		_focar(Geometria.EPICOS[id], float(Animacao.DADOS[id][6]), 0.40)
