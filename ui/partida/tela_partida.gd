@@ -16,6 +16,7 @@ var _resultado: ScrollContainer
 var _relogio: Label
 var _placares: Array[Label] = []
 var _ultimo_lance: Label
+var _ficha_inspecionada: Label
 var _ritmo: OptionButton
 var _progresso: ProgressBar
 var _pausa: Button
@@ -107,6 +108,11 @@ func _montar_placar() -> void:
 	_ultimo_lance.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_ultimo_lance.custom_minimum_size.y = 48.0
 	placar.add_child(_ultimo_lance)
+	_ficha_inspecionada = Tema.texto("", 16, Tema.SUAVE)
+	_ficha_inspecionada.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_ficha_inspecionada.hide()
+	placar.add_child(_ficha_inspecionada)
+	_mapa.ficha_alterada.connect(_atualizar_ficha_inspecionada)
 
 
 func _montar_controles() -> void:
@@ -156,6 +162,7 @@ func _recomecar() -> void:
 	_progresso.value = 0.0
 	_relogio.text = "00:00"
 	_ultimo_lance.text = ""
+	_ficha_inspecionada.hide()
 	_atualizar_placar()
 	_resultado.hide()
 	_normal.show()
@@ -179,6 +186,7 @@ func _process(delta: float) -> void:
 	_progresso.set_value_no_signal(_reproducao.segundo)
 	_atualizar_placar()
 	_mapa.atualizar(_reproducao.fichas_no_mapa(), _reproducao.segundo, delta)
+	_atualizar_ficha_inspecionada()
 	if _reproducao.segundo >= _reproducao.duracao:
 		_fim_em -= delta
 		if _fim_em <= 0.0:
@@ -206,17 +214,31 @@ func _exibir_lance(lance: Dictionary) -> void:
 			_mapa.destacar_lance(Mapa.Geometria.EPICOS[tipo], time, tipo)
 		"guardiao", "guardiao_renasce":
 			var presente: bool = tipo == "guardiao_renasce"
-			_mapa.presenca_guardiao(time if presente else 1 - time, presente)
+			_mapa.presenca_guardiao(time if presente else 1 - time, presente, lance.get("destaque", false))
 			_ultimo_lance.text = "%s · Guardião %s" % [lance["minuto"], "voltou" if presente else "caiu"]
 		"vitoria":
 			if time in [0, 1]:
 				_mapa.destacar_lance(Mapa.Geometria.BASES[1 - time]["cristal"], time, tipo)
 				_ultimo_lance.text = "%s · Cristal destruído" % lance["minuto"]
 		"luta", "abate":
+			var ponto: Vector2 = _mapa.geometria.projetar(Vector2(lance["x"], lance["y"]))
+			if tipo == "abate":
+				var alvo: String = lance.get("alvo", "")
+				_mapa.abater_ficha(alvo, _reproducao.ficha_de(alvo), ponto, float(lance["t"]))
 			if tipo == "luta" or lance.get("contexto") != "luta":
-				var ponto: Vector2 = Vector2(lance["x"], lance["y"])
-				_mapa.destacar_lance(_mapa.geometria.projetar(ponto), time if tipo == "abate" else -1, tipo)
+				_mapa.destacar_lance(ponto, time if tipo == "abate" else -1, tipo, lance.get("destaque", false))
 				_ultimo_lance.text = "%s · %s" % [lance["minuto"], "Confronto" if tipo == "luta" else "Abate"]
+
+
+func _atualizar_ficha_inspecionada() -> void:
+	var ficha: Dictionary = _mapa.ficha_selecionada()
+	_ficha_inspecionada.visible = not ficha.is_empty()
+	if not ficha.is_empty():
+		var texto: String = "%s · %s · Nível %d" % [ficha["nome"], String(ficha["posicao"]).capitalize(), ficha["nivel"]]
+		if ficha.get("abatido", false):
+			texto += " · Abatido"
+		if _ficha_inspecionada.text != texto:
+			_ficha_inspecionada.text = texto
 
 
 func _atualizar_placar() -> void:

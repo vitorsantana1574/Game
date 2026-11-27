@@ -1,8 +1,12 @@
 extends Control
 
+signal ficha_alterada
+
 const Geometria = preload("res://ui/partida/geometria_caldeira.gd")
 const Animacao = preload("res://ui/partida/animacao_atlas.gd")
 const Texturas = preload("res://ui/componentes/texturas_webp.gd")
+const GuardiaoVisual = preload("res://ui/partida/guardiao_visual.gd")
+const FichasCombate = preload("res://ui/partida/fichas_combate.gd")
 const QUEIMA_EPICO = preload("res://ui/partida/queima_epico.gdshader")
 const QUEIMA_DURACAO: float = 1.75
 const RECORTES_ABATE: Dictionary = {
@@ -37,15 +41,16 @@ var _vista: Control
 var _tabuleiro: Node2D
 var _chao: Control
 var _marcas: Control
-var _fichas: Array[Dictionary] = []
+var _fichas: FichasCombate
 var _torres: Dictionary = {}
 var _epicos: Dictionary = {}
 var _guardioes: Array[bool] = [true, true]
+var _guardioes_visuais: Array[GuardiaoVisual] = []
 var _placas_torre: Dictionary = {}
 var _atlas: Dictionary = {}
 var _mascaras: Dictionary = {}
 var _efeitos: Dictionary = {}
-var _luta: Dictionary = {}
+var _lutas: Array[Dictionary] = []
 var _camera: Dictionary = {}
 var _zoom: float = 1.0
 var _centro: Vector2 = Vector2(500, 500)
@@ -95,8 +100,19 @@ func _ready() -> void:
 		_epicos[id] = epico
 	if animar:
 		_carregar_atlas()
+	for time: int in range(2):
+		var guardiao: GuardiaoVisual = GuardiaoVisual.new()
+		_tabuleiro.add_child(guardiao)
+		guardiao.configurar(time)
+		_guardioes_visuais.append(guardiao)
 	_marcas = _camada(_desenhar_marcas)
 	_marcas.z_index = 2
+	_fichas = FichasCombate.new()
+	_fichas.animar = animar
+	_fichas.z_index = 3
+	_fichas.size = Vector2.ONE * Geometria.LADO
+	_fichas.selecao_alterada.connect(ficha_alterada.emit)
+	_tabuleiro.add_child(_fichas)
 	resized.connect(_dimensionar)
 	_dimensionar()
 
@@ -108,9 +124,11 @@ func inicializar(mapa: Dictionary) -> void:
 	_camera.clear()
 	_zoom = 1.0
 	_centro = Vector2(500, 500)
-	_luta.clear()
-	_fichas.clear()
+	_lutas.clear()
+	_fichas.reiniciar()
 	_guardioes = [true, true]
+	for guardiao: GuardiaoVisual in _guardioes_visuais:
+		guardiao.reiniciar()
 	for torre: Dictionary in _torres.values():
 		var sprite: TextureRect = torre["sprite"]
 		sprite.texture = _placas_torre[_lado(torre["time"]) + "_inteira"]
@@ -125,7 +143,9 @@ func inicializar(mapa: Dictionary) -> void:
 
 
 func atualizar(fichas: Array[Dictionary], segundo: float, delta: float) -> void:
-	_fichas = fichas
+	_fichas.atualizar(fichas, delta)
+	for guardiao: GuardiaoVisual in _guardioes_visuais:
+		guardiao.atualizar(delta)
 	for epico: Dictionary in _epicos.values():
 		epico["restante"] = maxf(0.0, float(epico["disponivel_em"]) - segundo)
 		var queima: TextureRect = epico.get("queima")
@@ -144,10 +164,10 @@ func atualizar(fichas: Array[Dictionary], segundo: float, delta: float) -> void:
 			_finalizar(id)
 		else:
 			quadro.quadro(efeito["tempo"])
-	if not _luta.is_empty():
-		_luta["tempo"] += delta
-		if float(_luta["tempo"]) >= 1.45:
-			_luta.clear()
+	for i: int in range(_lutas.size() - 1, -1, -1):
+		_lutas[i]["tempo"] += delta
+		if float(_lutas[i]["tempo"]) >= 1.45:
+			_lutas.remove_at(i)
 	_atualizar_camera(delta)
 	_marcas.queue_redraw()
 
@@ -192,7 +212,7 @@ func abater_epico(id: String, renasce_em: float, destaque: bool) -> void:
 		return
 	(queima.material as ShaderMaterial).set_shader_parameter(&"progresso", 0.0)
 	queima.show()
-	if destaque:
+	if destaque and _camera.is_empty():
 		_focar(Geometria.EPICOS[id], QUEIMA_DURACAO, 0.24)
 
 
@@ -217,13 +237,29 @@ func surgir(id: String) -> void:
 		_focar(Geometria.EPICOS[id], float(Animacao.DADOS[id][6]), 0.40)
 
 
-func destacar_lance(ponto: Vector2, time: int, tipo: String) -> void:
-	_luta = {"ponto": ponto, "time": time, "tipo": tipo, "tempo": 0.0}
+func destacar_lance(ponto: Vector2, time: int, tipo: String, destaque: bool = false) -> void:
+	_lutas.append({"ponto": ponto, "time": time, "tipo": tipo, "tempo": 0.0})
+	# Um lance já focado termina antes de a câmera seguir uma segunda luta.
+	if tipo == "luta" and animar and destaque and _camera.is_empty():
+		_focar(ponto, 2.8, 0.40)
 
 
-func presenca_guardiao(time: int, presente: bool) -> void:
-	if time in [0, 1]:
-		_guardioes[time] = presente
+func abater_ficha(id: String, ficha: Dictionary, ponto: Vector2, segundo: float) -> void:
+	_fichas.abater(id, ficha, ponto, segundo)
+
+
+func ficha_selecionada() -> Dictionary:
+	return _fichas.detalhe()
+
+
+func presenca_guardiao(time: int, presente: bool, destaque: bool = false) -> void:
+	if time not in [0, 1] or _guardioes[time] == presente:
+		return
+	_guardioes[time] = presente
+	_guardioes_visuais[time].mudar_presenca(presente, animar)
+	if animar and destaque and _camera.is_empty():
+		var duracao: float = GuardiaoVisual.RETORNO if presente else GuardiaoVisual.QUEDA
+		_focar(Geometria.BASES[time]["guardiao"], duracao, 0.33)
 
 
 func _dimensionar() -> void:
@@ -304,6 +340,7 @@ func _focar(ponto: Vector2, duracao: float, zoom: float) -> void:
 func _camada(desenhar: Callable) -> Control:
 	var camada: Control = Control.new()
 	camada.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	camada.size = Vector2.ONE * Geometria.LADO
 	camada.draw.connect(desenhar)
 	_tabuleiro.add_child(camada)
 	return camada
@@ -341,21 +378,22 @@ func _desenhar_marcas() -> void:
 		var local: Vector2 = Geometria.BASES[time]["guardiao"] + Vector2(22, 18)
 		var cor: Color = CORES[time] if _guardioes[time] else Color("#b7b7c3")
 		_rotulo(fonte, "Guardião" if _guardioes[time] else "Guardião caído", local, 15, cor)
-	if not _luta.is_empty():
-		var t: float = float(_luta["tempo"]) / 1.45
-		var cor: Color = CORES[_luta["time"]] if _luta["time"] in [0, 1] else Color("#ffdea5")
-		var p: Vector2 = _luta["ponto"]
+	var rotulos_luta: PackedVector2Array = []
+	for luta: Dictionary in _lutas:
+		var t: float = float(luta["tempo"]) / 1.45
+		var cor: Color = CORES[luta["time"]] if luta["time"] in [0, 1] else Color("#ffdea5")
+		var p: Vector2 = luta["ponto"]
 		_marcas.draw_circle(p, lerpf(13.0, 49.0, t), Color(cor, 0.18 * (1.0 - t)), true, -1.0, true)
 		_marcas.draw_arc(p, lerpf(11.0, 52.0, t), 0, TAU, 45, Color(cor, 1.0 - t), 3.0, true)
-		if _luta["tipo"] == "luta":
-			_rotulo(fonte, "Confronto", p + Vector2(0, -23), 19, Color(cor, 1.0 - t))
-	for ficha: Dictionary in _fichas:
-		var p: Vector2 = ficha["ponto"]
-		var cor: Color = CORES[ficha["time"]]
-		var opacidade: float = ficha["opacidade"]
-		_marcas.draw_circle(p, 15.5, Color(COR_FUNDO, 0.94 * opacidade), true, -1.0, true)
-		_marcas.draw_arc(p, 14.0, 0, TAU, 35, Color(cor, opacidade), 2.3, true)
-		_rotulo(fonte, ficha["sigla"], p + Vector2(0, 4), 14, Color(Color.WHITE, opacidade))
+		if luta["tipo"] == "luta":
+			var mostrar_rotulo: bool = true
+			for outro: Vector2 in rotulos_luta:
+				if p.distance_squared_to(outro) < 120.0 * 120.0:
+					mostrar_rotulo = false
+					break
+			if mostrar_rotulo:
+				rotulos_luta.append(p)
+				_rotulo(fonte, "Confronto", p + Vector2(0, -37), 19, Color(cor, 1.0 - t))
 
 
 func _ampulheta(p: Vector2, cor: Color) -> void:

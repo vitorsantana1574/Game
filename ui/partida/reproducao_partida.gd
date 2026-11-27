@@ -43,7 +43,8 @@ func preparar(partida: Dictionary, mapa: Mapa) -> void:
 	quadro = _quadros[0] if not _quadros.is_empty() else {}
 	for ficha: Dictionary in partida.get("jogadores", []):
 		var nome: String = ficha.get("campeao_nome", ficha.get("campeao", ""))
-		_jogadores[ficha["jogador"]] = {"sigla": nome.left(2).to_upper(), "time": ficha["time"]}
+		_jogadores[ficha["jogador"]] = {"sigla": nome.left(2).to_upper(), "time": ficha["time"],
+			"campeao": ficha.get("campeao", ""), "nome": nome, "posicao": ficha.get("posicao", "")}
 	_eventos = partida.get("eventos", []).duplicate()
 	_programar_epicos()
 	_eventos.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
@@ -108,6 +109,10 @@ func iniciar_no_horario(lance: Dictionary) -> bool:
 	return true
 
 
+func ficha_de(id: String) -> Dictionary:
+	return _jogadores.get(id, {})
+
+
 func fichas_no_mapa() -> Array[Dictionary]:
 	var fichas: Array[Dictionary] = []
 	if quadro.is_empty():
@@ -138,6 +143,9 @@ func fichas_no_mapa() -> Array[Dictionary]:
 				opacidade *= smoothstep(0.0, 0.24, fracao)
 		ficha["ponto"] = ponto
 		ficha["opacidade"] = opacidade
+		ficha["jogador"] = id
+		ficha["quadro_em"] = quadro["t"]
+		ficha["nivel"] = atuais[id]["nivel"]
 		fichas.append(ficha)
 	return fichas
 
@@ -147,7 +155,8 @@ func _posicoes(indice: int) -> Dictionary:
 		var registro: Dictionary = {}
 		for ficha: Dictionary in _quadros[indice].get("campeoes", []):
 			var origem: Vector2 = Vector2(float(ficha["x"]), float(ficha["y"]))
-			registro[ficha["jogador"]] = {"ponto": _mapa.geometria.projetar(origem), "vivo": ficha["vivo"]}
+			registro[ficha["jogador"]] = {"ponto": _mapa.geometria.projetar(origem),
+				"vivo": ficha["vivo"], "nivel": ficha.get("nivel", 1)}
 		_projecoes[indice] = registro
 	return _projecoes[indice]
 
